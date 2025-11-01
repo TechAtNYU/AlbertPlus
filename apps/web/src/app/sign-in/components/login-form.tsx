@@ -24,8 +24,8 @@ export function LoginForm({
     try {
       await signIn.authenticateWithRedirect({
         strategy: "oauth_google",
+        redirectUrl: "/sign-in/sso-callback",
         redirectUrlComplete: "/dashboard",
-        redirectUrl: "/dashboard",
       });
     } catch (error) {
       console.error("Sign in failed:", error);

@@ -1,0 +1,162 @@
+[
+  {
+    "userId": "test_user",
+    "courseCode": "CSCI-UA 101",
+    "title": "Introduction to Computer Science",
+    "year": 2023,
+    "term": "fall",
+    "grade": "a"
+  },
+  {
+    "userId": "test_user",
+    "courseCode": "MATH-UA 121",
+    "title": "Calculus I",
+    "year": 2023,
+    "term": "fall",
+    "grade": "a-"
+  },
+  {
+    "userId": "test_user",
+    "courseCode": "WRIT-UA 9",
+    "title": "Writing the Essay",
+    "year": 2023,
+    "term": "fall",
+    "grade": "b+"
+  },
+  {
+    "userId": "test_user",
+    "courseCode": "PSYCH-UA 1",
+    "title": "Introduction to Psychology",
+    "year": 2023,
+    "term": "fall",
+    "grade": "a"
+  },
+  {
+    "userId": "test_user",
+    "courseCode": "CSCI-UA 102",
+    "title": "Data Structures",
+    "year": 2024,
+    "term": "spring",
+    "grade": "a-"
+  },
+  {
+    "userId": "test_user",
+    "courseCode": "MATH-UA 122",
+    "title": "Calculus II",
+    "year": 2024,
+    "term": "spring",
+    "grade": "b+"
+  },
+  {
+    "userId": "test_user",
+    "courseCode": "MATH-UA 120",
+    "title": "Discrete Mathematics",
+    "year": 2024,
+    "term": "spring",
+    "grade": "a"
+  },
+  {
+    "userId": "test_user",
+    "courseCode": "HIST-UA 101",
+    "title": "World History to 1500",
+    "year": 2024,
+    "term": "spring",
+    "grade": "b"
+  },
+  {
+    "userId": "test_user",
+    "courseCode": "CSCI-UA 201",
+    "title": "Computer Systems Organization",
+    "year": 2024,
+    "term": "fall",
+    "grade": "a"
+  },
+  {
+    "userId": "test_user",
+    "courseCode": "MATH-UA 140",
+    "title": "Linear Algebra",
+    "year": 2024,
+    "term": "fall",
+    "grade": "a-"
+  },
+  {
+    "userId": "test_user",
+    "courseCode": "CORE-UA 214",
+    "title": "Physical Science: How Things Work",
+    "year": 2024,
+    "term": "fall",
+    "grade": "b+"
+  },
+  {
+    "userId": "test_user",
+    "courseCode": "ECON-UA 1",
+    "title": "Microeconomics",
+    "year": 2024,
+    "term": "fall",
+    "grade": "a"
+  },
+  {
+    "userId": "test_user",
+    "courseCode": "CSCI-UA 202",
+    "title": "Operating Systems",
+    "year": 2025,
+    "term": "spring",
+    "grade": "a-"
+  },
+  {
+    "userId": "test_user",
+    "courseCode": "CSCI-UA 310",
+    "title": "Basic Algorithms",
+    "year": 2025,
+    "term": "spring",
+    "grade": "a"
+  },
+  {
+    "userId": "test_user",
+    "courseCode": "MATH-UA 233",
+    "title": "Theory of Probability",
+    "year": 2025,
+    "term": "spring",
+    "grade": "b+"
+  },
+  {
+    "userId": "test_user",
+    "courseCode": "PHIL-UA 20",
+    "title": "Ancient Greek and Roman Philosophy",
+    "year": 2025,
+    "term": "spring",
+    "grade": "a-"
+  },
+  {
+    "userId": "test_user",
+    "courseCode": "CSCI-UA 380",
+    "title": "Computer Graphics",
+    "year": 2025,
+    "term": "fall",
+    "grade": "a"
+  },
+  {
+    "userId": "test_user",
+    "courseCode": "CSCI-UA 467",
+    "title": "Introduction to Machine Learning",
+    "year": 2025,
+    "term": "fall",
+    "grade": "a"
+  },
+  {
+    "userId": "test_user",
+    "courseCode": "CSCI-UA 473",
+    "title": "Fundamentals of Databases",
+    "year": 2025,
+    "term": "fall",
+    "grade": "a-"
+  },
+  {
+    "userId": "test_user",
+    "courseCode": "ECON-UA 2",
+    "title": "Macroeconomics",
+    "year": 2025,
+    "term": "fall",
+    "grade": "b+"
+  }
+]

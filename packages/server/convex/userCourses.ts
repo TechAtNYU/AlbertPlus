@@ -71,3 +71,52 @@ export const deleteUserCourse = protectedMutation({
     await ctx.db.delete(args.id);
   },
 });
+
+export const importUserCourses = protectedMutation({
+  args: {
+    courses: v.array(v.object(omit(userCourses, ["userId"]))),
+  },
+  handler: async (ctx, args) => {
+    const insertedIds = [];
+    const skippedCount = { duplicates: 0, updated: 0 };
+
+    for (const course of args.courses) {
+      // Check if this exact course already exists for this user
+      const existing = await ctx.db
+        .query("userCourses")
+        .withIndex("by_user_course_term", (q) =>
+          q
+            .eq("userId", ctx.user.subject)
+            .eq("courseCode", course.courseCode)
+            .eq("year", course.year)
+            .eq("term", course.term),
+        )
+        .first();
+
+      if (existing) {
+        // If the course exists and has no grade, but the new one has a grade, update it
+        if (!existing.grade && course.grade) {
+          await ctx.db.patch(existing._id, { grade: course.grade });
+          skippedCount.updated++;
+        } else {
+          // Otherwise, skip duplicate
+          skippedCount.duplicates++;
+        }
+      } else {
+        // Insert new course
+        const id = await ctx.db.insert("userCourses", {
+          userId: ctx.user.subject,
+          ...course,
+        });
+        insertedIds.push(id);
+      }
+    }
+
+    return {
+      inserted: insertedIds.length,
+      updated: skippedCount.updated,
+      duplicates: skippedCount.duplicates,
+      ids: insertedIds,
+    };
+  },
+});

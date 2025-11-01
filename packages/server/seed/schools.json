@@ -1,0 +1,162 @@
+[
+  {
+    "name": "College of Arts and Science",
+    "shortName": "CAS",
+    "level": "undergraduate"
+  },
+  {
+    "name": "Graduate School of Arts and Science",
+    "shortName": "GSAS",
+    "level": "graduate"
+  },
+  {
+    "name": "College of Dentistry",
+    "shortName": "Dentistry",
+    "level": "undergraduate"
+  },
+  {
+    "name": "College of Dentistry",
+    "shortName": "Dentistry",
+    "level": "graduate"
+  },
+  {
+    "name": "Gallatin School of Individualized Study",
+    "shortName": "Gallatin",
+    "level": "undergraduate"
+  },
+  {
+    "name": "Gallatin School of Individualized Study",
+    "shortName": "Gallatin",
+    "level": "graduate"
+  },
+  {
+    "name": "Leonard N. Stern School of Business",
+    "shortName": "Stern",
+    "level": "undergraduate"
+  },
+  {
+    "name": "Leonard N. Stern School of Business",
+    "shortName": "Stern",
+    "level": "graduate"
+  },
+  {
+    "name": "Liberal Studies",
+    "shortName": "LS",
+    "level": "undergraduate"
+  },
+  {
+    "name": "NYU Abu Dhabi",
+    "shortName": "NYUAD",
+    "level": "undergraduate"
+  },
+  {
+    "name": "NYU Abu Dhabi",
+    "shortName": "NYUAD",
+    "level": "graduate"
+  },
+  {
+    "name": "NYU Shanghai",
+    "shortName": "NYUSH",
+    "level": "undergraduate"
+  },
+  {
+    "name": "NYU Shanghai",
+    "shortName": "NYUSH",
+    "level": "graduate"
+  },
+  {
+    "name": "NYU Grossman School of Medicine",
+    "shortName": "Grossman",
+    "level": "graduate"
+  },
+  {
+    "name": "NYU Grossman Long Island School of Medicine",
+    "shortName": "Grossman LI",
+    "level": "graduate"
+  },
+  {
+    "name": "Robert F. Wagner Graduate School of Public Service",
+    "shortName": "Wagner",
+    "level": "undergraduate"
+  },
+  {
+    "name": "Robert F. Wagner Graduate School of Public Service",
+    "shortName": "Wagner",
+    "level": "graduate"
+  },
+  {
+    "name": "Rory Meyers College of Nursing",
+    "shortName": "Nursing",
+    "level": "undergraduate"
+  },
+  {
+    "name": "Rory Meyers College of Nursing",
+    "shortName": "Nursing",
+    "level": "graduate"
+  },
+  {
+    "name": "School of Global Public Health",
+    "shortName": "GPH",
+    "level": "undergraduate"
+  },
+  {
+    "name": "School of Global Public Health",
+    "shortName": "GPH",
+    "level": "graduate"
+  },
+  {
+    "name": "School of Law",
+    "shortName": "Law",
+    "level": "graduate"
+  },
+  {
+    "name": "School of Professional Studies",
+    "shortName": "SPS",
+    "level": "undergraduate"
+  },
+  {
+    "name": "School of Professional Studies",
+    "shortName": "SPS",
+    "level": "graduate"
+  },
+  {
+    "name": "Silver School of Social Work",
+    "shortName": "Social Work",
+    "level": "undergraduate"
+  },
+  {
+    "name": "Silver School of Social Work",
+    "shortName": "Social Work",
+    "level": "graduate"
+  },
+  {
+    "name": "Steinhardt School of Culture, Education, and Human Development",
+    "shortName": "Steinhardt",
+    "level": "undergraduate"
+  },
+  {
+    "name": "Steinhardt School of Culture, Education, and Human Development",
+    "shortName": "Steinhardt",
+    "level": "graduate"
+  },
+  {
+    "name": "Tandon School of Engineering",
+    "shortName": "Tandon",
+    "level": "undergraduate"
+  },
+  {
+    "name": "Tandon School of Engineering",
+    "shortName": "Tandon",
+    "level": "graduate"
+  },
+  {
+    "name": "Tisch School of the Arts",
+    "shortName": "Tisch",
+    "level": "undergraduate"
+  },
+  {
+    "name": "Tisch School of the Arts",
+    "shortName": "Tisch",
+    "level": "graduate"
+  }
+]

@@ -1,4 +1,4 @@
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { omit } from "convex-helpers";
 import { getOneFrom } from "convex-helpers/server/relationships";
 import { protectedMutation, protectedQuery } from "./helpers/auth";
@@ -22,6 +22,10 @@ export const getUserCourseOfferings = protectedQuery({
           "classNumber",
         );
 
+        if (!courseOffering) {
+          throw new Error("Course offering not found");
+        }
+
         return {
           ...userOffering,
           courseOffering,
@@ -41,7 +45,7 @@ export const addUserCourseOffering = protectedMutation({
       .unique();
 
     if (existing) {
-      throw new Error("Course offering already added to user schedule");
+      throw new ConvexError("Course offering already added to user schedule");
     }
 
     return await ctx.db.insert("userCourseOfferings", {
