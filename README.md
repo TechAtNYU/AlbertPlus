@@ -1,6 +1,5 @@
-# AlbertPlus
-
 <div align="center">
+    <!-- TODO: currently we don't have logo set up -->
   <a href="https://albertplus.com">
     <img src="https://raw.githubusercontent.com/TechAtNYU/AlbertPlus/main/apps/web/public/logo.svg" alt="Logo" width="80" height="80">
   </a>
@@ -8,16 +7,14 @@
   <h3 align="center">AlbertPlus</h3>
 
   <p align="center">
-    A modern, open-source platform to enhance the NYU course registration experience.
-    <br />
-    <a href="https://docs.albertplus.com"><strong>Explore the docs »</strong></a>
+    A modern, open-source platform to enhance the NYU course planning and registration experience.
     <br />
     <br />
-    <a href="https://albertplus.com">View Demo</a>
+    <a href="https://albertplus.com">Website</a>
     ·
-    <a href="https://github.com/TechAtNYU/AlbertPlus/issues">Report Bug</a>
+    <a href="https://docs.albertplus.com">Documentation</a>
     ·
-    <a href="https://github.com/TechAtNYU/AlbertPlus/issues">Request Feature</a>
+    <a href="https://github.com/TechAtNYU/AlbertPlus/issues">Bug Report/Feature Request</a>
   </p>
 </div>
 
@@ -79,9 +76,7 @@ To get a local copy up and running, please follow the instructions in our [Quick
 
 ## Contributing
 
-Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
-
-If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
+If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also contribute by opening an issue for bug report or feature request.
 
 For more information, please see our [Contributing Guidelines](https://docs.albertplus.com/getting-started/contributing/).
 

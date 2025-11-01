@@ -59,6 +59,10 @@ export default defineConfig({
             { label: "Documentation", slug: "modules/documentation" },
           ],
         },
+        {
+          label: "Contributing",
+          slug: "contributing",
+        },
       ],
     }),
   ],
