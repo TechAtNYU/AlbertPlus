@@ -1,10 +1,7 @@
 <div align="center">
-    <!-- TODO: currently we don't have logo set up -->
-  <!-- <a href="https://albertplus.com"> -->
-  <!--   <img src="https://raw.githubusercontent.com/TechAtNYU/AlbertPlus/main/apps/web/public/logo.svg" alt="Logo" width="80" height="80"> -->
-  <!-- </a> -->
-
-  <h3 align="center">AlbertPlus</h3>
+  <a href="https://albertplus.com">
+    <img src="https://raw.githubusercontent.com/TechAtNYU/AlbertPlus/main/apps/web/public/logo.svg" alt="Logo" width="100" height="50">
+  </a>
 
   <p align="center">
     A modern, open-source platform to enhance the NYU course planning and registration experience.
