@@ -1,4 +1,4 @@
-import FileUploadButton from "@/modules/report-parsing/components/file-upload-button";
+import DegreeProgreeUpload from "@/modules/report-parsing/components/degree-progress-upload";
 import { useFormContext } from "react-hook-form";
 import z from "zod";
 
@@ -15,24 +15,6 @@ export type ReportFormValues = z.infer<typeof reportSchema>;
 export function ReportUploadForm() {
   const { setValue, watch } = useFormContext<ReportFormValues>();
 
-  const handleFileUploaded = (file: File | null) => {
-    setValue("reportUploaded", file !== null);
-
-    if (file) {
-      setValue("reportFile", file);
-      setValue("reportFileName", file.name);
-      console.log("Degree report uploaded:", file.name);
-    } else {
-      setValue("reportFile", undefined);
-      setValue("reportFileName", undefined);
-      console.log("Degree report removed");
-    }
-  };
-
-  const isUploaded = watch("reportUploaded");
-  const uploadedFileName = watch("reportFileName");
-  const reportFile = watch("reportFile");
-
   return (
     <div className="space-y-4 text-start">
       <div className="space-y-4">
@@ -46,11 +28,7 @@ export function ReportUploadForm() {
           </p>
 
           <div className="space-y-4">
-            <FileUploadButton
-              maxSizeMB={20}
-              onFileUploaded={handleFileUploaded}
-              initialFile={reportFile}
-            />
+            <DegreeProgreeUpload maxSizeMB={20} />
           </div>
         </div>
       </div>
