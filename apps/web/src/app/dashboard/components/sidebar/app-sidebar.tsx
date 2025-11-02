@@ -35,10 +35,10 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
           <SidebarMenuItem>
             <SidebarMenuButton
               asChild
-              className="data-[slot=sidebar-menu-button]:!p-1.5 "
+              className="data-[slot=sidebar-menu-button]:p-1.5! "
             >
               <a href="/dashboard">
-                <ArrowUpCircleIcon className="!size-5" />
+                <ArrowUpCircleIcon className="size-5!" />
                 <span className="text-base font-semibold">Course Helper</span>
               </a>
             </SidebarMenuButton>
@@ -49,7 +49,6 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
       <SidebarContent>
         <NavItems items={config.sidebar.navMain} />
         <div className="mt-auto">
-          {user.isAdmin && <NavItems items={config.sidebar.navAdmin} />}
           <NavItems items={config.sidebar.navBottom} />
         </div>
       </SidebarContent>

@@ -36,6 +36,10 @@ export default defineSchema({
     .searchIndex("search_title", {
       searchField: "title",
       filterFields: ["isCorequisite", "term", "year"],
+    })
+    .searchIndex("search_course_code", {
+      searchField: "courseCode",
+      filterFields: ["isCorequisite", "term", "year"],
     }),
   userCourses: defineTable(userCourses)
     .index("by_user", ["userId"])

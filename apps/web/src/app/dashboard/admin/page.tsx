@@ -50,7 +50,11 @@ export default function AdminPage() {
   }
 
   if (isLoading || !isAuthenticated || !configs) {
-    return <Spinner />;
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <Spinner />
+      </div>
+    );
   }
 
   async function onSaveConfig(key: string, value: string) {

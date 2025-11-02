@@ -1,0 +1,41 @@
+name: docs
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "apps/docs/**"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./apps/docs
+    permissions:
+      contents: read
+      deployments: write
+    environment: deploy-docs
+
+    steps:
+      - name: 💾 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: 📦 Install dependencies
+        run: bun ci
+
+      - name: 🏗️ Build docs
+        run: bun run build
+
+      - name: 🚀 Deploy to Cloudflare Pages
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: albert-plus-docs
+          directory: ./apps/docs/dist
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
