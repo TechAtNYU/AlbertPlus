@@ -18,7 +18,7 @@ const SchedulePage = () => {
   // );
 
   const allClasses = useQuery(
-    api.userCourseOfferings.getUserCourseOfferings,
+    api.userCourseOfferings.getScheduleCourseOfferings,
     isAuthenticated ? {} : "skip",
   );
 
