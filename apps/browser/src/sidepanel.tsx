@@ -51,32 +51,11 @@ function CourseDisplay() {
     return () => clearInterval(interval);
   }, [getToken]);
 
-  // Load initial data from local storage (instant display)
-  useEffect(() => {
-    chrome.storage.local.get(
-      ["enrolledCourses", "completedCourses", "courseSearchSaved"],
-      (result) => {
-        const enrolled = result.enrolledCourses || [];
-        const completed = result.completedCourses || [];
-        const courseSearchSaved = result.courseSearchSaved || [];
-        setEnrolledCourses(enrolled);
-        setCompletedCourses(completed);
-        setCourseSearchSaved(courseSearchSaved);
-        console.log(
-          "Loaded from local storage - Enrolled:",
-          enrolled.length,
-          "Completed:",
-          completed.length
-        );
-      }
-    );
-  }, []);
-
-  // Sync with Convex data when it loads
+  // Load data from Convex only
   useEffect(() => {
     if (userCoursesFromConvex) {
       console.log(
-        "Syncing with Convex backend - Total courses:",
+        "Loading courses from Convex - Total:",
         userCoursesFromConvex.length
       );
 
@@ -84,34 +63,24 @@ function CourseDisplay() {
       const enrolled = userCoursesFromConvex.filter((course) => !course.grade);
       const completed = userCoursesFromConvex.filter((course) => course.grade);
 
-      // Update local state
+      // Update state
       setEnrolledCourses(enrolled);
       setCompletedCourses(completed);
 
-      // Update local storage to keep it in sync
-      chrome.storage.local.set(
-        {
-          enrolledCourses: enrolled,
-          completedCourses: completed,
-          lastSync: new Date().toISOString(),
-        },
-        () => {
-          console.log(
-            "Synced with Convex - Enrolled:",
-            enrolled.length,
-            "Completed:",
-            completed.length
-          );
-        }
+      console.log(
+        "Loaded - Enrolled:",
+        enrolled.length,
+        "Completed:",
+        completed.length
       );
     }
   }, [userCoursesFromConvex]);
 
-  // Sync saved course offerings from Convex
+  // Load saved course offerings from Convex only
   useEffect(() => {
     if (userCourseOfferingsFromConvex) {
       console.log(
-        "Syncing saved courses from Convex:",
+        "Loading saved courses from Convex:",
         userCourseOfferingsFromConvex.length
       );
 
@@ -140,42 +109,9 @@ function CourseDisplay() {
         }));
 
       setCourseSearchSaved(savedCourses);
-
-      // Update local storage
-      chrome.storage.local.set(
-        {
-          courseSearchSaved: savedCourses,
-          savedAt: new Date().toISOString(),
-        },
-        () => {
-          console.log("Synced saved courses with Convex:", savedCourses.length);
-        }
-      );
+      console.log("Loaded saved courses:", savedCourses.length);
     }
   }, [userCourseOfferingsFromConvex]);
-
-  // Listen for storage changes
-  useEffect(() => {
-    const handleStorageChange = (changes: {
-      [key: string]: chrome.storage.StorageChange;
-    }) => {
-      if (changes.enrolledCourses) {
-        setEnrolledCourses(changes.enrolledCourses.newValue || []);
-      }
-      if (changes.completedCourses) {
-        setCompletedCourses(changes.completedCourses.newValue || []);
-      }
-      if (changes.courseSearchSaved) {
-        setCourseSearchSaved(changes.courseSearchSaved.newValue || []);
-      }
-    };
-
-    chrome.storage.onChanged.addListener(handleStorageChange);
-
-    return () => {
-      chrome.storage.onChanged.removeListener(handleStorageChange);
-    };
-  }, []);
 
   const isLoading = !userCoursesFromConvex && !userCourseOfferingsFromConvex;
 

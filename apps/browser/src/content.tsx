@@ -282,16 +282,7 @@ function parseCourseSearch(course: HTMLElement) {
         button.children[0].children[0].textContent
           .replace("Select Class #", "")
           .trim() || "";
-      let isSaved = savedCourseSearch.some(
-        (course) => course.classNumber === number
-      );
-      if (isSaved) {
-        saveCourseButton.className =
-          "add-course-button add-course-button-saved";
-        saveCourseButton.textContent = "Saved to A+";
-        button.appendChild(saveCourseButton);
-        return;
-      }
+
       saveCourseButton.onclick = () => {
         if (saveCourseButton.className.includes("add-course-button-saved")) {
           return;
@@ -447,11 +438,7 @@ const courseSearchObserver = new MutationObserver(() => {
   courseSearchObserver.observe(target, { childList: true, subtree: true });
 });
 
-let savedCourseSearch = [];
-chrome.storage.local.get(["courseSearchSaved"], (result) => {
-  savedCourseSearch = result.courseSearchSaved || [];
-  console.log("Saved course search:", savedCourseSearch);
-});
+// Removed local storage - all data now stored in Convex
 
 const target = document.body;
 

@@ -45,7 +45,8 @@
     "permissions": [
       "cookies",
       "activeTab",
-      "sidePanel"
+      "sidePanel",
+      "storage"
     ],
     "host_permissions": [
       "$PLASMO_PUBLIC_CLERK_SYNC_HOST/*",
