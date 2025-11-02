@@ -66,7 +66,7 @@ async function saveCoursesToConvex(
 chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
   switch (request.type) {
     case "UPDATE_AUTH_TOKEN":
-      // Update cached auth token from popup/sidepanel
+      // Update cached auth token from sidepanel
       cachedAuthToken = request.token;
       if (cachedAuthToken) {
         convex.setAuth(cachedAuthToken);
@@ -113,7 +113,10 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
           gradesLastSync: new Date().toISOString(),
         },
         () => {
-          console.log("Saved completed courses to local storage:", request.payload);
+          console.log(
+            "Saved completed courses to local storage:",
+            request.payload,
+          );
         },
       );
 
@@ -137,7 +140,10 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
             savedAt: new Date().toISOString(),
           },
           () => {
-            console.log("Saved course search to local storage:", request.payload);
+            console.log(
+              "Saved course search to local storage:",
+              request.payload,
+            );
           },
         );
       });
@@ -147,9 +153,9 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
         try {
           if (!cachedAuthToken) {
             console.error("No auth token available for saving course search");
-            sendResponse({ 
-              success: false, 
-              error: "Not authenticated. Please sign in first." 
+            sendResponse({
+              success: false,
+              error: "Not authenticated. Please sign in first.",
             });
             return;
           }
@@ -167,9 +173,9 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
           sendResponse({ success: true, result });
         } catch (error) {
           console.error("Error saving course search to Convex:", error);
-          sendResponse({ 
-            success: false, 
-            error: (error as Error).message 
+          sendResponse({
+            success: false,
+            error: (error as Error).message,
           });
         }
       })();

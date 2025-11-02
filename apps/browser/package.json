@@ -44,7 +44,6 @@
   "manifest": {
     "permissions": [
       "cookies",
-      "storage",
       "activeTab",
       "sidePanel"
     ],
