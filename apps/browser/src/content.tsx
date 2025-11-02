@@ -90,24 +90,36 @@ function getCurrentAcademicTerm(): { year: number; term: string } {
 }
 
 function parseCourse(row: HTMLTableRowElement) {
-  let courseCode, section;
-
-  // Name, Code, Section, Credits
-  let regex1 = /\s*([\w\s]+)\s+([A-Z]+-\w+\s*\d+)\s+(\d+)\s+\((\d+)\)/;
-  const match1 = row.cells[0].textContent?.match(regex1);
-  if (match1) {
-    const [, , codeMatch, sectionMatch] = match1;
-    courseCode = codeMatch;
-    section = sectionMatch;
-  } else {
+  // Find the course title div
+  const courseTitleDiv = row.querySelector(".isSSS_CourseTitle p");
+  if (!courseTitleDiv) {
     return null;
   }
+
+  // Get the title attribute which has the course name
+  const title =
+    courseTitleDiv.getAttribute("title") ||
+    courseTitleDiv.textContent?.split("\n")[0].trim() ||
+    "";
+
+  // Get the full text content to extract course code
+  const fullText = courseTitleDiv.textContent || "";
+
+  // Extract course code (e.g., "CSCI-UA 201")
+  const codeMatch = fullText.match(/([A-Z]+-[A-Z]+)\s*(\d+)/);
+  if (!codeMatch) {
+    return null;
+  }
+
+  const courseCode = `${codeMatch[1]} ${codeMatch[2]}`
+    .replace(/\s+/g, " ")
+    .trim();
 
   const { year, term } = getCurrentAcademicTerm();
 
   let course = {
     courseCode: courseCode,
-    section: section,
+    title: title,
     year: year,
     term: term,
   };
@@ -117,7 +129,7 @@ function parseCourse(row: HTMLTableRowElement) {
 
 // Helper function to parse term string like "Spring 2025" into year and term
 function parseTermString(
-  termString: string,
+  termString: string
 ): { year: number; term: string } | null {
   const termMatch = termString.match(/^(\w+)\s+(\d{4})$/);
   if (!termMatch) return null;
@@ -174,7 +186,7 @@ function parseGradesTranscript(gradesContainer: Element) {
           if (courseCode && title) {
             // Parse course code to extract program and number
             const codeMatch = courseCode.match(
-              /^([A-Z]+-[A-Z]+)\s*-\s*(\d+|[A-Z]+)$/,
+              /^([A-Z]+-[A-Z]+)\s*-\s*(\d+|[A-Z]+)$/
             );
             let program = "";
             let catalogNumber = "";
@@ -219,7 +231,7 @@ function parseGradesTranscript(gradesContainer: Element) {
 
 function waitForTable(
   selector: string,
-  callback: (table: HTMLTableElement) => void,
+  callback: (table: HTMLTableElement) => void
 ) {
   const observer = new MutationObserver(() => {
     const table = document.querySelector<HTMLTableElement>(selector);
@@ -271,7 +283,7 @@ function parseCourseSearch(course: HTMLElement) {
           .replace("Select Class #", "")
           .trim() || "";
       let isSaved = savedCourseSearch.some(
-        (course) => course.classNumber === number,
+        (course) => course.classNumber === number
       );
       if (isSaved) {
         saveCourseButton.className =
@@ -290,11 +302,11 @@ function parseCourseSearch(course: HTMLElement) {
 
         let courseTitleElement =
           course.firstElementChild?.firstElementChild?.firstElementChild?.firstElementChild?.querySelector(
-            "b",
+            "b"
           );
 
         let courseSectionInfo = course.querySelector(
-          '[id^="COURSE' + number + 'nyu"]',
+          '[id^="COURSE' + number + 'nyu"]'
         ) as HTMLElement;
 
         let sectionTopic =
@@ -425,7 +437,7 @@ const gradesObserver = new MutationObserver(() => {
 const courseSearchObserver = new MutationObserver(() => {
   courseSearchObserver.disconnect();
   const courses = document.querySelectorAll(
-    '[id^="win0divSELECT_COURSE_row$"]',
+    '[id^="win0divSELECT_COURSE_row$"]'
   );
   courses.forEach((course) => {
     if (!course.classList.contains("extension-modified")) {

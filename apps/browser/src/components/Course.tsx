@@ -1,3 +1,5 @@
+import { ChevronDown } from "lucide-react";
+
 interface CourseProps {
   courseCode: string;
   title: string;
@@ -19,7 +21,7 @@ const Course = ({
         <span className="plasmo-font-normal">{courseCode}</span>
         <span className="plasmo-font-semibold">{title}</span>
       </div>
-      <div>Details</div>
+      <ChevronDown className="plasmo-w-5 plasmo-h-5 plasmo-text-gray-500 plasmo-cursor-pointer" />
     </div>
   );
 };
