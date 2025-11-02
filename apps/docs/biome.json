@@ -3,7 +3,7 @@
   "$schema": "https://biomejs.dev/schemas/2.3.2/schema.json",
   "extends": "//",
   "files": {
-    "includes": ["**", "!node_modules"]
+    "includes": ["**", "!node_modules", "!!dist", "!!.astro"]
   },
   "html": {
     "formatter": { "enabled": true },
