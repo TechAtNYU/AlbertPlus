@@ -1,6 +1,7 @@
-# Agent Guidelines for dev-team-fall-25
+# Agent Guidelines for albert-plus
 
 ## Build/Lint/Test Commands
+
 - `bun run dev` - Start all apps in development mode
 - `bun run build` - Build all applications
 - `bun run check` - Run Biome linting across all workspaces
@@ -11,6 +12,7 @@
 - **Tests**: No test suite currently configured in this project
 
 ## Code Style
+
 - **Formatter**: Biome with 2-space indentation, double quotes, auto-organize imports
 - **Imports**: Use `@/` for app-relative paths; imports auto-sorted by Biome
 - **Types**: TypeScript strict mode; use explicit return types for exported functions
@@ -21,8 +23,10 @@
 - **Patterns**: Use `class-variance-authority` (cva) for component variants; Convex helpers for auth/data
 
 ## Project Structure
+
 - **Monorepo**: Turbo + Bun package manager; workspaces in `apps/*` and `packages/*`
 - **Apps**: `web` (Next.js 15 + Clerk), `chrome` (extension), `scraper` (Cloudflare Worker + Drizzle)
 - **Server**: Convex backend in `packages/server` with protected queries/mutations
 - **Dependencies**: Use `workspace:*` for internal packages; Doppler for environment variables
 - **Database**: Convex for main data; Cloudflare D1 + Drizzle for scraper operations
+

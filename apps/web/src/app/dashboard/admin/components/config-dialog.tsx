@@ -1,7 +1,7 @@
 import {
   type AppConfigKey,
   appConfigOptions,
-} from "@dev-team-fall-25/server/convex/schemas/appConfigs";
+} from "@albert-plus/server/convex/schemas/appConfigs";
 import { useForm } from "@tanstack/react-form";
 import z from "zod";
 import { Button } from "@/components/ui/button";

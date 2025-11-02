@@ -1,0 +1,77 @@
+[
+  {
+    "courseCode": "CSCI-UA 102",
+    "type": "required",
+    "courses": ["CSCI-UA 101"]
+  },
+  {
+    "courseCode": "CSCI-UA 201",
+    "type": "required",
+    "courses": ["CSCI-UA 102"]
+  },
+  {
+    "courseCode": "CSCI-UA 202",
+    "type": "required",
+    "courses": ["CSCI-UA 201"]
+  },
+  {
+    "courseCode": "CSCI-UA 310",
+    "type": "required",
+    "courses": ["CSCI-UA 102", "MATH-UA 120"]
+  },
+  {
+    "courseCode": "CSCI-UA 380",
+    "type": "required",
+    "courses": ["CSCI-UA 102", "MATH-UA 140"]
+  },
+  {
+    "courseCode": "CSCI-UA 467",
+    "type": "required",
+    "courses": ["CSCI-UA 102", "MATH-UA 140", "MATH-UA 233"]
+  },
+  {
+    "courseCode": "CSCI-UA 470",
+    "type": "required",
+    "courses": ["CSCI-UA 202"]
+  },
+  {
+    "courseCode": "CSCI-UA 473",
+    "type": "required",
+    "courses": ["CSCI-UA 102"]
+  },
+  {
+    "courseCode": "CSCI-UA 479",
+    "type": "required",
+    "courses": ["CSCI-UA 102"]
+  },
+  {
+    "courseCode": "CSCI-UA 480",
+    "type": "required",
+    "courses": ["CSCI-UA 202"]
+  },
+  {
+    "courseCode": "CSCI-UA 481",
+    "type": "required",
+    "courses": ["CSCI-UA 202"]
+  },
+  {
+    "courseCode": "MATH-UA 122",
+    "type": "required",
+    "courses": ["MATH-UA 121"]
+  },
+  {
+    "courseCode": "MATH-UA 140",
+    "type": "required",
+    "courses": ["MATH-UA 121"]
+  },
+  {
+    "courseCode": "MATH-UA 233",
+    "type": "required",
+    "courses": ["MATH-UA 122"]
+  },
+  {
+    "courseCode": "DSGA-UA 201",
+    "type": "alternative",
+    "courses": ["CSCI-UA 101", "MATH-UA 121"]
+  }
+]

@@ -1,7 +1,7 @@
-import FileUploadButton from "@/modules/report-parsing/components/file-upload-button";
+import DegreeProgreeUpload from "@/modules/report-parsing/components/degree-progress-upload";
 
 const HomePage = () => {
-  return <FileUploadButton />;
+  return <DegreeProgreeUpload />;
 };
 
 export default HomePage;

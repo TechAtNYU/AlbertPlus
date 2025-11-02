@@ -1,8 +1,8 @@
 /** biome-ignore-all lint/correctness/noUnusedFunctionParameters: bypass for now */
 import type {
-  ZUpsertProgram,
+  ZUpsertProgramWithRequirements,
   ZUpsertRequirements,
-} from "@dev-team-fall-25/server/convex/http";
+} from "@albert-plus/server/convex/http";
 import type { DrizzleD1Database } from "drizzle-orm/d1";
 import type * as z from "zod/mini";
 
@@ -23,7 +23,7 @@ export async function scrapeProgram(
   db: DrizzleD1Database,
   env: CloudflareBindings,
 ): Promise<{
-  program: z.infer<typeof ZUpsertProgram>;
+  program: Omit<z.infer<typeof ZUpsertProgramWithRequirements>, "requirements">;
   requirements: ProgramRequirement[];
 }> {
   // TODO: implement this function

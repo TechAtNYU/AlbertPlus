@@ -5,15 +5,27 @@ import type { Id } from "./_generated/dataModel";
 import { apiAction } from "./helpers/auth";
 import { AppConfigKey } from "./schemas/appConfigs";
 
-export const ZUpsertCourse = z.object({
-  program: z.string(),
-  code: z.string(),
-  level: z.coerce.number(),
-  title: z.string(),
-  credits: z.int(),
-  description: z.string(),
-  courseUrl: z.string(),
-});
+const ZSchoolName = z.enum([
+  "College of Arts and Science",
+  "Graduate School of Arts and Science",
+  "College of Dentistry",
+  "Gallatin School of Individualized Study",
+  "Leonard N. Stern School of Business",
+  "Liberal Studies",
+  "NYU Abu Dhabi",
+  "NYU Shanghai",
+  "NYU Grossman School of Medicine",
+  "NYU Grossman Long Island School of Medicine",
+  "Robert F. Wagner Graduate School of Public Service",
+  "Rory Meyers College of Nursing",
+  "School of Global Public Health",
+  "School of Law",
+  "School of Professional Studies",
+  "Silver School of Social Work",
+  "Steinhardt School of Culture, Education, and Human Development",
+  "Tandon School of Engineering",
+  "Tisch School of the Arts",
+] as const);
 
 export const ZUpsertCourseWithPrerequisites = z.object({
   program: z.string(),
@@ -23,6 +35,7 @@ export const ZUpsertCourseWithPrerequisites = z.object({
   credits: z.int(),
   description: z.string(),
   courseUrl: z.string(),
+  school: ZSchoolName,
   prerequisites: z.array(
     z.discriminatedUnion("type", [
       z.object({
@@ -42,15 +55,10 @@ export const ZUpsertCourseWithPrerequisites = z.object({
   ),
 });
 
-export const ZUpsertProgram = z.object({
-  name: z.string(),
-  level: z.enum(["undergraduate", "graduate"]),
-  programUrl: z.string(),
-});
-
 export const ZUpsertProgramWithRequirements = z.object({
   name: z.string(),
   level: z.enum(["undergraduate", "graduate"]),
+  school: ZSchoolName,
   programUrl: z.string(),
   requirements: z.array(
     z.discriminatedUnion("type", [
@@ -156,7 +164,7 @@ export const ZUpsertCourseOffering = z.object({
   section: z.string(),
   year: z.number(),
   term: z.enum(["spring", "summer", "fall", "j-term"]),
-  instructor: z.string(),
+  instructor: z.array(z.string()),
   location: z.string(),
   days: z.array(
     z.enum([
@@ -171,9 +179,9 @@ export const ZUpsertCourseOffering = z.object({
   ),
   startTime: z.string(),
   endTime: z.string(),
-  status: z.enum(["open", "closed", "waitlist", "enrolled"]),
+  status: z.enum(["open", "closed", "waitlist"]),
   waitlistNum: z.optional(z.number()),
-  isCorequisite: z.boolean(),
+  isCorequisite: z._default(z.boolean(), false),
   corequisiteOf: z.optional(z.number()),
 });
 

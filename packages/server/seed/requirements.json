@@ -1,0 +1,89 @@
+[
+  {
+    "programName": "Computer Science (BA)",
+    "isMajor": true,
+    "type": "required",
+    "courses": [
+      "CSCI-UA 101",
+      "CSCI-UA 102",
+      "CSCI-UA 201",
+      "CSCI-UA 202",
+      "CSCI-UA 310",
+      "MATH-UA 120",
+      "MATH-UA 121",
+      "MATH-UA 122"
+    ]
+  },
+  {
+    "programName": "Computer Science (BA)",
+    "isMajor": true,
+    "type": "options",
+    "courses": [],
+    "courseLevels": [
+      {
+        "program": "CSCI-UA",
+        "level": 400
+      }
+    ],
+    "creditsRequired": 16
+  },
+  {
+    "programName": "Computer Science (BS)",
+    "isMajor": true,
+    "type": "required",
+    "courses": [
+      "CSCI-UA 101",
+      "CSCI-UA 102",
+      "CSCI-UA 201",
+      "CSCI-UA 202",
+      "CSCI-UA 310",
+      "MATH-UA 120",
+      "MATH-UA 121",
+      "MATH-UA 122"
+    ]
+  },
+  {
+    "programName": "Computer Science (BS)",
+    "isMajor": true,
+    "type": "options",
+    "courses": [],
+    "courseLevels": [
+      {
+        "program": "CSCI-UA",
+        "level": 400
+      }
+    ],
+    "creditsRequired": 20
+  },
+  {
+    "programName": "Data Science (BS)",
+    "isMajor": true,
+    "type": "required",
+    "courses": [
+      "CSCI-UA 101",
+      "CSCI-UA 102",
+      "DSGA-UA 201",
+      "MATH-UA 120",
+      "MATH-UA 121",
+      "MATH-UA 122"
+    ]
+  },
+  {
+    "programName": "Data Science (BS)",
+    "isMajor": true,
+    "type": "alternative",
+    "courses": ["CSCI-UA 479", "CSCI-UA 480"]
+  },
+  {
+    "programName": "Mathematics (BA)",
+    "isMajor": true,
+    "type": "required",
+    "courses": ["MATH-UA 120", "MATH-UA 121", "MATH-UA 122"]
+  },
+  {
+    "programName": "Economics (BA)",
+    "isMajor": true,
+    "type": "required",
+    "courses": ["ECON-UA 1", "ECON-UA 2", "MATH-UA 121"]
+  }
+]

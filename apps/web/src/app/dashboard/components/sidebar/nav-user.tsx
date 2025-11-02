@@ -1,7 +1,13 @@
 "use client";
 
 import { useClerk } from "@clerk/nextjs";
-import { LogOutIcon, MoreVerticalIcon, UserCircleIcon } from "lucide-react";
+import {
+  LogOutIcon,
+  MoreVerticalIcon,
+  ShieldCheck,
+  UserCircleIcon,
+} from "lucide-react";
+import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -27,6 +33,8 @@ export function NavUser({
     email: string;
     avatar: string;
     initial: string;
+    isAdmin: boolean;
+    userId?: string;
   };
 }) {
   const { isMobile } = useSidebar();
@@ -75,14 +83,29 @@ export function NavUser({
                   <span className="truncate text-xs text-muted-foreground">
                     {user.email}
                   </span>
+                  {user.userId && (
+                    <span className="truncate text-xs text-muted-foreground font-mono">
+                      {user.userId}
+                    </span>
+                  )}
                 </div>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <UserCircleIcon />
-                Account
+              {user.isAdmin && (
+                <DropdownMenuItem asChild>
+                  <Link href="/dashboard/admin">
+                    <ShieldCheck />
+                    Admin
+                  </Link>
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuItem asChild>
+                <Link href="/dashboard/account">
+                  <UserCircleIcon />
+                  Account
+                </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />

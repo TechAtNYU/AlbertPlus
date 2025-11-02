@@ -3,6 +3,8 @@ import { api } from "@dev-team-fall-25/server/convex/_generated/api";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { AppSidebar } from "@/app/dashboard/components/sidebar/app-sidebar";
+import { AppConfigProvider } from "@/components/AppConfigProvider";
+import { SettingsDialog } from "@/components/SettingsDialog";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { fetchProtectedQuery } from "@/lib/convex";
 
@@ -29,20 +31,25 @@ export default async function Layout({
   }
 
   return (
-    <SidebarProvider defaultOpen={defaultOpen}>
-      <AppSidebar
-        user={{
-          name: user?.fullName || user?.username || "Unknown User",
-          email: user?.primaryEmailAddress?.emailAddress || "",
-          avatar: user?.imageUrl || "",
-          initial: `${user?.firstName?.[0]}${user?.lastName?.[0]}` || "UU",
-          isAdmin: Boolean(user?.publicMetadata?.is_admin),
-        }}
-      />
-      <SidebarInset>
-        {header}
-        <main className="p-6 space-y-6">{children}</main>
-      </SidebarInset>
-    </SidebarProvider>
+    <AppConfigProvider>
+      <SidebarProvider defaultOpen={defaultOpen}>
+        <AppSidebar
+          user={{
+            name: user?.fullName || user?.username || "Unknown User",
+            email: user?.primaryEmailAddress?.emailAddress || "",
+            avatar: user?.imageUrl || "",
+            initial: `${user?.firstName?.[0]}${user?.lastName?.[0]}` || "UU",
+            isAdmin: Boolean(user?.publicMetadata?.is_admin),
+            userId:
+              process.env.NODE_ENV === "development" ? user?.id : undefined,
+          }}
+        />
+        <SidebarInset>
+          <div className="sticky top-0 z-40">{header}</div>
+          <main className="flex-1 p-6 space-y-6">{children}</main>
+        </SidebarInset>
+      </SidebarProvider>
+      <SettingsDialog />
+    </AppConfigProvider>
   );
 }

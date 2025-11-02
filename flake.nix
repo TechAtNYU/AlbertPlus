@@ -1,5 +1,5 @@
 {
-  description = "Dev Team Fall 25 Flake";
+  description = "AlbertPlus Flake";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
