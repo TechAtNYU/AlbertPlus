@@ -1,26 +1,18 @@
 [
   {
-    "userId": "<user-id>",
-    "classNumber": 1
+    "userId": "test_user",
+    "classNumber": 30001
   },
   {
-    "userId": "<user-id>",
-    "classNumber": 2
+    "userId": "test_user",
+    "classNumber": 30002
   },
   {
-    "userId": "<user-id>",
-    "classNumber": 3
+    "userId": "test_user",
+    "classNumber": 30003
   },
   {
-    "userId": "<user-id>",
-    "classNumber": 4
-  },
-  {
-    "userId": "<user-id>",
-    "classNumber": 5
-  },
-  {
-    "userId": "<user-id>",
-    "classNumber": 6
+    "userId": "test_user",
+    "classNumber": 30004
   }
 ]

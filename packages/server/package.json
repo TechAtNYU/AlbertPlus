@@ -7,7 +7,8 @@
     "dashboard": "convex dashboard",
     "check": "biome check",
     "check:types": "tsc --noEmit",
-    "seed:configs": "convex import --table appConfigs --replace seed/appConfigs.jsonl"
+    "seed:configs": "convex import --table appConfigs --replace seed/appConfigs.json",
+    "seed": "bun seed/seed.ts"
   },
   "dependencies": {
     "convex": "^1.28.0",
@@ -15,7 +16,7 @@
     "zod": "^4.1.12"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.3.0",
+    "@biomejs/biome": "2.3.2",
     "@types/bun": "latest",
     "typescript": "^5.9.3"
   },

@@ -10,7 +10,8 @@
     "clean": "turbo run clean && rm -rf node_modules",
     "check": "turbo run check",
     "check:fix": "turbo run check -- --fix",
-    "check:types": "turbo run check:types"
+    "check:types": "turbo run check:types",
+    "test": "turbo run test"
   },
   "engines": {
     "node": ">=20"
@@ -21,8 +22,8 @@
     "packages/*"
   ],
   "devDependencies": {
-    "turbo": "^2.5.8",
-    "@types/bun": "1.3.1"
+    "@types/bun": "1.3.1",
+    "turbo": "^2.5.8"
   },
   "peerDependencies": {
     "typescript": "^5.9.3"
