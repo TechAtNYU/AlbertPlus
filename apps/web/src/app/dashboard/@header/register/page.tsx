@@ -1,19 +1,19 @@
 "use client";
 
-import { useCurrentTerm, useCurrentYear } from "@/components/AppConfigProvider";
+import { useNextTerm, useNextYear } from "@/components/AppConfigProvider";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatTermTitle } from "@/utils/format-term";
 import { AppHeader } from "../../components/app-header";
 
 export default function ScheduleHeader() {
-  const term = useCurrentTerm();
-  const year = useCurrentYear();
+  const term = useNextTerm();
+  const year = useNextYear();
 
   const title = formatTermTitle(term, year);
 
   return (
     <AppHeader
-      title="Schedule"
+      title="Register"
       center={
         title ? (
           <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-secondary border border-border shadow-sm">

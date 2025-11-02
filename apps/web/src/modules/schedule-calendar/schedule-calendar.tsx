@@ -4,8 +4,9 @@ import type { api } from "@albert-plus/server/convex/_generated/api";
 import type { Doc } from "@albert-plus/server/convex/_generated/dataModel";
 import type { FunctionReturnType } from "convex/server";
 import { addDays, startOfWeek } from "date-fns";
+import type { Term } from "@/components/AppConfigProvider";
 import { Skeleton } from "@/components/ui/skeleton";
-import { WeekView } from "./schedule-calendar/week-view";
+import { WeekView } from "./components/week-view";
 
 export const EventHeight = 24;
 export const EventGap = 4;
@@ -70,20 +71,33 @@ export const allClassColors: EventColor[] = [
   "cyan",
 ];
 
+export function getUserClassesByTerm(
+  classes:
+    | FunctionReturnType<typeof api.userCourseOfferings.getUserCourseOfferings>
+    | undefined,
+  year: number | null,
+  term: Term | null,
+) {
+  if (!year || !term || !classes) {
+    return undefined;
+  }
+  return classes.filter((cls) => {
+    return cls.courseOffering.year === year && cls.courseOffering.term === term;
+  });
+}
+
 export interface ScheduleCalendarProps {
   classes:
     | FunctionReturnType<typeof api.userCourseOfferings.getUserCourseOfferings>
     | undefined;
-  title: string | undefined;
   hoveredCourse?: Doc<"courseOfferings"> | null;
 }
 
 export function ScheduleCalendar({
   classes,
-  title,
   hoveredCourse,
 }: ScheduleCalendarProps) {
-  if (!classes || !title) {
+  if (!classes) {
     return <Skeleton className="h-full w-full rounded-lg" />;
   }
 

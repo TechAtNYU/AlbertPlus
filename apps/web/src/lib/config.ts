@@ -1,6 +1,7 @@
 import {
   Calendar,
-  LayoutDashboard,
+  ClipboardList,
+  Home,
   MapIcon,
   Send,
   Settings,
@@ -9,8 +10,9 @@ import {
 const config = {
   sidebar: {
     navMain: [
-      { title: "Home", url: "/dashboard", icon: LayoutDashboard },
+      { title: "Home", url: "/dashboard", icon: Home },
       { title: "Schedule", url: "/dashboard/schedule", icon: Calendar },
+      { title: "Register", url: "/dashboard/register", icon: ClipboardList },
       { title: "Plan", url: "/dashboard/plan", icon: MapIcon },
     ],
     navBottom: [
