@@ -70,7 +70,7 @@ To get a local copy up and running, please follow the instructions in our [Quick
 
 If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also contribute by opening an issue for bug report or feature request.
 
-For more information, please see our [Contributing Guidelines](https://docs.albertplus.com/getting-started/contributing/).
+For more information, please see our [Contributing Guidelines](https://docs.albertplus.com/contributing/).
 
 ## License
 
