@@ -6,11 +6,7 @@ import { redirect } from "next/navigation";
 export default async function Page() {
   const student = await fetchProtectedQuery(api.students.getCurrentStudent);
 
-  if (!student) {
-    redirect("/");
-  }
-
-  if (student.isOnboarded) {
+  if (student?.isOnboarded) {
     redirect("/dashboard");
   }
 
