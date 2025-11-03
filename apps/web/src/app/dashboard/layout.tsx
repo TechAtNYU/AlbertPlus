@@ -1,5 +1,5 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
-import { api } from "@dev-team-fall-25/server/convex/_generated/api";
+import { api } from "@albert-plus/server/convex/_generated/api";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { AppSidebar } from "@/app/dashboard/components/sidebar/app-sidebar";

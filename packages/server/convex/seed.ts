@@ -149,6 +149,7 @@ export const seedAll = internalMutation({
           year: v.number(),
           term: v.union(v.literal("spring"), v.literal("fall")),
         }),
+        isOnboarded: v.boolean(),
       }),
     ),
     userCourses: v.array(
@@ -365,6 +366,7 @@ export const seedAll = internalMutation({
         school: student.school,
         startingDate: student.startingDate,
         expectedGraduationDate: student.expectedGraduationDate,
+        isOnboarded: student.isOnboarded,
       };
 
       if (existing) {
