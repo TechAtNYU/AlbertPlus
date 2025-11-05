@@ -11,7 +11,7 @@
     "seed": "bun seed/seed.ts"
   },
   "dependencies": {
-    "convex": "^1.28.0",
+    "convex": "^1.28.2",
     "convex-helpers": "^0.1.104",
     "zod": "^4.1.12"
   },

@@ -27,9 +27,9 @@
   },
   "devDependencies": {
     "@libsql/client": "^0.15.15",
-    "@types/node": "^24.9.2",
-    "convex": "^1.28.0",
+    "@types/node": "^24.10.0",
+    "convex": "^1.28.2",
     "drizzle-kit": "^0.31.6",
-    "wrangler": "^4.45.3"
+    "wrangler": "^4.45.4"
   }
 }
