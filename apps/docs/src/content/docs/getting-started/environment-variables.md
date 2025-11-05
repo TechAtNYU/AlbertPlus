@@ -39,10 +39,11 @@ These variables are required for the Cloudflare Worker scraper.
 
 These variables are configured in your Convex deployment environment.
 
-| Variable                  | Description                                                         |
-| ------------------------- | ------------------------------------------------------------------- |
-| `CLERK_JWT_ISSUER_DOMAIN` | The JWT issuer domain from your Clerk account for token validation. |
-| `CONVEX_API_KEY`          | An API key for authenticating with the Convex backend.              |
+| Variable                  | Description                                                                        |
+| ------------------------- | ---------------------------------------------------------------------------------- |
+| `CLERK_JWT_ISSUER_DOMAIN` | The JWT issuer domain from your Clerk account for token validation.                |
+| `CONVEX_API_KEY`          | A shared API key for authenticating requests between Convex and the scraper worker. |
+| `SCRAPER_URL`             | The URL of the deployed scraper worker (e.g., `https://scraper.albertplus.com`).   |
 
 ## Cloudflare Worker Bindings
 

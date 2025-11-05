@@ -9,11 +9,13 @@ Understanding the flow of data is crucial to comprehending how AlbertPlus works.
 The primary data pipeline is responsible for collecting, storing, and serving course and program information.
 
 1. **Scraping (Cloudflare Worker)**
-   - **Trigger**: The process begins with a scheduled job (cron trigger) or http handlers in the Cloudflare Worker.
-   - **Discovery**: The scraper first discovers the URLs for all available programs and courses from NYU's public course catalog.
-   - **Job Queuing**: For each discovered program and course, a new job is added to a Cloudflare D1 queue. This allows for resilient and distributed processing.
+   - **Admin Trigger**: Admin users initiate scraping by calling Convex actions (`api.scraper.triggerMajorsScraping` or `api.scraper.triggerCoursesScraping`).
+   - **Authenticated Request**: The Convex action makes a POST request to the scraper's HTTP endpoints (`/api/trigger-majors` or `/api/trigger-courses`) with the `CONVEX_API_KEY` in the `X-API-KEY` header.
+   - **API Key Validation**: The scraper validates the API key to ensure the request is from the trusted Convex backend.
+   - **Discovery**: The scraper discovers the URLs for all available programs or courses from NYU's public course catalog.
+   - **Job Queuing**: For each discovered program or course, a new job is added to a Cloudflare Queue. This allows for resilient and distributed processing.
    - **Data Extraction**: Each job in the queue is processed by the worker, which scrapes the detailed information for a specific course or program.
-   - **Upsert to Backend**: The scraped data is then sent to the Convex backend via an HTTP endpoint.
+   - **Upsert to Backend**: The scraped data is sent back to the Convex backend via authenticated HTTP endpoints.
 
 2. **Backend Processing (Convex)**
    - **Data Reception**: The Convex backend receives the scraped data from the Cloudflare Worker.
