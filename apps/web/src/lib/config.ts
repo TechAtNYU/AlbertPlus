@@ -1,16 +1,11 @@
-import {
-  Calendar,
-  LayoutDashboard,
-  MapIcon,
-  Send,
-  Settings,
-} from "lucide-react";
+import { ClipboardList, Home, MapIcon, Send, Settings } from "lucide-react";
 
 const config = {
   sidebar: {
     navMain: [
-      { title: "Home", url: "/dashboard", icon: LayoutDashboard },
-      { title: "Schedule", url: "/dashboard/schedule", icon: Calendar },
+      { title: "Home", url: "/dashboard", icon: Home },
+      // { title: "Schedule", url: "/dashboard/schedule", icon: Calendar },
+      { title: "Register", url: "/dashboard/register", icon: ClipboardList },
       { title: "Plan", url: "/dashboard/plan", icon: MapIcon },
     ],
     navBottom: [

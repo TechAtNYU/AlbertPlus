@@ -6,8 +6,8 @@ const appConfigOptions = [
   "current_year",
   "next_term",
   "next_year",
-  "is_scraping_majors",
-  "is_scraping_courses",
+  "is_scrape_current",
+  "is_scrape_next",
 ] as const;
 
 const AppConfigKey = z.string() as z.ZodMiniType<

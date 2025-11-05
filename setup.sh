@@ -53,4 +53,11 @@ echo "Setting CONVEX_API_KEY in Convex environment..."
 echo "Adding CONVEX_API_KEY to scraper environment file..."
 echo "CONVEX_API_KEY=$CONVEX_API_KEY" >> "$SCRAPER_DEST_FILE"
 
+echo "Setting up SCRAPER_URL..."
+SCRAPER_URL=$(doppler secrets get SCRAPER_URL --plain)
+echo "Retrieved SCRAPER_URL from Doppler: $SCRAPER_URL"
+
+echo "Setting SCRAPER_URL in Convex environment..."
+(cd ./packages/server && bunx convex env set SCRAPER_URL "$SCRAPER_URL")
+
 echo "Setup complete!"
