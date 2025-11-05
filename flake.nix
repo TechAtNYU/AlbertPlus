@@ -65,7 +65,7 @@
             gum style --margin "0 2" \
               "$(gum style --bold --foreground "#89b4fa" 'bun dev')         - Start development servers" \
               "$(gum style --bold --foreground "#89b4fa" 'bun dashboard')   - Open Convex dashboard" \
-              "$(gum style --bold --foreground "#89b4fa" 'bun check')       - Check code with Biome" \
+              "$(gum style --bold --foreground "#89b4fa" 'bun check')       - Check code with Biome" 
             echo ""
           '';
         };
