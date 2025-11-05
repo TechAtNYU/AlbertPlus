@@ -23,7 +23,7 @@ export const triggerMajorsScraping = protectedAdminAction({
       );
     }
 
-    const response = await fetch(`${scraperUrl}/api/majors`, {
+    const response = await fetch(`${scraperUrl}/api/programs`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

@@ -38,7 +38,7 @@ app.get("/", async (c) => {
 });
 
 // Endpoint to trigger major discovery scraping
-app.post("/api/majors", validateApiKey, async (c) => {
+app.post("/api/programs", validateApiKey, async (c) => {
   const db = getDB(c.env);
 
   const programsUrl = new URL("/programs", c.env.SCRAPING_BASE_URL).toString();
