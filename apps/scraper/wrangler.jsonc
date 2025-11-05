@@ -7,42 +7,36 @@
   "compatibility_date": "2025-09-26",
   "compatibility_flags": ["nodejs_compat"],
   "observability": {
-    "enabled": true,
+    "enabled": true
   },
   "triggers": {
-    "crons": ["0 */6 * * *"], // Run every 6 hours
+    "crons": ["0 */6 * * *"] // Run every 6 hours
   },
   "queues": {
     "producers": [
       {
         "queue": "albert-plus-scraping-queue",
-        "binding": "SCRAPING_QUEUE",
-      },
+        "binding": "SCRAPING_QUEUE"
+      }
     ],
     "consumers": [
       {
         "queue": "albert-plus-scraping-queue",
         "max_batch_size": 10,
-        "max_batch_timeout": 60,
-      },
-    ],
+        "max_batch_timeout": 60
+      }
+    ]
   },
   "d1_databases": [
     {
       "binding": "DB",
       "database_name": "albert-plus-scraper",
       "database_id": "e438e708-bc01-418d-9542-e33f476f28d0",
-      "migrations_dir": "src/drizzle/migrations",
-    },
+      "migrations_dir": "src/drizzle/migrations"
+    }
   ],
   "vars": {
     "SCRAPING_BASE_URL": "https://bulletins.nyu.edu/",
-<<<<<<< HEAD
-    "CONVEX_SITE_URL": "http://127.0.0.1:3210",
-    "CONVEX_API_KEY": "dev-secret-key",
-  },
-=======
     "ALBERT_SCRAPING_BASE_URL": "https://bulletins.nyu.edu/class-search/"
   }
->>>>>>> origin/main
 }
