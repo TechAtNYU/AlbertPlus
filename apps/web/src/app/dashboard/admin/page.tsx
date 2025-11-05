@@ -4,7 +4,7 @@ import { api } from "@albert-plus/server/convex/_generated/api";
 import type { Doc } from "@albert-plus/server/convex/_generated/dataModel";
 import { useUser } from "@clerk/nextjs";
 import { useAction, useConvexAuth, useMutation, useQuery } from "convex/react";
-import { BookOpen, GraduationCap, Plus } from "lucide-react";
+import { BookOpen, GraduationCap, Pencil, Plus, Save } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -37,10 +37,9 @@ export default function AdminPage() {
   const triggerCoursesScraping = useAction(api.scraper.triggerCoursesScraping);
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [mode, setMode] = useState<"add" | "edit">("add");
-  const [editingValues, setEditingValues] = useState<
-    Doc<"appConfigs"> | undefined
-  >(undefined);
+  const [isEditing, setIsEditing] = useState(false);
+  const [draftValues, setDraftValues] = useState<Record<string, string>>({});
+  const [isSavingConfigs, setIsSavingConfigs] = useState(false);
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [deletingConfig, setDeletingConfig] = useState<
@@ -68,15 +67,66 @@ export default function AdminPage() {
   }
 
   const handleAdd = () => {
-    setMode("add");
-    setEditingValues(undefined);
     setIsDialogOpen(true);
   };
 
-  const handleEdit = (config: Doc<"appConfigs">) => {
-    setMode("edit");
-    setEditingValues(config);
-    setIsDialogOpen(true);
+  const handleStartEditing = () => {
+    const initialValues: Record<string, string> = {};
+    for (const config of configs) {
+      initialValues[config.key] = config.value;
+    }
+    setDraftValues(initialValues);
+    setIsEditing(true);
+  };
+
+  const handleCancelEditing = () => {
+    setIsEditing(false);
+    setDraftValues({});
+  };
+
+  const handleValueChange = (key: string, value: string) => {
+    setDraftValues((previous) => ({
+      ...previous,
+      [key]: value,
+    }));
+  };
+
+  const handleSaveEditing = async () => {
+    const updates = configs.filter(
+      (config) => draftValues[config.key] !== config.value,
+    );
+
+    if (!updates.length) {
+      toast.info("No configuration changes to save.");
+      setIsEditing(false);
+      setDraftValues({});
+      return;
+    }
+
+    setIsSavingConfigs(true);
+    try {
+      await Promise.all(
+        updates.map((config) =>
+          setConfig({
+            key: config.key,
+            value: draftValues[config.key] ?? "",
+          }),
+        ),
+      );
+      toast.success("Configurations updated.", {
+        description: `${updates.length} ${
+          updates.length === 1 ? "entry" : "entries"
+        } saved.`,
+      });
+      setIsEditing(false);
+      setDraftValues({});
+    } catch (error) {
+      toast.error("Failed to save configurations.", {
+        description: error instanceof Error ? error.message : "Unknown error",
+      });
+    } finally {
+      setIsSavingConfigs(false);
+    }
   };
 
   const handleDelete = (config: Doc<"appConfigs">) => {
@@ -160,24 +210,64 @@ export default function AdminPage() {
 
       <div>
         <h2 className="text-lg font-semibold mb-3">App Configuration</h2>
-        <Button onClick={handleAdd} size="sm">
-          <Plus className="size-4" />
-          Add
-        </Button>
+        <div className="flex flex-wrap gap-3">
+          <Button onClick={handleAdd} size="sm" disabled={isEditing}>
+            <Plus className="size-4" />
+            Add
+          </Button>
+          {isEditing ? (
+            <>
+              <Button
+                onClick={handleCancelEditing}
+                size="sm"
+                variant="outline"
+                disabled={isSavingConfigs}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSaveEditing}
+                size="sm"
+                disabled={isSavingConfigs}
+              >
+                {isSavingConfigs ? (
+                  <Spinner className="size-4" />
+                ) : (
+                  <Save className="size-4" />
+                )}
+                Save
+              </Button>
+            </>
+          ) : (
+            <Button
+              onClick={handleStartEditing}
+              size="sm"
+              variant="outline"
+              disabled={!configs.length}
+            >
+              <Pencil className="size-4" />
+              Update
+            </Button>
+          )}
+        </div>
       </div>
 
-      <ConfigTable data={configs} onEdit={handleEdit} onDelete={handleDelete} />
+      <ConfigTable
+        data={configs}
+        isEditing={isEditing}
+        editingValues={draftValues}
+        onValueChange={handleValueChange}
+        onDelete={handleDelete}
+      />
 
       <ConfigDialog
         open={isDialogOpen}
         onOpenChange={(open) => {
           setIsDialogOpen(open);
           if (!open) {
-            setEditingValues(undefined);
+            setDraftValues({});
           }
         }}
-        mode={mode}
-        initial={editingValues}
         onSubmit={onSaveConfig}
       />
 
