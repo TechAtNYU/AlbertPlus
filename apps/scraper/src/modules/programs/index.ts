@@ -31,10 +31,13 @@ export async function scrapeProgram(
 }> {
   const base = "https://bulletins.nyu.edu/";
   let target: URL;
-
-  let program: z.infer<typeof ZUpsertProgram> = {
+  let program: Omit<
+    z.infer<typeof ZUpsertProgramWithRequirements>,
+    "requirements"
+  > = {
     name: "Unknown Program",
     level: "undergraduate",
+    school: "College of Arts and Science",
     programUrl: url,
   };
   let requirements: ProgramRequirement[] = [];
@@ -43,27 +46,21 @@ export async function scrapeProgram(
     try {
       target = new URL(url, base);
     } catch {
-      target = new URL(url);
+      target = new URL(base);
     }
 
     console.log("Fetching:", target.toString());
-    const res = await fetch(target.toString());
+    const res = await fetch(target);
     console.log("Status:", res.status);
-
     const html = await res.text();
     console.log("Content from website:\n", html);
 
-    const titleMatch = html.match(/<title>([^<]+)<\/title>/i);
-    const title =
-      (titleMatch?.[1] ?? "").trim() ||
-      decodeURIComponent(
-        target.pathname.split("/").filter(Boolean).pop() ?? ""
-      ) ||
-      "Unknown Program";
-
+    //TODO: Find format of html and insert major and requirements parsing logic
+    //TODO: Place the variables in correct place
     program = {
-      name: title,
+      name: "name",
       level: "undergraduate",
+      school: "College of Arts and Science",
       programUrl: target.toString(),
     };
     requirements = [];

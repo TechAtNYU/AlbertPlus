@@ -1,5 +1,5 @@
 {
-  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "albert-plus-scraper",
   "routes": [{ "pattern": "scraper.albertplus.com", "custom_domain": true }],
   "main": "src/index.ts",
@@ -37,7 +37,12 @@
   ],
   "vars": {
     "SCRAPING_BASE_URL": "https://bulletins.nyu.edu/",
+<<<<<<< HEAD
     "CONVEX_SITE_URL": "http://127.0.0.1:3210",
     "CONVEX_API_KEY": "dev-secret-key",
   },
+=======
+    "ALBERT_SCRAPING_BASE_URL": "https://bulletins.nyu.edu/class-search/"
+  }
+>>>>>>> origin/main
 }
