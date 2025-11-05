@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
-import { Hono } from "hono";
 import type { Context, Next } from "hono";
+import { Hono } from "hono";
 import getDB from "./drizzle";
 import { errorLogs, jobs } from "./drizzle/schema";
 import { ConvexApi } from "./lib/convex";
@@ -46,9 +46,7 @@ app.post("/api/majors", validateApiKey, async (c) => {
 
   await c.env.SCRAPING_QUEUE.send({ jobId: createdJob.id });
 
-  console.log(
-    `Created major discovery job [id: ${createdJob.id}], disabled is_scraping_majors flag`,
-  );
+  console.log(`Created major discovery job [id: ${createdJob.id}]`);
 
   return c.json({
     success: true,
@@ -70,9 +68,7 @@ app.post("/api/courses", validateApiKey, async (c) => {
 
   await c.env.SCRAPING_QUEUE.send({ jobId: createdJob.id });
 
-  console.log(
-    `Created course discovery job [id: ${createdJob.id}], disabled is_scraping_courses flag`,
-  );
+  console.log(`Created course discovery job [id: ${createdJob.id}]`);
 
   return c.json({
     success: true,
@@ -84,7 +80,7 @@ app.post("/api/courses", validateApiKey, async (c) => {
 export default {
   fetch: app.fetch,
 
-  async scheduled(_event: ScheduledEvent, env: CloudflareBindings) {
+  async scheduled(_event: ScheduledEvent, _env: CloudflareBindings) {
     // const db = getDB(env);
     // const convex = new ConvexApi({
     //   baseUrl: env.CONVEX_SITE_URL,

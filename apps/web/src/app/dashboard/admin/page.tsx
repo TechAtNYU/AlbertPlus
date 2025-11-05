@@ -3,10 +3,11 @@
 import { api } from "@albert-plus/server/convex/_generated/api";
 import type { Doc } from "@albert-plus/server/convex/_generated/dataModel";
 import { useUser } from "@clerk/nextjs";
-import { useConvexAuth, useMutation, useQuery } from "convex/react";
-import { Plus } from "lucide-react";
+import { useAction, useConvexAuth, useMutation, useQuery } from "convex/react";
+import { BookOpen, GraduationCap, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -32,6 +33,8 @@ export default function AdminPage() {
   );
   const setConfig = useMutation(api.appConfigs.setAppConfig);
   const removeConfig = useMutation(api.appConfigs.removeAppConfig);
+  const triggerMajorsScraping = useAction(api.scraper.triggerMajorsScraping);
+  const triggerCoursesScraping = useAction(api.scraper.triggerCoursesScraping);
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [mode, setMode] = useState<"add" | "edit">("add");
@@ -43,6 +46,9 @@ export default function AdminPage() {
   const [deletingConfig, setDeletingConfig] = useState<
     Doc<"appConfigs"> | undefined
   >(undefined);
+
+  const [isTriggeringMajors, setIsTriggeringMajors] = useState(false);
+  const [isTriggeringCourses, setIsTriggeringCourses] = useState(false);
 
   if (isAuthenticated && !isAdmin) {
     router.push("/dashboard");
@@ -86,12 +92,79 @@ export default function AdminPage() {
     }
   };
 
+  const handleTriggerMajors = async () => {
+    setIsTriggeringMajors(true);
+    try {
+      const result = await triggerMajorsScraping({});
+      toast.success("Majors scraping triggered successfully", {
+        description: `Job ID: ${result.jobId}`,
+      });
+    } catch (error) {
+      toast.error("Failed to trigger majors scraping", {
+        description: error instanceof Error ? error.message : "Unknown error",
+      });
+    } finally {
+      setIsTriggeringMajors(false);
+    }
+  };
+
+  const handleTriggerCourses = async () => {
+    setIsTriggeringCourses(true);
+    try {
+      const result = await triggerCoursesScraping({});
+      toast.success("Courses scraping triggered successfully", {
+        description: `Job ID: ${result.jobId}`,
+      });
+    } catch (error) {
+      toast.error("Failed to trigger courses scraping", {
+        description: error instanceof Error ? error.message : "Unknown error",
+      });
+    } finally {
+      setIsTriggeringCourses(false);
+    }
+  };
+
   return (
-    <div className="space-y-4">
-      <Button onClick={handleAdd} size="sm">
-        <Plus className="size-4" />
-        Add
-      </Button>
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-lg font-semibold mb-3">Scraper Controls</h2>
+        <div className="flex gap-3">
+          <Button
+            onClick={handleTriggerMajors}
+            disabled={isTriggeringMajors}
+            size="sm"
+            variant="outline"
+          >
+            {isTriggeringMajors ? (
+              <Spinner className="size-4" />
+            ) : (
+              <GraduationCap className="size-4" />
+            )}
+            Trigger Majors Scraping
+          </Button>
+          <Button
+            onClick={handleTriggerCourses}
+            disabled={isTriggeringCourses}
+            size="sm"
+            variant="outline"
+          >
+            {isTriggeringCourses ? (
+              <Spinner className="size-4" />
+            ) : (
+              <BookOpen className="size-4" />
+            )}
+            Trigger Courses Scraping
+          </Button>
+        </div>
+      </div>
+
+      <div>
+        <h2 className="text-lg font-semibold mb-3">App Configuration</h2>
+        <Button onClick={handleAdd} size="sm">
+          <Plus className="size-4" />
+          Add
+        </Button>
+      </div>
 
       <ConfigTable data={configs} onEdit={handleEdit} onDelete={handleDelete} />
 
