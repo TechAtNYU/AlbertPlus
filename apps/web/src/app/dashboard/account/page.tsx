@@ -1,15 +1,19 @@
 "use client";
 
-import { useUser } from "@clerk/nextjs";
-import { useQuery, useMutation } from "convex/react";
 import { api } from "@albert-plus/server/convex/_generated/api";
+import { useUser } from "@clerk/nextjs";
+import { useConvexAuth, useMutation, useQuery } from "convex/react";
 
 export default function ProfilePage() {
-  const { user, isLoaded } = useUser();
-  const student = useQuery(api.students.getCurrentStudent);
-  const upsert = useMutation(api.students.upsertCurrentStudent);
+  const { isAuthenticated } = useConvexAuth();
+  const { user } = useUser();
 
-  if (!isLoaded) return <div>Loading...</div>;
+  const student = useQuery(
+    api.students.getCurrentStudent,
+    isAuthenticated ? {} : "skip",
+  );
+
+  const upsert = useMutation(api.students.upsertCurrentStudent);
 
   return (
     <div className="space-y-2">
@@ -36,14 +40,7 @@ export default function ProfilePage() {
         </>
       )}
 
-      {!student && (
-        <>
-          <p>
-            HIIII
-          </p>
-          
-        </>
-      )}
+      {!student && <p>HIIII</p>}
     </div>
   );
 }
