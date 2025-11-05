@@ -74,6 +74,8 @@ export const removeAppConfig = protectedAdminMutation({
   },
 });
 
+// TODO: might be able to remove this function
+
 export const setAppConfigInternal = internalMutation({
   args: {
     key: v.string(),
