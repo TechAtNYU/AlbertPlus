@@ -30,7 +30,7 @@ echo "Setting up scraper environment file..."
 echo "Source: $SOURCE_FILE"
 echo "Destination: $SCRAPER_DEST_FILE"
 
-CONVEX_SITE_URL="http://127.0.0.1:3210"
+CONVEX_SITE_URL="http://127.0.0.1:3211"
 
 echo "CONVEX_SITE_URL=$CONVEX_SITE_URL" > "$SCRAPER_DEST_FILE"
 
