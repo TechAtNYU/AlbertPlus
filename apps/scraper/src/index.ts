@@ -5,6 +5,10 @@ import getDB from "./drizzle";
 import { errorLogs, jobs } from "./drizzle/schema";
 import { ConvexApi } from "./lib/convex";
 import { JobError, type JobMessage } from "./lib/queue";
+import {
+  discoverCourseOfferings,
+  scrapeCourseOfferings,
+} from "./modules/courseOfferings";
 import { discoverCourses, scrapeCourse } from "./modules/courses";
 import { discoverPrograms, scrapeProgram } from "./modules/programs";
 
@@ -80,14 +84,77 @@ app.post("/api/courses", validateApiKey, async (c) => {
 export default {
   fetch: app.fetch,
 
-  async scheduled(_event: ScheduledEvent, _env: CloudflareBindings) {
-    // const db = getDB(env);
-    // const convex = new ConvexApi({
-    //   baseUrl: env.CONVEX_SITE_URL,
-    //   apiKey: env.CONVEX_API_KEY,
-    // });
-    // TODO: add albert public search
-    return;
+  async scheduled(_event: ScheduledEvent, env: CloudflareBindings) {
+    const db = getDB(env);
+    const convex = new ConvexApi({
+      baseUrl: env.CONVEX_SITE_URL,
+      apiKey: env.CONVEX_API_KEY,
+    });
+
+    // Get scraping flags from Convex app config
+    const isScrapeCurrentData = await convex.getAppConfig({
+      key: "is_scrape_current",
+    });
+    const isScrapeNextData = await convex.getAppConfig({
+      key: "is_scrape_next",
+    });
+
+    const isScrapeCurrent = isScrapeCurrentData === "true";
+    const isScrapeNext = isScrapeNextData === "true";
+
+    console.log(
+      `Cronjob: Scraping flags - current: ${isScrapeCurrent}, next: ${isScrapeNext}`,
+    );
+
+    // Collect terms to scrape
+    const termsToScrape: Array<{
+      term: "spring" | "summer" | "fall" | "j-term";
+      year: number;
+    }> = [];
+
+    if (isScrapeCurrent) {
+      const currentTerm = (await convex.getAppConfig({
+        key: "current_term",
+      })) as "spring" | "summer" | "fall" | "j-term";
+      const currentYearStr = await convex.getAppConfig({ key: "current_year" });
+      if (currentYearStr) {
+        const currentYear = Number.parseInt(currentYearStr, 10);
+        termsToScrape.push({ term: currentTerm, year: currentYear });
+      }
+    }
+
+    if (isScrapeNext) {
+      const nextTerm = (await convex.getAppConfig({ key: "next_term" })) as
+        | "spring"
+        | "summer"
+        | "fall"
+        | "j-term";
+      const nextYearStr = await convex.getAppConfig({ key: "next_year" });
+      if (nextYearStr) {
+        const nextYear = Number.parseInt(nextYearStr, 10);
+        termsToScrape.push({ term: nextTerm, year: nextYear });
+      }
+    }
+
+    // Trigger course offerings discovery for each enabled term
+    const courseOfferingsUrl = new URL(env.SCRAPING_BASE_URL).toString();
+
+    for (const { term, year } of termsToScrape) {
+      const [createdJob] = await db
+        .insert(jobs)
+        .values({
+          url: courseOfferingsUrl,
+          jobType: "discover-course-offerings",
+          metadata: { term, year },
+        })
+        .returning();
+
+      await env.SCRAPING_QUEUE.send({ jobId: createdJob.id });
+
+      console.log(
+        `Cronjob: Created course offerings discovery job [id: ${createdJob.id}, term: ${term}, year: ${year}]`,
+      );
+    }
   },
 
   async queue(
@@ -184,6 +251,50 @@ export default {
                     "validation",
                   );
                 }
+                break;
+              }
+              case "discover-course-offerings": {
+                const metadata = job.metadata as {
+                  term: "spring" | "summer" | "fall" | "j-term";
+                  year: number;
+                } | null;
+
+                if (!metadata?.term || !metadata?.year) {
+                  throw new JobError(
+                    "Missing term or year in job metadata",
+                    "validation",
+                  );
+                }
+
+                const courseOfferingUrls = await discoverCourseOfferings(
+                  job.url,
+                  metadata.term,
+                  metadata.year,
+                );
+                const newJobs = await db
+                  .insert(jobs)
+                  .values(
+                    courseOfferingUrls.map((url) => ({
+                      url,
+                      jobType: "course-offering" as const,
+                      metadata: { term: metadata.term, year: metadata.year },
+                    })),
+                  )
+                  .returning();
+
+                await env.SCRAPING_QUEUE.sendBatch(
+                  newJobs.map((j) => ({ body: { jobId: j.id } })),
+                );
+                break;
+              }
+              case "course-offering": {
+                const courseOfferings = await scrapeCourseOfferings(
+                  job.url,
+                  db,
+                  env,
+                );
+
+                await convex.upsertCourseOfferings(courseOfferings);
                 break;
               }
             }
