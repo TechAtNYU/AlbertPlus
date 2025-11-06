@@ -1,4 +1,4 @@
-import type { Term } from "@/components/AppConfigProvider";
+import type { Term } from "@/utils/term";
 import type { Grade, UserCourse } from "../types";
 
 interface ParsedCourse {

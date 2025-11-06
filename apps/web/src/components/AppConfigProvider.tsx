@@ -3,8 +3,7 @@
 import { api } from "@albert-plus/server/convex/_generated/api";
 import { useConvexAuth, useQuery } from "convex/react";
 import { createContext, type ReactNode, useContext, useMemo } from "react";
-
-export type Term = "spring" | "summer" | "fall" | "j-term";
+import type { Term } from "@/utils/term";
 
 export type AppConfig = {
   current_term: Term | null;
