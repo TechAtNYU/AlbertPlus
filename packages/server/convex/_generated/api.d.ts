@@ -23,6 +23,7 @@ import type * as schemas_programs from "../schemas/programs.js";
 import type * as schemas_schools from "../schemas/schools.js";
 import type * as schemas_students from "../schemas/students.js";
 import type * as schools from "../schools.js";
+import type * as scraper from "../scraper.js";
 import type * as seed from "../seed.js";
 import type * as students from "../students.js";
 import type * as userCourseOfferings from "../userCourseOfferings.js";
@@ -58,6 +59,7 @@ declare const fullApi: ApiFromModules<{
   "schemas/schools": typeof schemas_schools;
   "schemas/students": typeof schemas_students;
   schools: typeof schools;
+  scraper: typeof scraper;
   seed: typeof seed;
   students: typeof students;
   userCourseOfferings: typeof userCourseOfferings;
