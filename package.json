@@ -34,15 +34,5 @@
     "esbuild",
     "sharp",
     "workerd"
-  ],
-  "dependencies": {
-    "@hookform/resolvers": "^5.2.2",
-    "@radix-ui/react-label": "^2.1.7",
-    "@radix-ui/react-select": "^2.2.6",
-    "@radix-ui/react-slot": "^1.2.3",
-    "@stepperize/react": "^5.1.9",
-    "cmdk": "^1.1.1",
-    "react-hook-form": "^7.65.0",
-    "zod": "^4.1.12"
-  }
+  ]
 }
