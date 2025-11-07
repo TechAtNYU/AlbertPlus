@@ -1,4 +1,4 @@
-import type { Term } from "@/components/AppConfigProvider";
+export type Term = "spring" | "summer" | "fall" | "j-term";
 
 export function formatTermTitle(term: Term | null, year: number | null) {
   if (!term || !year) {

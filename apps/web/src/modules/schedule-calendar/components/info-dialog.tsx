@@ -13,6 +13,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { formatTermTitle } from "@/utils/term";
 import type { Class } from "../schedule-calendar";
 
 interface CourseInfoDialogProps {
@@ -47,16 +48,6 @@ export function CourseInfoDialog({
 
   const formatTimeSlot = (slot: { start: Date; end: Date }) => {
     return `${format(slot.start, "EEEE, h:mm a")} - ${format(slot.end, "h:mm a")}`;
-  };
-
-  const formatTerm = (term: string, year: number) => {
-    const termMap: Record<string, string> = {
-      spring: "Spring",
-      summer: "Summer",
-      fall: "Fall",
-      "j-term": "J-Term",
-    };
-    return `${termMap[term] || term} ${year}`;
   };
 
   const getStatusBadgeColor = (status: string) => {
@@ -118,7 +109,7 @@ export function CourseInfoDialog({
                         Term
                       </p>
                       <p className="text-sm text-muted-foreground">
-                        {formatTerm(course.term, course.year)}
+                        {formatTermTitle(course.term, course.year)}
                       </p>
                     </div>
                   </div>
