@@ -1,13 +1,17 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Form } from "@/components/ui/form";
 import { defineStepper } from "@/components/ui/stepper";
-import { useUser } from "@clerk/nextjs";
 import { api } from "@albert-plus/server/convex/_generated/api";
 import type { Doc } from "@albert-plus/server/convex/_generated/dataModel";
+import { useUser } from "@clerk/nextjs";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "convex/react";
+import {
+  useMutation,
+  usePaginatedQuery,
+  useQuery,
+  type PaginationStatus,
+} from "convex/react";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { useForm } from "react-hook-form";
@@ -51,9 +55,6 @@ function CompleteComponent() {
   );
 }
 
-// TODO: after the scraper is impelmented, get programs from the backend instead
-const programs: Doc<"programs">[] = [];
-
 const { Stepper, useStepper } = defineStepper(
   {
     id: "academic-info",
@@ -81,19 +82,49 @@ const { Stepper, useStepper } = defineStepper(
   },
 );
 
-interface OnboardingStepperProps {
-  student: Doc<"students"> | null;
-}
+export function OnboardingStepper() {
+  const [programsQuery, setProgramsQuery] = React.useState<string | undefined>(
+    undefined,
+  );
+  const {
+    results: programs,
+    status: programsStatus,
+    loadMore: programsLoadMore,
+  } = usePaginatedQuery(
+    api.programs.getPrograms,
+    { query: programsQuery },
+    { initialNumItems: 20 },
+  );
+  const schools = useQuery(api.schools.getSchools);
 
-export function OnboardingStepper(props: OnboardingStepperProps) {
   return (
     <Stepper.Provider>
-      <OnboardingStepperContent {...props} />
+      <OnboardingStepperContent
+        schools={schools}
+        programs={programs}
+        setProgramsQuery={setProgramsQuery}
+        programsStatus={programsStatus}
+        programsLoadMore={programsLoadMore}
+      />
     </Stepper.Provider>
   );
 }
 
-const OnboardingStepperContent = ({ student }: OnboardingStepperProps) => {
+interface OnboardingStepperContentProps {
+  schools: Doc<"schools">[] | undefined;
+  programs: Doc<"programs">[];
+  setProgramsQuery: React.Dispatch<React.SetStateAction<string | undefined>>;
+  programsStatus: PaginationStatus;
+  programsLoadMore: (numItems: number) => void;
+}
+
+const OnboardingStepperContent = ({
+  schools,
+  programs,
+  setProgramsQuery,
+  programsStatus,
+  programsLoadMore,
+}: OnboardingStepperContentProps) => {
   const methods = useStepper();
 
   const form = useForm({
