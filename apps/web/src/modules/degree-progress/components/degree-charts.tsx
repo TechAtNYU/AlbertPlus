@@ -2,7 +2,13 @@
 
 import type { api } from "@albert-plus/server/convex/_generated/api";
 import type { FunctionReturnType } from "convex/server";
-import { Bar, BarChart, LabelList, Tooltip, XAxis, YAxis } from "recharts";
+import {
+  type RequestForQueries,
+  useConvexAuth,
+  useQueries,
+  useQuery,
+} from "convex/react";
+import { Cell, Legend, Pie, PieChart, LabelList, XAxis, YAxis } from "recharts";
 import {
   Card,
   CardContent,
@@ -21,12 +27,89 @@ interface ProgramRequirementsChartProps {
     | undefined;
 }
 
+const getRequirementsByCategory = (programs: Record<
+                                    string,
+                                    FunctionReturnType<typeof api.programs.getProgramById> | undefined
+                                  >) => {
+  if (!programs) return null;
+
+  // Calculate total credits for each category
+  const groupedRequirements: Record<
+    string,
+    { credits: number; courses: string[][] }
+  > = {};
+
+  const programList: string[] = [];
+
+  // FIXME: currently no merging of programs if more than one listed (dual degree), assumes only one program for now
+  for (const [programName, data] of Object.entries(programs)) {
+    programList.push(programName);
+
+    const requirements = data?.requirements;
+    if (requirements) {
+      for (const requirement of requirements) {
+        const courses = requirement.courses;
+        // CASE: requirements is type option
+        if (requirement.type === "options") {
+          const uniquePrefixes = [
+            ...new Set(requirement.courses.map((c: string) => c.split(" ")[0])),
+          ];
+
+          if (uniquePrefixes.length === 1) {
+            // All same prefix - assign all credits to that one prefix
+            const prefix = uniquePrefixes[0];
+            if (!groupedRequirements[prefix]) {
+              groupedRequirements[prefix] = { credits: 0, courses: [] };
+            }
+            groupedRequirements[prefix].credits += requirement.creditsRequired;
+            groupedRequirements[prefix].courses.push(courses);
+          } else {
+            // Mixed prefixes - assign to "Other" category
+            if (!groupedRequirements.Other) {
+              groupedRequirements.Other = { credits: 0, courses: [] };
+            }
+            groupedRequirements.Other.credits += requirement.creditsRequired;
+            groupedRequirements.Other.courses.push(courses);
+          }
+        }
+        // CASE: Required/Alternative type - calculate actual credits per course
+        else {
+          const courseQueries = useQueries(
+            Array.from(courses).map((code) => ({
+              query: api.courses.getCourseByCode,
+              args: { code },
+            }))
+          );
+
+          for (const course of courseQueries) {
+            const code = course.split(" ")[0];
+
+            // FIXME: fallback to 4 credits if number of credits not found
+            const credits = course ? course.credits : 4;
+
+            if (!groupedRequirements[code]) {
+              groupedRequirements[code] = { credits: 0, courses: [] };
+            }
+            groupedRequirements[code].credits += credits;
+            groupedRequirements[code].courses.push([course]);
+          }
+        }
+      }
+    }
+  }
+    
+  return {
+    ...program,
+    requirementsByCategory: groupedRequirements,
+  };
+};
+
 export function ProgramRequirementsChart({
   programs,
   userCourses,
 }: ProgramRequirementsChartProps) {
   // FIXME: set program to null for now just so that it doenst error. should use programs defined above instead
-  const program = null;
+  const program = programs[0];
 
   if (program === undefined) {
     return (
@@ -129,7 +212,7 @@ export function ProgramRequirementsChart({
       </CardHeader>
       <CardContent>
         <div className="w-full h-[400px]">
-          <BarChart
+          <PieChart
             data={chartData}
             layout="vertical"
             width={800}
