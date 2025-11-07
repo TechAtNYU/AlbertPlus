@@ -8,7 +8,10 @@ import {
   useQueries,
   useQuery,
 } from "convex/react";
-import { Cell, Legend, Pie, PieChart, LabelList, XAxis, YAxis } from "recharts";
+import { useMemo, useState } from "react";
+import { Cell, Legend, Pie, PieChart, Tooltip, ResponsiveContainer } from "recharts";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
@@ -27,11 +30,41 @@ interface ProgramRequirementsChartProps {
     | undefined;
 }
 
-const getRequirementsByCategory = (programs: Record<
-                                    string,
-                                    FunctionReturnType<typeof api.programs.getProgramById> | undefined
-                                  >) => {
+// Color palette for pie chart slices
+const COLORS = [
+  "#3b82f6", // blue
+  "#10b981", // green
+  "#f59e0b", // amber
+  "#ef4444", // red
+  "#8b5cf6", // violet
+  "#ec4899", // pink
+  "#06b6d4", // cyan
+  "#84cc16", // lime
+  "#f97316", // orange
+  "#6366f1", // indigo
+];
+
+// Helper function to lighten a color (for completed portion)
+const lightenColor = (color: string, percent: number = 40): string => {
+  const num = parseInt(color.replace("#", ""), 16);
+  const r = Math.min(255, ((num >> 16) & 0xff) + Math.floor((255 - ((num >> 16) & 0xff)) * (percent / 100)));
+  const g = Math.min(255, ((num >> 8) & 0xff) + Math.floor((255 - ((num >> 8) & 0xff)) * (percent / 100)));
+  const b = Math.min(255, (num & 0xff) + Math.floor((255 - (num & 0xff)) * (percent / 100)));
+  return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, "0")}`;
+};
+
+const getRequirementsByCategory = (
+  programs: Record<
+    string,
+    FunctionReturnType<typeof api.programs.getProgramById> | undefined
+  >,
+  courseLookup: Map<string, any>
+) => {
   if (!programs) return null;
+
+  // Get the first defined program
+  const program = Object.values(programs).find((p) => p !== undefined);
+  if (!program) return null;
 
   // Calculate total credits for each category
   const groupedRequirements: Record<
@@ -39,65 +72,52 @@ const getRequirementsByCategory = (programs: Record<
     { credits: number; courses: string[][] }
   > = {};
 
-  const programList: string[] = [];
-
   // FIXME: currently no merging of programs if more than one listed (dual degree), assumes only one program for now
-  for (const [programName, data] of Object.entries(programs)) {
-    programList.push(programName);
+  const requirements = program.requirements;
+  if (!requirements) return null;
 
-    const requirements = data?.requirements;
-    if (requirements) {
-      for (const requirement of requirements) {
-        const courses = requirement.courses;
-        // CASE: requirements is type option
-        if (requirement.type === "options") {
-          const uniquePrefixes = [
-            ...new Set(requirement.courses.map((c: string) => c.split(" ")[0])),
-          ];
+  for (const requirement of requirements) {
+    const courses = requirement.courses;
 
-          if (uniquePrefixes.length === 1) {
-            // All same prefix - assign all credits to that one prefix
-            const prefix = uniquePrefixes[0];
-            if (!groupedRequirements[prefix]) {
-              groupedRequirements[prefix] = { credits: 0, courses: [] };
-            }
-            groupedRequirements[prefix].credits += requirement.creditsRequired;
-            groupedRequirements[prefix].courses.push(courses);
-          } else {
-            // Mixed prefixes - assign to "Other" category
-            if (!groupedRequirements.Other) {
-              groupedRequirements.Other = { credits: 0, courses: [] };
-            }
-            groupedRequirements.Other.credits += requirement.creditsRequired;
-            groupedRequirements.Other.courses.push(courses);
-          }
+    // CASE: requirements is type option
+    if (requirement.type === "options") {
+      const uniquePrefixes = [
+        ...new Set(requirement.courses.map((c: string) => c.split(" ")[0])),
+      ];
+
+      if (uniquePrefixes.length === 1) {
+        // All same prefix - assign all credits to that one prefix
+        const prefix = uniquePrefixes[0];
+        if (!groupedRequirements[prefix]) {
+          groupedRequirements[prefix] = { credits: 0, courses: [] };
         }
-        // CASE: Required/Alternative type - calculate actual credits per course
-        else {
-          const courseQueries = useQueries(
-            Array.from(courses).map((code) => ({
-              query: api.courses.getCourseByCode,
-              args: { code },
-            }))
-          );
-
-          for (const course of courseQueries) {
-            const code = course.split(" ")[0];
-
-            // FIXME: fallback to 4 credits if number of credits not found
-            const credits = course ? course.credits : 4;
-
-            if (!groupedRequirements[code]) {
-              groupedRequirements[code] = { credits: 0, courses: [] };
-            }
-            groupedRequirements[code].credits += credits;
-            groupedRequirements[code].courses.push([course]);
-          }
+        groupedRequirements[prefix].credits += requirement.creditsRequired;
+        groupedRequirements[prefix].courses.push(courses);
+      } else {
+        // Mixed prefixes - assign to "Other" category
+        if (!groupedRequirements.Other) {
+          groupedRequirements.Other = { credits: 0, courses: [] };
         }
+        groupedRequirements.Other.credits += requirement.creditsRequired;
+        groupedRequirements.Other.courses.push(courses);
+      }
+    }
+    // CASE: Required/Alternative type - calculate actual credits per course
+    else {
+      for (const courseCode of courses) {
+        const prefix = courseCode.split(" ")[0];
+        const course = courseLookup.get(courseCode);
+        const credits = course?.credits ?? 4; // fallback to 4 credits if not found
+
+        if (!groupedRequirements[prefix]) {
+          groupedRequirements[prefix] = { credits: 0, courses: [] };
+        }
+        groupedRequirements[prefix].credits += credits;
+        groupedRequirements[prefix].courses.push([courseCode]);
       }
     }
   }
-    
+
   return {
     ...program,
     requirementsByCategory: groupedRequirements,
@@ -108,8 +128,46 @@ export function ProgramRequirementsChart({
   programs,
   userCourses,
 }: ProgramRequirementsChartProps) {
-  // FIXME: set program to null for now just so that it doenst error. should use programs defined above instead
-  const program = programs[0];
+  // 1. Collect all unique course codes from all requirements
+  const allCourseCodes = useMemo(() => {
+    const codes = new Set<string>();
+
+    for (const [_, programData] of Object.entries(programs)) {
+      if (programData?.requirements) {
+        for (const requirement of programData.requirements) {
+          // Add all course codes from this requirement
+          for (const courseCode of requirement.courses) {
+            codes.add(courseCode);
+          }
+        }
+      }
+    }
+
+    return Array.from(codes);
+  }, [programs]);
+
+  // 2. Fetch all courses in parallel using useQueries
+  const courseQueries = useQueries(
+    allCourseCodes.map((code) => ({
+      query: api.courses.getCourseByCode,
+      args: { code },
+    }))
+  );
+
+  // 3. Create a lookup map from course code to course data
+  const courseLookup = useMemo(() => {
+    const lookup = new Map();
+    allCourseCodes.forEach((code, index) => {
+      if (courseQueries[index]) {
+        lookup.set(code, courseQueries[index]);
+      }
+    });
+    return lookup;
+  }, [allCourseCodes, courseQueries]);
+
+  // 4. Get grouped requirements using the lookup
+  const programWithGroupedReqs = getRequirementsByCategory(programs, courseLookup);
+  const program = programWithGroupedReqs;
 
   if (program === undefined) {
     return (
@@ -193,6 +251,58 @@ export function ProgramRequirementsChart({
       ? Math.round((totalCompletedCredits / totalCredits) * 100)
       : 0;
 
+  // State for toggling completion view
+  const [showCompletion, setShowCompletion] = useState(false);
+
+  // Prepare data based on toggle state
+  const pieChartData = useMemo(() => {
+    if (!showCompletion) {
+      // Default view: just total credits per category
+      return chartData.map((item, index) => ({
+        name: item.category,
+        value: item.credits,
+        fill: COLORS[index % COLORS.length],
+      }));
+    } else {
+      // Completion view: split each category into completed and remaining
+      const splitData: Array<{
+        name: string;
+        value: number;
+        fill: string;
+        isCompleted: boolean;
+        category: string;
+      }> = [];
+
+      chartData.forEach((item, index) => {
+        const baseColor = COLORS[index % COLORS.length];
+
+        // Add completed portion (lighter shade)
+        if (item.completedCredits > 0) {
+          splitData.push({
+            name: `${item.category} (Completed)`,
+            value: item.completedCredits,
+            fill: lightenColor(baseColor),
+            isCompleted: true,
+            category: item.category,
+          });
+        }
+
+        // Add remaining portion (original color)
+        if (item.remainingCredits > 0) {
+          splitData.push({
+            name: `${item.category} (Remaining)`,
+            value: item.remainingCredits,
+            fill: baseColor,
+            isCompleted: false,
+            category: item.category,
+          });
+        }
+      });
+
+      return splitData;
+    }
+  }, [chartData, showCompletion]);
+
   return (
     <Card>
       <CardHeader>
@@ -205,126 +315,61 @@ export function ProgramRequirementsChart({
                 • {overallPercentage}% Complete ({totalCompletedCredits}/
                 {totalCredits} credits)
               </span>
-              )
             </CardDescription>
           </div>
         </div>
+        <div className="flex items-center space-x-2 mt-4">
+          <Checkbox
+            id="show-completion"
+            checked={showCompletion}
+            onCheckedChange={(checked) => setShowCompletion(checked === true)}
+          />
+          <Label
+            htmlFor="show-completion"
+            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          >
+            Show completion progress
+          </Label>
+        </div>
       </CardHeader>
       <CardContent>
-        <div className="w-full h-[400px]">
-          <PieChart
-            data={chartData}
-            layout="vertical"
-            width={800}
-            height={400}
-            margin={{
-              left: 0,
-              right: 40,
-              bottom: 20,
-            }}
-          >
-            <YAxis
-              dataKey="category"
-              type="category"
-              tickLine={false}
-              tickMargin={10}
-              axisLine={false}
-              width={140}
-              tick={{ fontSize: 12 }}
-            />
-            <XAxis dataKey="credits" type="number" hide />
-            <Bar
-              dataKey="credits"
-              radius={[0, 4, 4, 0]}
-              fill="hsl(var(--muted))"
-            >
-              <LabelList
-                dataKey="credits"
-                position="right"
-                offset={8}
-                className="fill-foreground"
-                fontSize={12}
-              />
-            </Bar>
-          </BarChart>
-        </div>
-        <div className="w-full h-[400px]">
-          <BarChart
-            data={chartData}
-            layout="vertical"
-            width={800}
-            height={400}
-            margin={{
-              left: 0,
-              right: 40,
-              bottom: 20,
-            }}
-          >
-            <YAxis
-              dataKey="category"
-              type="category"
-              tickLine={false}
-              tickMargin={10}
-              axisLine={false}
-              width={140}
-              tick={{ fontSize: 12 }}
-            />
-            <XAxis dataKey="credits" type="number" hide />
-            <Tooltip
-              content={({ active, payload }) => {
-                if (active && payload && payload.length) {
-                  const data = payload[0].payload;
-                  return (
-                    <div className="rounded-lg border bg-background p-2 shadow-sm">
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="flex flex-col">
-                          <span className="text-[0.70rem] uppercase text-muted-foreground">
-                            Category
-                          </span>
-                          <span className="font-bold text-muted-foreground">
-                            {data.category}
-                          </span>
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-[0.70rem] uppercase text-muted-foreground">
-                            Completed
-                          </span>
-                          <span className="font-bold text-muted-foreground">
-                            {data.completedCredits} / {data.credits} credits
-                          </span>
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-[0.70rem] uppercase text-muted-foreground">
-                            Progress
-                          </span>
-                          <span className="font-bold text-muted-foreground">
-                            {data.percentage}%
+        <div className="flex justify-center">
+          <ResponsiveContainer width="100%" height={400}>
+            <PieChart>
+              <Pie
+                data={pieChartData}
+                dataKey="value"
+                nameKey="name"
+                cx="50%"
+                cy="50%"
+                outerRadius={120}
+                label={({ name, value }) => `${name}: ${value}`}
+              >
+                {pieChartData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.fill} />
+                ))}
+              </Pie>
+              <Tooltip
+                content={({ active, payload }) => {
+                  if (active && payload && payload.length) {
+                    const data = payload[0].payload as any;
+                    return (
+                      <div className="rounded-lg border bg-background p-2 shadow-sm">
+                        <div className="flex flex-col gap-1">
+                          <span className="text-sm font-bold">{data.name}</span>
+                          <span className="text-sm text-muted-foreground">
+                            Credits: {data.value}
                           </span>
                         </div>
                       </div>
-                    </div>
-                  );
-                }
-                return null;
-              }}
-            />
-            <Bar dataKey="completedCredits" stackId="stack" fill="#3b82f6" />
-
-            <Bar
-              dataKey="remainingCredits"
-              stackId="stack"
-              fill="hsl(var(--muted))"
-              radius={[0, 4, 4, 0]}
-            >
-              <LabelList
-                dataKey="credits"
-                position="right"
-                offset={8}
-                className="fill-foreground"
-                fontSize={12}
+                    );
+                  }
+                  return null;
+                }}
               />
-            </Bar>
-          </BarChart>
+              <Legend />
+            </PieChart>
+          </ResponsiveContainer>
         </div>
       </CardContent>
     </Card>
