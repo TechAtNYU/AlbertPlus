@@ -88,7 +88,6 @@ export async function scrapeProgramsListFromSchool(urlarray, db, env) {
 }
 
 export async function scrapeProgramsFromProgramsList(programarray, db, env) {
-  const base = "https://bulletins.nyu.edu";
   const [schoolbaseinfo, programlist] = programarray;
 
   const programs = programlist.map(([name, href]) => ({
@@ -236,7 +235,6 @@ export async function scrapeRequirements(programdet, db, env) {
       const m = src.match(pat);
       return m ? m[0] : "";
     };
-    const openTag = (tableHtml.match(/<table\b[^>]*>/i) || ["<table>"])[0];
     const tbodyFull = getPart(tableHtml, /<tbody[\s\S]*?<\/tbody>/i) || "";
     const tbodyInner = (tbodyFull.match(/<tbody[^>]*>([\s\S]*?)<\/tbody>/i) || [
       null,
