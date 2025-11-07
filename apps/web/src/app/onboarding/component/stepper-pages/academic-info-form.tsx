@@ -80,10 +80,10 @@ export const AcademicInfoForm = () => {
             </FormLabel>
             <FormControl>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select your school or college" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="w-full">
                   {schools.map((school) => (
                     <SelectItem key={school} value={school}>
                       {school}
