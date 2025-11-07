@@ -17,10 +17,27 @@ import {
 import { useFormContext } from "react-hook-form";
 import z from "zod";
 
+const schools = [
+  "College of Arts & Science",
+  "College of Dentistry",
+  "Gallatin School of Individualized Study",
+  "Leonard N. Stern School of Business",
+  "Liberal Studies",
+  "Rory Meyers College of Nursing",
+  "Steinhardt School of Culture, Education, and Human Development",
+  "Silver School of Social Work",
+  "School of Professional Studies",
+  "Tandon School of Engineering",
+  "Tisch School of the Arts",
+] as const;
+
+const programOptions: string[] = [];
+
 export type AcademicInfoFormValues = z.infer<typeof academicInfoSchema>;
 
 export const academicInfoSchema = z
   .object({
+    school: z.enum(schools),
     programs: z.array(z.string()).min(1, "At least one program is required"),
     startingDate: z.object({
       year: z.number().min(2000).max(2100),
@@ -53,6 +70,33 @@ export const AcademicInfoForm = () => {
 
   return (
     <div className="space-y-6 text-start">
+      <FormField
+        control={control}
+        name="school"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel className="text-sm font-medium text-gray-700">
+              What school or college do you go to?
+            </FormLabel>
+            <FormControl>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select your school or college" />
+                </SelectTrigger>
+                <SelectContent>
+                  {schools.map((school) => (
+                    <SelectItem key={school} value={school}>
+                      {school}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
       {/* Programs Selection */}
       <div className="space-y-2">
         <p className="text-sm font-medium text-gray-700">
@@ -65,7 +109,10 @@ export const AcademicInfoForm = () => {
             console.log("Programs selected:", values);
             setValue("programs", values);
           }}
-          defaultOptions={programs.map((p) => ({ value: p, label: p }))}
+          defaultOptions={programOptions.map((program) => ({
+            value: program,
+            label: program,
+          }))}
           placeholder="Select your programs"
           commandProps={{
             label: "Select programs",
