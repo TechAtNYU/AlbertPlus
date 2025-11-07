@@ -2,12 +2,6 @@
 
 import type { api } from "@albert-plus/server/convex/_generated/api";
 import type { FunctionReturnType } from "convex/server";
-import {
-  type RequestForQueries,
-  useConvexAuth,
-  useQueries,
-  useQuery,
-} from "convex/react";
 import { useMemo, useState } from "react";
 import { Cell, Legend, Pie, PieChart, Tooltip, ResponsiveContainer } from "recharts";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -28,6 +22,10 @@ interface ProgramRequirementsChartProps {
   userCourses:
     | FunctionReturnType<typeof api.userCourses.getUserCourses>
     | undefined;
+  courses: Record<
+    string,
+    FunctionReturnType<typeof api.courses.getCourseByCode> | undefined
+  >;
 }
 
 // Color palette for pie chart slices
@@ -127,47 +125,24 @@ const getRequirementsByCategory = (
 export function ProgramRequirementsChart({
   programs,
   userCourses,
+  courses,
 }: ProgramRequirementsChartProps) {
-  // 1. Collect all unique course codes from all requirements
-  const allCourseCodes = useMemo(() => {
-    const codes = new Set<string>();
-
-    for (const [_, programData] of Object.entries(programs)) {
-      if (programData?.requirements) {
-        for (const requirement of programData.requirements) {
-          // Add all course codes from this requirement
-          for (const courseCode of requirement.courses) {
-            codes.add(courseCode);
-          }
-        }
-      }
-    }
-
-    return Array.from(codes);
-  }, [programs]);
-
-  // 2. Fetch all courses in parallel using useQueries
-  const courseQueries = useQueries(
-    allCourseCodes.map((code) => ({
-      query: api.courses.getCourseByCode,
-      args: { code },
-    }))
-  );
-
-  // 3. Create a lookup map from course code to course data
+  // Create a lookup map from courses Record
   const courseLookup = useMemo(() => {
     const lookup = new Map();
-    allCourseCodes.forEach((code, index) => {
-      if (courseQueries[index]) {
-        lookup.set(code, courseQueries[index]);
+    for (const [code, courseData] of Object.entries(courses)) {
+      if (courseData !== undefined) {
+        lookup.set(code, courseData);
       }
-    });
+    }
     return lookup;
-  }, [allCourseCodes, courseQueries]);
+  }, [courses]);
 
-  // 4. Get grouped requirements using the lookup
-  const programWithGroupedReqs = getRequirementsByCategory(programs, courseLookup);
-  const program = programWithGroupedReqs;
+  // Get grouped requirements using the lookup
+  const program = useMemo(
+    () => getRequirementsByCategory(programs, courseLookup),
+    [programs, courseLookup]
+  );
 
   if (program === undefined) {
     return (

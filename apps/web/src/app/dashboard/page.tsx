@@ -34,13 +34,40 @@ const HomePage = () => {
 
   const programs = useQueries(programQueries);
 
+  // Collect all unique course codes from all programs
+  const allCourseCodes = new Set<string>();
+  for (const [_, programData] of Object.entries(programs)) {
+    if (programData?.requirements) {
+      for (const requirement of programData.requirements) {
+        for (const courseCode of requirement.courses) {
+          allCourseCodes.add(courseCode);
+        }
+      }
+    }
+  }
+
+  // Fetch all courses
+  const courseQueries: RequestForQueries = {};
+  for (const code of allCourseCodes) {
+    courseQueries[code] = {
+      query: api.courses.getCourseByCode,
+      args: { code },
+    };
+  }
+
+  const courses = useQueries(courseQueries);
+
   return (
     <div className="container mx-auto space-y-6 p-6">
       <h1 className="text-3xl font-bold">Dashboard</h1>
 
       <DegreeProgreeUpload />
 
-      <ProgramRequirementsChart programs={programs} userCourses={userCourses} />
+      <ProgramRequirementsChart
+        programs={programs}
+        userCourses={userCourses}
+        courses={courses}
+      />
     </div>
   );
 };
