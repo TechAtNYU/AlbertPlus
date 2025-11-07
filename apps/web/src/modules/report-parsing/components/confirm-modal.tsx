@@ -1,4 +1,3 @@
-import type { Term } from "@/components/AppConfigProvider";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -9,6 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import type { Term } from "@/utils/term";
 import type { UserCourse } from "../types";
 
 type ConfirmModalProps = {
