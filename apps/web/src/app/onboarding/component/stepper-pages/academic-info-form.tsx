@@ -1,3 +1,5 @@
+"use client";
+
 import {
   FormControl,
   FormField,
@@ -16,20 +18,8 @@ import {
 } from "@/components/ui/select";
 import { useFormContext } from "react-hook-form";
 import z from "zod";
-
-const schools = [
-  "College of Arts & Science",
-  "College of Dentistry",
-  "Gallatin School of Individualized Study",
-  "Leonard N. Stern School of Business",
-  "Liberal Studies",
-  "Rory Meyers College of Nursing",
-  "Steinhardt School of Culture, Education, and Human Development",
-  "Silver School of Social Work",
-  "School of Professional Studies",
-  "Tandon School of Engineering",
-  "Tisch School of the Arts",
-] as const;
+import { api } from "@albert-plus/server/convex/_generated/api";
+import { useQuery } from "convex/react";
 
 const programOptions: string[] = [];
 
@@ -37,7 +27,7 @@ export type AcademicInfoFormValues = z.infer<typeof academicInfoSchema>;
 
 export const academicInfoSchema = z
   .object({
-    school: z.enum(schools),
+    school: z.string().min(1, "Please select your school or college"),
     programs: z.array(z.string()).min(1, "At least one program is required"),
     startingDate: z.object({
       year: z.number().min(2000).max(2100),
@@ -65,7 +55,8 @@ export const academicInfoSchema = z
 
 export const AcademicInfoForm = () => {
   const { control, setValue, watch } = useFormContext<AcademicInfoFormValues>();
-
+  const schools = useQuery(api.schools.getSchools);
+  const isLoadingSchools = schools === undefined;
   const programsValue = watch("programs") || [];
 
   return (
@@ -79,16 +70,30 @@ export const AcademicInfoForm = () => {
               What school or college do you go to?
             </FormLabel>
             <FormControl>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select
+                onValueChange={field.onChange}
+                value={field.value}
+                disabled={isLoadingSchools}
+              >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select your school or college" />
                 </SelectTrigger>
                 <SelectContent className="w-full">
-                  {schools.map((school) => (
-                    <SelectItem key={school} value={school}>
-                      {school}
-                    </SelectItem>
-                  ))}
+                  {isLoadingSchools ? (
+                    <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                      Loading schools...
+                    </div>
+                  ) : schools?.length ? (
+                    schools.map((school) => (
+                      <SelectItem key={school._id} value={school.name}>
+                        {school.name}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                      No schools available
+                    </div>
+                  )}
                 </SelectContent>
               </Select>
             </FormControl>
