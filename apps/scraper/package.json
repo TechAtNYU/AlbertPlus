@@ -30,6 +30,6 @@
     "@types/node": "^24.10.0",
     "convex": "^1.28.2",
     "drizzle-kit": "^0.31.6",
-    "wrangler": "^4.45.4"
+    "wrangler": "^4.46.0"
   }
 }
