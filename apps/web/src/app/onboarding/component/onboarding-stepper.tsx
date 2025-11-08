@@ -152,110 +152,112 @@ const OnboardingStepperContent = ({
   });
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <Stepper.Navigation>
-          {methods.all.map((step) => (
-            <Stepper.Step
-              key={step.id}
-              of={step.id}
-              type={step.id === methods.current.id ? "submit" : "button"}
-              onClick={async () => {
-                const valid = await form.trigger();
-                if (!valid) return;
-                methods.goTo(step.id);
-              }}
-            >
-              <Stepper.Title>{step.title}</Stepper.Title>
-            </Stepper.Step>
-          ))}
-        </Stepper.Navigation>
-        {methods.switch({
-          "academic-info": ({ Component }) => <Component />,
-          report: ({ Component }) => <Component />,
-          extension: ({ Component }) => <Component />,
-          complete: ({ Component }) => <Component />,
-        })}
-        <Stepper.Controls>
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={methods.prev}
-            disabled={methods.isFirst}
-          >
-            Previous
-          </Button>
-          <Button
-            type="submit"
-            onClick={async (e) => {
-              e.preventDefault();
-
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        form.handleSubmit();
+      }}
+      className="space-y-4"
+    >
+      <Stepper.Navigation>
+        {methods.all.map((step) => (
+          <Stepper.Step
+            key={step.id}
+            of={step.id}
+            type={step.id === methods.current.id ? "submit" : "button"}
+            onClick={async () => {
               const valid = await form.trigger();
               if (!valid) return;
-
-              // Submit the current form to save this step's data
-              await form.handleSubmit(onSubmit)();
-
-              if (methods.isLast) {
-                // Complete onboarding and go to dashboard
-                try {
-                  // Get programs data from the first step
-                  const academicInfo = allStepsData["academic-info"] as
-                    | AcademicInfoFormValues
-                    | undefined;
-                  console.log("Collected academic info:", academicInfo);
-
-                  if (!academicInfo) {
-                    console.error("Academic info not found");
-                    return;
-                  }
-
-                  // TODO: Convert program names to program IDs
-                  // For now, we'll use an empty array until we implement program lookup
-                  // The academic info data contains the program names selected by the user
-                  // We need to look up these programs in the database and get their IDs
-
-                  // Save student data to Convex
-                  // Note: This requires program IDs, not names.
-                  // We're using the actual dates collected from the form
-                  await upsertStudent({
-                    // TODO: Map program names to program IDs
-                    // For now using empty array - will be populated once we add program lookup
-                    programs: [],
-                    startingDate: {
-                      year: academicInfo.startingDate.year,
-                      term: academicInfo.startingDate.term,
-                    },
-                    expectedGraduationDate: {
-                      year: academicInfo.expectedGraduationDate.year,
-                      term: academicInfo.expectedGraduationDate.term,
-                    },
-                    isOnboarded: true,
-                  });
-
-                  // Update user metadata to mark onboarding as complete
-                  await user?.update({
-                    unsafeMetadata: {
-                      ...user.unsafeMetadata,
-                      onboarding_completed: true,
-                    },
-                  });
-
-                  // Redirect to dashboard
-                  router.push("/dashboard");
-                } catch (error) {
-                  console.error("Error completing onboarding:", error);
-                }
-              } else {
-                // For non-last steps, just move to the next step
-                methods.next();
-              }
+              methods.goTo(step.id);
             }}
           >
-            {methods.isLast ? "Complete Onboarding" : "Next"}
-          </Button>
-        </Stepper.Controls>
-      </form>
-    </Form>
+            <Stepper.Title>{step.title}</Stepper.Title>
+          </Stepper.Step>
+        ))}
+      </Stepper.Navigation>
+      {methods.switch({
+        "academic-info": ({ Component }) => <Component />,
+        report: ({ Component }) => <Component />,
+        extension: ({ Component }) => <Component />,
+        complete: ({ Component }) => <Component />,
+      })}
+      <Stepper.Controls>
+        <Button
+          type="button"
+          variant="secondary"
+          onClick={methods.prev}
+          disabled={methods.isFirst}
+        >
+          Previous
+        </Button>
+        <Button
+          type="submit"
+          onClick={async (e) => {
+            e.preventDefault();
+
+            const valid = await form.trigger();
+            if (!valid) return;
+
+            if (methods.isLast) {
+              // Complete onboarding and go to dashboard
+              try {
+                // Get programs data from the first step
+                const academicInfo = allStepsData["academic-info"] as
+                  | AcademicInfoFormValues
+                  | undefined;
+                console.log("Collected academic info:", academicInfo);
+
+                if (!academicInfo) {
+                  console.error("Academic info not found");
+                  return;
+                }
+
+                // TODO: Convert program names to program IDs
+                // For now, we'll use an empty array until we implement program lookup
+                // The academic info data contains the program names selected by the user
+                // We need to look up these programs in the database and get their IDs
+
+                // Save student data to Convex
+                // Note: This requires program IDs, not names.
+                // We're using the actual dates collected from the form
+                await upsertStudent({
+                  // TODO: Map program names to program IDs
+                  // For now using empty array - will be populated once we add program lookup
+                  programs: [],
+                  startingDate: {
+                    year: academicInfo.startingDate.year,
+                    term: academicInfo.startingDate.term,
+                  },
+                  expectedGraduationDate: {
+                    year: academicInfo.expectedGraduationDate.year,
+                    term: academicInfo.expectedGraduationDate.term,
+                  },
+                  isOnboarded: true,
+                });
+
+                // Update user metadata to mark onboarding as complete
+                await user?.update({
+                  unsafeMetadata: {
+                    ...user.unsafeMetadata,
+                    onboarding_completed: true,
+                  },
+                });
+
+                // Redirect to dashboard
+                router.push("/dashboard");
+              } catch (error) {
+                console.error("Error completing onboarding:", error);
+              }
+            } else {
+              // For non-last steps, just move to the next step
+              methods.next();
+            }
+          }}
+        >
+          {methods.isLast ? "Complete Onboarding" : "Next"}
+        </Button>
+      </Stepper.Controls>
+    </form>
   );
 };
