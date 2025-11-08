@@ -3,7 +3,6 @@
 import type { api } from "@albert-plus/server/convex/_generated/api";
 import clsx from "clsx";
 import type { FunctionReturnType } from "convex/server";
-import _ from "lodash";
 import { SearchIcon } from "lucide-react";
 import Link from "next/link";
 import { useId, useMemo, useState } from "react";
@@ -175,10 +174,11 @@ export default function PlanTable({ courses }: PlanTableProps) {
               <div className="font-semibold">Term</div>
             </TableHead>
             {years.map((year) => {
-              const totalCredits = _.sumBy(
-                _.flatten(Array.from(yearTermMap.get(year)?.values() || [])),
-                (c) => c?.course?.credits || 0,
-              );
+              const totalCredits = Array.from(
+                yearTermMap.get(year)?.values() || [],
+              )
+                .flat()
+                .reduce((sum, c) => sum + (c?.course?.credits || 0), 0);
 
               return (
                 <TableHead
