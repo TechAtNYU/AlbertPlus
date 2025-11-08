@@ -10,6 +10,7 @@
     "expectedGraduationDate": {
       "year": 2027,
       "term": "spring"
-    }
+    },
+    "isOnboarded": false
   }
 ]
