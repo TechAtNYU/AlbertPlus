@@ -33,23 +33,28 @@ describe("Courses Scraper", () => {
       const mockDb = createMockDb();
       const mockEnv = createMockEnv();
 
-      const result = await scrapeCourse(
+      const courses = await scrapeCourse(
         "https://bulletins.nyu.edu/courses/acct_gb/",
         mockDb,
         mockEnv,
       );
 
-      expect(result).toHaveProperty("course");
-      expect(result).toHaveProperty("prerequisites");
-      expect(typeof result.course).toBe("object");
-      expect(Array.isArray(result.prerequisites)).toBe(true);
+      expect(Array.isArray(courses)).toBe(true);
+      expect(courses.length).toBeGreaterThan(0);
+
+      for (const result of courses) {
+        expect(result).toHaveProperty("course");
+        expect(result).toHaveProperty("prerequisites");
+        expect(typeof result.course).toBe("object");
+        expect(Array.isArray(result.prerequisites)).toBe(true);
+      }
     });
 
     test("should handle invalid course URLs", async () => {
       const mockDb = createMockDb();
       const mockEnv = createMockEnv();
 
-      expect(
+      await expect(
         scrapeCourse(
           "https://bulletins.nyu.edu/courses/nonexistent/",
           mockDb,

@@ -250,18 +250,25 @@ export default {
                 break;
               }
               case "course": {
-                const res = await scrapeCourse(job.url, db, env);
+                // A single URL may contain multiple courses
+                const courses = await scrapeCourse(job.url, db, env);
 
-                const courseId = await convex.upsertCourseWithPrerequisites({
-                  ...res.course,
-                  prerequisites: res.prerequisites,
-                });
+                console.log(
+                  `Scraped ${courses.length} courses from ${job.url}`,
+                );
 
-                if (!courseId) {
-                  throw new JobError(
-                    "Failed to upsert course: no ID returned",
-                    "validation",
-                  );
+                for (const courseData of courses) {
+                  const courseId = await convex.upsertCourseWithPrerequisites({
+                    ...courseData.course,
+                    prerequisites: courseData.prerequisites,
+                  });
+
+                  if (!courseId) {
+                    throw new JobError(
+                      `Failed to upsert course ${courseData.course.code}: no ID returned`,
+                      "validation",
+                    );
+                  }
                 }
                 break;
               }
