@@ -1,7 +1,6 @@
 "use client";
 
 import type { api } from "@albert-plus/server/convex/_generated/api";
-import clsx from "clsx";
 import type { FunctionReturnType } from "convex/server";
 import { SearchIcon } from "lucide-react";
 import Link from "next/link";
@@ -42,23 +41,9 @@ export default function PlanTable({ courses, student }: PlanTableProps) {
 
   const [courseSearch, setCourseSearch] = useState<string>("");
 
-  const [creditFilter, setCreditFilter] = useState<number | null>(null);
-
   const courseSearchId = useId();
 
-  // Get unique credit values from all courses
-  // used by the credits filter
-  const availableCredits = useMemo(() => {
-    const credits = new Set<number>();
-    courses?.forEach((userCourse) => {
-      if (userCourse.course) {
-        credits.add(userCourse.course.credits);
-      }
-    });
-    return Array.from(credits).sort((a, b) => a - b);
-  }, [courses]);
-
-  // Filter courses based on all filters
+  // Filter courses based on search
   const filteredData = useMemo(() => {
     return courses?.filter((userCourse) => {
       if (!userCourse.course) return false;
@@ -69,11 +54,9 @@ export default function PlanTable({ courses, student }: PlanTableProps) {
           .toLowerCase()
           .includes(courseSearch.toLowerCase()) ||
         userCourse.title.toLowerCase().includes(courseSearch.toLowerCase());
-      const matchesCredits =
-        creditFilter === null || userCourse.course.credits === creditFilter;
-      return matchesSearch && matchesCredits;
+      return matchesSearch;
     });
-  }, [courses, courseSearch, creditFilter]);
+  }, [courses, courseSearch]);
 
   const academicTimeline = useMemo(() => {
     if (!student?.startingDate || !student?.expectedGraduationDate) {
@@ -185,40 +168,6 @@ export default function PlanTable({ courses, student }: PlanTableProps) {
             <div className="text-muted-foreground/80 pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 peer-disabled:opacity-50">
               <SearchIcon size={16} />
             </div>
-          </div>
-        </div>
-
-        {/* Credits filter */}
-        <div className="flex flex-col space-y-1">
-          <Label>Credits</Label>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => setCreditFilter(null)}
-              className={clsx(
-                "px-3 py-2 text-sm font-medium border rounded-lg transition-colors",
-                creditFilter === null
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-background hover:bg-muted",
-              )}
-            >
-              All
-            </button>
-            {availableCredits.map((credit) => (
-              <button
-                type="button"
-                key={credit}
-                onClick={() => setCreditFilter(credit)}
-                className={clsx(
-                  "px-3 py-2 text-sm font-medium border rounded-lg transition-colors",
-                  creditFilter === credit
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-background hover:bg-muted",
-                )}
-              >
-                {credit}
-              </button>
-            ))}
           </div>
         </div>
       </div>
