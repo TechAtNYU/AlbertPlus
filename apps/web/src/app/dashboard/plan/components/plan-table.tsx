@@ -1,6 +1,6 @@
 "use client";
 
-import type { api } from "@dev-team-fall-25/server/convex/_generated/api";
+import type { api } from "@albert-plus/server/convex/_generated/api";
 import clsx from "clsx";
 import type { FunctionReturnType } from "convex/server";
 import _ from "lodash";
