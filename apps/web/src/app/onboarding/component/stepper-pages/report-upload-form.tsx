@@ -1,5 +1,4 @@
 import DegreeProgreeUpload from "@/modules/report-parsing/components/degree-progress-upload";
-import { useFormContext } from "react-hook-form";
 import z from "zod";
 
 export const reportSchema = z.object({
@@ -13,8 +12,6 @@ export const reportSchema = z.object({
 export type ReportFormValues = z.infer<typeof reportSchema>;
 
 export function ReportUploadForm() {
-  const { setValue, watch } = useFormContext<ReportFormValues>();
-
   return (
     <div className="space-y-4 text-start">
       <div className="space-y-4">

@@ -1,6 +1,6 @@
+import { OnboardingForm } from "./component/onboarding-form";
 import { fetchProtectedQuery } from "@/lib/convex";
 import { api } from "@albert-plus/server/convex/_generated/api";
-import { OnboardingStepper } from "./component/onboarding-stepper";
 import { redirect } from "next/navigation";
 
 export default async function Page() {
@@ -12,8 +12,8 @@ export default async function Page() {
 
   return (
     <div className="flex min-h-screen items-center justify-center">
-      <div className="w-full max-w-4xl px-8 py-8">
-        <OnboardingStepper />
+      <div className="w-full max-w-5xl px-8 py-10">
+        <OnboardingForm student={student ?? null} />
       </div>
     </div>
   );

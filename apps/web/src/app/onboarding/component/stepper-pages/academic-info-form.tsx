@@ -1,12 +1,13 @@
 "use client";
 
 import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+  Field,
+  FieldContent,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  FieldSet,
+} from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import MultipleSelector from "@/components/ui/multiselect";
 import {
@@ -16,7 +17,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useFormContext } from "react-hook-form";
+import {
+  Controller,
+  type FieldError as RHFFieldError,
+  useFormContext,
+} from "react-hook-form";
 import z from "zod";
 import { api } from "@albert-plus/server/convex/_generated/api";
 import { useQuery } from "convex/react";
@@ -54,22 +59,27 @@ export const academicInfoSchema = z
   );
 
 export const AcademicInfoForm = () => {
-  const { control, setValue, watch } = useFormContext<AcademicInfoFormValues>();
+  const {
+    control,
+    formState: { errors },
+  } = useFormContext<AcademicInfoFormValues>();
   const schools = useQuery(api.schools.getSchools);
   const isLoadingSchools = schools === undefined;
-  const programsValue = watch("programs") || [];
+
+  const toErrorArray = (error?: RHFFieldError) =>
+    error ? [{ message: error.message }] : undefined;
 
   return (
-    <div className="space-y-6 text-start">
-      <FormField
+    <FieldSet className="space-y-6 text-start">
+      <Controller
         control={control}
         name="school"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel className="text-sm font-medium text-gray-700">
+        render={({ field, fieldState }) => (
+          <Field data-invalid={fieldState.invalid}>
+            <FieldLabel className="text-sm font-medium text-gray-700">
               What school or college do you go to?
-            </FormLabel>
-            <FormControl>
+            </FieldLabel>
+            <FieldContent>
               <Select
                 onValueChange={field.onChange}
                 value={field.value}
@@ -96,80 +106,88 @@ export const AcademicInfoForm = () => {
                   )}
                 </SelectContent>
               </Select>
-            </FormControl>
-            <FormMessage />
-          </FormItem>
+            </FieldContent>
+            <FieldError errors={toErrorArray(fieldState.error)} />
+          </Field>
         )}
       />
 
-      {/* Programs Selection */}
-      <div className="space-y-2">
-        <p className="text-sm font-medium text-gray-700">
-          Please select your program (major and minor)
-        </p>
-        <MultipleSelector
-          value={programsValue.map((p) => ({ value: p, label: p }))}
-          onChange={(options) => {
-            const values = options.map((opt) => opt.value);
-            console.log("Programs selected:", values);
-            setValue("programs", values);
-          }}
-          defaultOptions={programOptions.map((program) => ({
-            value: program,
-            label: program,
-          }))}
-          placeholder="Select your programs"
-          commandProps={{
-            label: "Select programs",
-          }}
-          emptyIndicator={
-            <p className="text-center text-sm">No programs found</p>
-          }
-        />
-      </div>
+      <Controller
+        control={control}
+        name="programs"
+        render={({ field, fieldState }) => (
+          <Field data-invalid={fieldState.invalid} className="gap-2">
+            <FieldLabel className="text-sm font-medium text-gray-700">
+              Please select your program (major and minor)
+            </FieldLabel>
+            <FieldContent>
+              <MultipleSelector
+                value={(field.value ?? []).map((program) => ({
+                  value: program,
+                  label: program,
+                }))}
+                onChange={(options) => {
+                  const values = options.map((option) => option.value);
+                  field.onChange(values);
+                }}
+                defaultOptions={programOptions.map((program) => ({
+                  value: program,
+                  label: program,
+                }))}
+                placeholder="Select your programs"
+                commandProps={{
+                  label: "Select programs",
+                }}
+                emptyIndicator={
+                  <p className="text-center text-sm">No programs found</p>
+                }
+              />
+            </FieldContent>
+            <FieldError errors={toErrorArray(fieldState.error)} />
+          </Field>
+        )}
+      />
 
-      {/* Starting Date */}
-      <div className="space-y-2">
-        <FormLabel className="text-sm font-medium text-gray-700">
+      <FieldGroup className="space-y-4">
+        <FieldLabel className="text-sm font-medium text-gray-700">
           When did you start your program?
-        </FormLabel>
+        </FieldLabel>
         <div className="grid grid-cols-2 gap-4">
-          <FormField
+          <Controller
             control={control}
             name="startingDate.year"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Year</FormLabel>
-                <FormControl>
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel>Year</FieldLabel>
+                <FieldContent>
                   <Input
                     type="number"
                     min="2000"
                     max="2100"
-                    {...field}
+                    ref={field.ref}
                     value={field.value ?? ""}
-                    onChange={(e) => {
-                      const value = e.target.value;
+                    onChange={(event) => {
+                      const { value } = event.target;
                       field.onChange(
                         value === "" ? undefined : Number.parseInt(value, 10),
                       );
                     }}
+                    onBlur={field.onBlur}
+                    name={field.name}
                   />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+                </FieldContent>
+                <FieldError errors={toErrorArray(fieldState.error)} />
+              </Field>
             )}
           />
-          <FormField
+          <Controller
             control={control}
             name="startingDate.term"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Term</FormLabel>
-                <FormControl>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel>Term</FieldLabel>
+                <FieldContent>
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select term" />
                     </SelectTrigger>
@@ -178,85 +196,72 @@ export const AcademicInfoForm = () => {
                       <SelectItem value="spring">Spring</SelectItem>
                     </SelectContent>
                   </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+                </FieldContent>
+                <FieldError errors={toErrorArray(fieldState.error)} />
+              </Field>
             )}
           />
         </div>
-      </div>
+      </FieldGroup>
 
-      {/* Expected Graduation Date */}
-      <FormField
-        control={control}
-        name="expectedGraduationDate"
-        render={({ fieldState }) => (
-          <div className="space-y-2">
-            <p className="text-sm font-medium text-gray-700">
-              When do you expect to graduate?
-            </p>
-
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={control}
-                name="expectedGraduationDate.year"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Year</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        min="2000"
-                        max="2100"
-                        {...field}
-                        value={field.value ?? ""}
-                        onChange={(e) => {
-                          const value = e.target.value;
-                          field.onChange(
-                            value === ""
-                              ? undefined
-                              : Number.parseInt(value, 10),
-                          );
-                        }}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={control}
-                name="expectedGraduationDate.term"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Term</FormLabel>
-                    <FormControl>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select term" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="spring">Spring</SelectItem>
-                          <SelectItem value="fall">Fall</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            {fieldState.error && (
-              <p className="text-sm text-destructive">
-                {fieldState.error.message}
-              </p>
+      <FieldGroup className="space-y-4">
+        <FieldLabel className="text-sm font-medium text-gray-700">
+          When do you expect to graduate?
+        </FieldLabel>
+        <div className="grid grid-cols-2 gap-4">
+          <Controller
+            control={control}
+            name="expectedGraduationDate.year"
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel>Year</FieldLabel>
+                <FieldContent>
+                  <Input
+                    type="number"
+                    min="2000"
+                    max="2100"
+                    ref={field.ref}
+                    value={field.value ?? ""}
+                    onChange={(event) => {
+                      const { value } = event.target;
+                      field.onChange(
+                        value === "" ? undefined : Number.parseInt(value, 10),
+                      );
+                    }}
+                    onBlur={field.onBlur}
+                    name={field.name}
+                  />
+                </FieldContent>
+                <FieldError errors={toErrorArray(fieldState.error)} />
+              </Field>
             )}
-          </div>
-        )}
-      />
-    </div>
+          />
+          <Controller
+            control={control}
+            name="expectedGraduationDate.term"
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel>Term</FieldLabel>
+                <FieldContent>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select term" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="spring">Spring</SelectItem>
+                      <SelectItem value="fall">Fall</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FieldContent>
+                <FieldError errors={toErrorArray(fieldState.error)} />
+              </Field>
+            )}
+          />
+        </div>
+        <FieldError
+          errors={toErrorArray(errors.expectedGraduationDate as RHFFieldError)}
+        />
+      </FieldGroup>
+    </FieldSet>
   );
 };
