@@ -61,8 +61,16 @@ export default function ConfirmModal({
 }: ConfirmModalProps) {
   const groupedCourses = groupCoursesByYearAndTerm(courses);
 
+  const handleOpenChange = (newOpen: boolean) => {
+    onOpenChange(newOpen);
+    // If dialog is being closed (newOpen is false), trigger onCancel
+    if (!newOpen) {
+      onCancel();
+    }
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="flex flex-col gap-0 p-0 sm:max-h-[min(640px,80vh)] sm:max-w-2xl [&>button:last-child]:top-6">
         <DialogHeader className="shrink-0 space-y-0 text-left">
           <DialogTitle className="px-6 pt-6 text-xl">
