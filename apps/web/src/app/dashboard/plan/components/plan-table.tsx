@@ -5,7 +5,8 @@ import type { FunctionReturnType } from "convex/server";
 import { useMutation } from "convex/react";
 import { SearchIcon } from "lucide-react";
 import Link from "next/link";
-import { useCallback, useId, useMemo, useState } from "react";
+import { useId, useMemo, useState } from "react";
+import { useCurrentTerm, useCurrentYear } from "@/components/AppConfigProvider";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -17,6 +18,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 import DegreeProgreeUpload from "@/modules/report-parsing/components/degree-progress-upload";
 import type { UserCourse } from "@/modules/report-parsing/types";
 import {
@@ -51,6 +53,9 @@ type UserCourseEntry = NonNullable<
 
 export default function PlanTable({ courses, student }: PlanTableProps) {
   const allTerms = ["fall", "j-term", "spring", "summer"] as const;
+
+  const currentTerm = useCurrentTerm();
+  const currentYear = useCurrentYear();
 
   const [courseSearch, setCourseSearch] = useState<string>("");
   const [isUploadOpen, setIsUploadOpen] = useState(false);
@@ -150,6 +155,21 @@ export default function PlanTable({ courses, student }: PlanTableProps) {
     }
     return new Set(academicTimeline.termToYearIndex.values());
   }, [academicTimeline]);
+
+  const currentColumnKey = useMemo(() => {
+    if (!currentTerm || !currentYear) {
+      return null;
+    }
+
+    const key = makeTermKey(currentTerm, currentYear);
+    const mapped = academicTimeline?.termToYearIndex.get(key);
+
+    if (mapped !== undefined) {
+      return mapped;
+    }
+
+    return currentYear;
+  }, [academicTimeline, currentTerm, currentYear]);
 
   const yearColumns = useMemo(() => {
     const yearSet = new Set<number>();
@@ -260,7 +280,7 @@ export default function PlanTable({ courses, student }: PlanTableProps) {
               return (
                 <TableHead
                   key={year}
-                  className="border-t min-w-[200px] w-[200px] "
+                  className={"border-t min-w-[200px] w-[200px]"}
                 >
                   <div className="px-2 flex flex-row justify-between">
                     <div className="font-semibold">{columnLabel}</div>
@@ -283,8 +303,15 @@ export default function PlanTable({ courses, student }: PlanTableProps) {
                 {yearColumns.map((year) => {
                   const termMap = yearTermMap.get(year);
                   const userCourses = termMap?.get(term) ?? [];
+                  const isCurrentColumn = currentColumnKey === year;
                   return (
-                    <TableCell key={year} className="align-top p-3">
+                    <TableCell
+                      key={year}
+                      className={cn(
+                        "align-top p-3",
+                        isCurrentColumn && "bg-primary/5",
+                      )}
+                    >
                       {userCourses.length > 0 ? (
                         <div className="space-y-3">
                           {userCourses.map((userCourse) => {
@@ -296,7 +323,9 @@ export default function PlanTable({ courses, student }: PlanTableProps) {
                                 key={key}
                                 href={userCourse.course.courseUrl}
                                 target="_blank"
-                                className="block p-2 border rounded-md bg-card hover:bg-muted/50 transition-colors"
+                                className={
+                                  "block p-2 border rounded-md bg-card hover:bg-muted/50 transition-colors"
+                                }
                               >
                                 <div className="font-medium text-sm">
                                   {userCourse.course.code}
@@ -309,7 +338,12 @@ export default function PlanTable({ courses, student }: PlanTableProps) {
                           })}
                         </div>
                       ) : (
-                        <div className="text-sm text-muted-foreground italic">
+                        <div
+                          className={cn(
+                            "text-sm text-muted-foreground italic",
+                            isCurrentColumn && "text-foreground",
+                          )}
+                        >
                           No courses
                         </div>
                       )}
