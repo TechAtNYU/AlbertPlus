@@ -5,7 +5,6 @@ import { defineStepper } from "@/components/ui/stepper";
 import { api } from "@albert-plus/server/convex/_generated/api";
 import type { Doc } from "@albert-plus/server/convex/_generated/dataModel";
 import { useUser } from "@clerk/nextjs";
-import { zodResolver } from "@hookform/resolvers/zod";
 import {
   useMutation,
   usePaginatedQuery,
@@ -14,7 +13,6 @@ import {
 } from "convex/react";
 import { useRouter } from "next/navigation";
 import React from "react";
-import { useForm } from "react-hook-form";
 import { z } from "zod";
 import {
   AcademicInfoForm,
@@ -26,6 +24,8 @@ import {
   reportSchema,
   ReportUploadForm,
 } from "./stepper-pages/report-upload-form";
+import { useForm } from "@tanstack/react-form";
+import { FunctionArgs } from "convex/server";
 
 function CompleteComponent() {
   return (
@@ -127,33 +127,29 @@ const OnboardingStepperContent = ({
 }: OnboardingStepperContentProps) => {
   const methods = useStepper();
 
-  const form = useForm({
-    mode: "onTouched",
-    resolver: zodResolver(methods.current.schema),
-  });
-
   const { user } = useUser();
   const router = useRouter();
   const upsertStudent = useMutation(api.students.upsertCurrentStudent);
 
-  // Track data across all steps
-  const [allStepsData, setAllStepsData] = React.useState<
-    Record<string, unknown>
-  >({});
-
-  const onSubmit = async (values: z.infer<typeof methods.current.schema>) => {
-    // Store this step's data
-    setAllStepsData((prev) => ({
-      ...prev,
-      [methods.current.id]: values,
-    }));
-
-    if (methods.current.id !== "complete") {
-      console.log(
-        `Form values for step ${methods.current.id}: ${JSON.stringify(values)}`,
-      );
-    }
-  };
+  const form = useForm({
+    defaultValues: {
+      // student data
+      school: "",
+      programs: [] as string[],
+      startingDate: undefined as Doc<"students">["startingDate"] | undefined,
+      expectedGraduationDate: undefined as
+        | Doc<"students">["expectedGraduationDate"]
+        | undefined,
+      // user courses
+      userCourses: [] as FunctionArgs<
+        typeof api.userCourses.importUserCourses
+      >["courses"],
+    },
+    onSubmit: async ({ value }) => {
+      // TODO: handle save to convex database
+      console.log(value);
+    },
+  });
 
   return (
     <Form {...form}>
