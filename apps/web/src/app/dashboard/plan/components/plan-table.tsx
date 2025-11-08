@@ -16,17 +16,32 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import type { Term, TermYear } from "@/utils/term";
+import {
+  buildAcademicTimeline,
+  compareTermYear,
+  getAcademicYearLabel,
+  makeTermKey,
+} from "@/utils/term";
 
 interface PlanTableProps {
   courses:
     | FunctionReturnType<typeof api.userCourses.getUserCourses>
     | undefined;
+  student:
+    | FunctionReturnType<typeof api.students.getCurrentStudent>
+    | undefined;
 }
 
-export default function PlanTable({ courses }: PlanTableProps) {
+type UserCourseEntry = NonNullable<
+  FunctionReturnType<typeof api.userCourses.getUserCourses>
+>[number];
+
+export default function PlanTable({ courses, student }: PlanTableProps) {
   const allTerms = ["fall", "j-term", "spring", "summer"] as const;
 
   const [courseSearch, setCourseSearch] = useState<string>("");
+
   const [creditFilter, setCreditFilter] = useState<number | null>(null);
 
   const courseSearchId = useId();
@@ -60,55 +75,95 @@ export default function PlanTable({ courses }: PlanTableProps) {
     });
   }, [courses, courseSearch, creditFilter]);
 
-  // Get unique years from the filtered data
-  const years = useMemo(() => {
+  const academicTimeline = useMemo(() => {
+    if (!student?.startingDate || !student?.expectedGraduationDate) {
+      return null;
+    }
+
+    const start: TermYear = {
+      term: student.startingDate.term as Term,
+      year: student.startingDate.year,
+    };
+
+    const expected: TermYear = {
+      term: student.expectedGraduationDate.term as Term,
+      year: student.expectedGraduationDate.year,
+    };
+
+    let end: TermYear = { ...expected };
+
+    const courseTerms: TermYear[] =
+      courses?.map((userCourse) => ({
+        term: userCourse.term as Term,
+        year: userCourse.year,
+      })) ?? [];
+
+    for (const courseTerm of courseTerms) {
+      if (compareTermYear(courseTerm, end) > 0) {
+        end = courseTerm;
+      }
+    }
+
+    return buildAcademicTimeline(start, end);
+  }, [courses, student]);
+
+  const timelineYearIndices = useMemo(() => {
+    if (!academicTimeline) {
+      return null;
+    }
+    return new Set(academicTimeline.termToYearIndex.values());
+  }, [academicTimeline]);
+
+  const yearColumns = useMemo(() => {
     const yearSet = new Set<number>();
     filteredData?.forEach((userCourse) => {
-      yearSet.add(userCourse.year);
+      const term = userCourse.term as Term;
+      const key = makeTermKey(term, userCourse.year);
+      const mappedYear =
+        academicTimeline?.termToYearIndex.get(key) ?? userCourse.year;
+      yearSet.add(mappedYear);
     });
     return Array.from(yearSet).sort((a, b) => a - b);
-  }, [filteredData]);
+  }, [academicTimeline, filteredData]);
 
-  // Create a map of year -> term -> courses using filtered courses
   const yearTermMap = useMemo(() => {
-    const map = new Map<
-      number,
-      Map<(typeof allTerms)[number], typeof filteredData>
-    >();
+    const map = new Map<number, Map<Term, UserCourseEntry[]>>();
 
     filteredData?.forEach((userCourse) => {
-      if (!map.has(userCourse.year)) {
-        map.set(userCourse.year, new Map());
+      const term = userCourse.term as Term;
+      const key = makeTermKey(term, userCourse.year);
+      const yearKey =
+        academicTimeline?.termToYearIndex.get(key) ?? userCourse.year;
+
+      if (!map.has(yearKey)) {
+        map.set(yearKey, new Map());
       }
-      const termMap = map.get(userCourse.year);
+      const termMap = map.get(yearKey);
       if (!termMap) return;
 
-      if (!termMap.has(userCourse.term)) {
-        termMap.set(userCourse.term, []);
+      if (!termMap.has(term)) {
+        termMap.set(term, []);
       }
-      const termCourses = termMap.get(userCourse.term);
-      if (termCourses) {
-        termCourses.push(userCourse);
-      }
+      termMap.get(term)?.push(userCourse);
     });
 
     return map;
-  }, [filteredData]);
+  }, [academicTimeline, filteredData]);
 
   // only show terms with course
   const visibleTerms = useMemo(() => {
     return allTerms.filter((term) => {
-      return years.some((year) => {
+      return yearColumns.some((year) => {
         const termMap = yearTermMap.get(year);
-        const courses = termMap?.get(term) || [];
-        return courses.length > 0;
+        const termCourses = termMap?.get(term) ?? [];
+        return termCourses.length > 0;
       });
     });
-  }, [allTerms, years, yearTermMap]);
+  }, [allTerms, yearColumns, yearTermMap]);
 
   if (!courses) {
-    // TODO add skeletons for the page
-    return <></>;
+    // TODO: add skeletons for the page
+    return null;
   }
 
   return (
@@ -173,12 +228,15 @@ export default function PlanTable({ courses }: PlanTableProps) {
             <TableHead className="border-t w-[80px]">
               <div className="font-semibold">Term</div>
             </TableHead>
-            {years.map((year) => {
+            {yearColumns.map((year) => {
               const totalCredits = Array.from(
                 yearTermMap.get(year)?.values() || [],
               )
                 .flat()
                 .reduce((sum, c) => sum + (c?.course?.credits || 0), 0);
+              const columnLabel = timelineYearIndices?.has(year)
+                ? getAcademicYearLabel(year)
+                : year.toString();
 
               return (
                 <TableHead
@@ -186,7 +244,7 @@ export default function PlanTable({ courses }: PlanTableProps) {
                   className="border-t min-w-[200px] w-[200px] "
                 >
                   <div className="px-2 flex flex-row justify-between">
-                    <div className="font-semibold">{year}</div>
+                    <div className="font-semibold">{columnLabel}</div>
                     <div className="text-xs text-muted-foreground mt-1">
                       {totalCredits} credits
                     </div>
@@ -203,9 +261,9 @@ export default function PlanTable({ courses }: PlanTableProps) {
                 <TableCell className="font-medium bg-muted/30 capitalize">
                   {term}
                 </TableCell>
-                {years.map((year) => {
+                {yearColumns.map((year) => {
                   const termMap = yearTermMap.get(year);
-                  const userCourses = termMap?.get(term) || [];
+                  const userCourses = termMap?.get(term) ?? [];
                   return (
                     <TableCell key={year} className="align-top p-3">
                       {userCourses.length > 0 ? (

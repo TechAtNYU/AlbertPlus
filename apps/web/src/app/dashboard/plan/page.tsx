@@ -11,8 +11,12 @@ const PlanPage = () => {
     api.userCourses.getUserCourses,
     isAuthenticated ? {} : "skip",
   );
+  const student = useQuery(
+    api.students.getCurrentStudent,
+    isAuthenticated ? {} : "skip",
+  );
 
-  return <PlanTable courses={courses} />;
+  return <PlanTable courses={courses} student={student} />;
 };
 
 export default PlanPage;
