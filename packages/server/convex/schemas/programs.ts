@@ -1,8 +1,10 @@
 import { v } from "convex/values";
+import { schoolName } from "./schools";
 
 const programs = {
   name: v.string(), // Computer Science (BA)
   level: v.union(v.literal("undergraduate"), v.literal("graduate")),
+  school: schoolName,
   programUrl: v.string(),
 };
 

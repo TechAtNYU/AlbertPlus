@@ -1,5 +1,9 @@
 "use client";
 
+import { api } from "@albert-plus/server/convex/_generated/api";
+import type { Id } from "@albert-plus/server/convex/_generated/dataModel";
+import { useMutation } from "convex/react";
+import { ConvexError } from "convex/values";
 import {
   addHours,
   areIntervalsOverlapping,
@@ -15,7 +19,9 @@ import {
   startOfDay,
   startOfWeek,
 } from "date-fns";
-import { useMemo } from "react";
+import { X } from "lucide-react";
+import { useMemo, useState } from "react";
+import { toast } from "sonner";
 import {
   type Class,
   EndHour,
@@ -24,9 +30,11 @@ import {
   WeekCellsHeight,
 } from "../schedule-calendar";
 import { EventItem } from "./event-item";
+import { CourseInfoDialog } from "./info-dialog";
 
 interface WeekViewProps {
   classes: Class[];
+  hoveredCourseId?: string | null;
 }
 
 interface PositionedEvent {
@@ -39,14 +47,79 @@ interface PositionedEvent {
   timeSlotIndex: number;
 }
 
-export function WeekView({ classes }: WeekViewProps) {
+export function WeekView({
+  classes,
+  hoveredCourseId: externalHoveredCourseId,
+}: WeekViewProps) {
   const currentDate = new Date();
+  const [internalHoveredCourseId, setInternalHoveredCourseId] = useState<
+    string | null
+  >(null);
+  const [selectedCourse, setSelectedCourse] = useState<Class | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
-  const days = useMemo(() => {
+  // Combine external hover (from selector) and internal hover (from calendar)
+  const hoveredCourseId = externalHoveredCourseId ?? internalHoveredCourseId;
+
+  const removeOffering = useMutation(
+    api.userCourseOfferings.removeUserCourseOffering,
+  );
+
+  const addOffering = useMutation(
+    api.userCourseOfferings.addUserCourseOffering,
+  );
+
+  const handleRemove = async (
+    id: Id<"userCourseOfferings">,
+    classNumber: number,
+    title: string,
+  ) => {
+    try {
+      await removeOffering({ id });
+      toast.success(`${title} removed`, {
+        action: {
+          label: "Undo",
+          onClick: () => addOffering({ classNumber }),
+        },
+      });
+    } catch (error) {
+      const errorMessage =
+        error instanceof ConvexError
+          ? (error.data as string)
+          : "Unexpected error occurred";
+      toast.error(errorMessage);
+    }
+  };
+
+  const handleEventClick = (event: Class) => {
+    setSelectedCourse(event);
+    setDialogOpen(true);
+  };
+
+  const allDays = useMemo(() => {
     const weekStart = startOfWeek(currentDate, { weekStartsOn: 0 });
     const weekEnd = endOfWeek(currentDate, { weekStartsOn: 0 });
     return eachDayOfInterval({ start: weekStart, end: weekEnd });
   }, [currentDate]);
+
+  // Filter out Saturday and Sunday if they have no classes
+  const days = useMemo(() => {
+    const daysWithClasses = new Set<number>();
+
+    classes.forEach((event) => {
+      if (!event.times?.length) return;
+      event.times.forEach((slot) => {
+        const start = new Date(slot.start);
+        daysWithClasses.add(start.getDay());
+      });
+    });
+
+    return allDays.filter((day) => {
+      const dayOfWeek = day.getDay();
+      if (dayOfWeek >= 1 && dayOfWeek <= 5) return true;
+      return daysWithClasses.has(dayOfWeek);
+    });
+  }, [allDays, classes]);
 
   const hours = useMemo(() => {
     const dayStart = startOfDay(currentDate);
@@ -156,9 +229,14 @@ export function WeekView({ classes }: WeekViewProps) {
     });
   }, [days, classes]);
 
+  const gridCols = days.length + 1; // +1 for the time column
+
   return (
-    <div data-slot="week-view" className="flex h-full flex-col">
-      <div className="bg-background/80 border-border/70 sticky top-0 z-30 grid grid-cols-8 border-b backdrop-blur-md">
+    <div data-slot="week-view" className="flex min-h-0 flex-1 flex-col">
+      <div
+        className="bg-background/80 border-border/70 sticky top-0 z-30 grid shrink-0 border-b backdrop-blur-md"
+        style={{ gridTemplateColumns: `repeat(${gridCols}, minmax(0, 1fr))` }}
+      >
         <div className="text-muted-foreground/70 py-2 text-center text-sm">
           <span className="max-[479px]:sr-only">{format(new Date(), "O")}</span>
         </div>
@@ -176,7 +254,10 @@ export function WeekView({ classes }: WeekViewProps) {
         ))}
       </div>
 
-      <div className="grid flex-1 grid-cols-8 overflow-hidden">
+      <div
+        className="grid min-h-0 flex-1 overflow-y-auto no-scrollbar"
+        style={{ gridTemplateColumns: `repeat(${gridCols}, minmax(0, 1fr))` }}
+      >
         <div className="border-border/70 grid auto-cols-fr border-r">
           {hours.map((hour, index) => (
             <div
@@ -204,30 +285,75 @@ export function WeekView({ classes }: WeekViewProps) {
                 className="border-border/70 relative border-b last:border-b-0"
               />
             ))}
-            {(processedDayEvents[dayIndex] ?? []).map((positionedEvent) => (
-              <div
-                key={positionedEvent.event.id}
-                className="absolute z-10 px-0.5"
-                style={{
-                  top: `${positionedEvent.top}px`,
-                  height: `${positionedEvent.height}px`,
-                  left: `${positionedEvent.left * 100}%`,
-                  width: `${positionedEvent.width * 100}%`,
-                  zIndex: positionedEvent.zIndex,
-                }}
-              >
-                <div className="size-full">
-                  <EventItem
-                    event={positionedEvent.event}
-                    timeSlotIndex={positionedEvent.timeSlotIndex}
-                    showTime
-                  />
+            {(processedDayEvents[dayIndex] ?? []).map((positionedEvent) => {
+              const courseOfferingId = positionedEvent.event.id.replace(
+                "preview-",
+                "",
+              );
+              const isHovered = hoveredCourseId === courseOfferingId;
+              return (
+                // biome-ignore lint/a11y/noStaticElementInteractions: change div to button will cause hydration error
+                <div
+                  key={positionedEvent.event.id}
+                  className="absolute z-10 px-0.5 cursor-pointer"
+                  style={{
+                    top: `${positionedEvent.top}px`,
+                    height: `${positionedEvent.height}px`,
+                    left: `${positionedEvent.left * 100}%`,
+                    width: `${positionedEvent.width * 100}%`,
+                    zIndex: positionedEvent.zIndex,
+                  }}
+                  onMouseEnter={() =>
+                    setInternalHoveredCourseId(courseOfferingId)
+                  }
+                  onMouseLeave={() => setInternalHoveredCourseId(null)}
+                  onClick={() => handleEventClick(positionedEvent.event)}
+                  // biome lint/a11y/useKeyWithClickEvents
+                  onKeyDown={() => {}}
+                >
+                  <div className="relative size-full group">
+                    <EventItem
+                      event={positionedEvent.event}
+                      timeSlotIndex={positionedEvent.timeSlotIndex}
+                      showTime
+                      isHovered={isHovered}
+                    />
+                    {positionedEvent.event.userCourseOfferingId &&
+                      positionedEvent.event.classNumber && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (!positionedEvent.event.classNumber) {
+                              return null;
+                            }
+                            handleRemove(
+                              positionedEvent.event
+                                .userCourseOfferingId as Id<"userCourseOfferings">,
+                              positionedEvent.event.classNumber,
+                              positionedEvent.event.title,
+                            );
+                          }}
+                          className="absolute right-1 top-1 z-50 flex size-5 items-center justify-center rounded-full bg-black/10 dark:bg-white/10 text-foreground/70 opacity-0 shadow-md backdrop-blur-sm transition-all hover:bg-black/20 dark:hover:bg-white/20 hover:text-foreground hover:scale-110 group-hover:opacity-100"
+                          aria-label="Remove course"
+                        >
+                          <X className="size-3.5 stroke-[2.5]" />
+                        </button>
+                      )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         ))}
       </div>
+
+      <CourseInfoDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        course={selectedCourse}
+        onDelete={handleRemove}
+      />
     </div>
   );
 }

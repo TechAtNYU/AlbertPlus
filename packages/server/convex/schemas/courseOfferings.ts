@@ -3,7 +3,7 @@ import { v } from "convex/values";
 const courseOfferings = {
   courseCode: v.string(), // CSCI-UA 102
   classNumber: v.number(), // 10349
-  title: v.string(),
+  title: v.optional(v.string()),
   section: v.string(), // 001
   year: v.number(), // 2025
   term: v.union(

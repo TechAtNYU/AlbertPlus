@@ -1,6 +1,6 @@
 /** biome-ignore-all lint/correctness/noUnusedFunctionParameters: bypass for now */
 import type {
-  ZUpsertCourse,
+  ZUpsertCourseWithPrerequisites,
   ZUpsertPrerequisites,
 } from "@albert-plus/server/convex/http";
 import type { DrizzleD1Database } from "drizzle-orm/d1";
@@ -23,7 +23,7 @@ export async function scrapeCourse(
   db: DrizzleD1Database,
   env: CloudflareBindings,
 ): Promise<{
-  course: z.infer<typeof ZUpsertCourse>;
+  course: Omit<z.infer<typeof ZUpsertCourseWithPrerequisites>, "prerequisites">;
   prerequisites: CoursePrerequisite[];
 }> {
   // TODO: implement this function
