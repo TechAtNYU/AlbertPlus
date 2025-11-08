@@ -1,12 +1,24 @@
 "use client";
 
-import type { api } from "@albert-plus/server/convex/_generated/api";
+import { api } from "@albert-plus/server/convex/_generated/api";
 import type { FunctionReturnType } from "convex/server";
+import { useMutation } from "convex/react";
 import { SearchIcon } from "lucide-react";
 import Link from "next/link";
-import { useId, useMemo, useState } from "react";
+import { useCallback, useId, useMemo, useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import DegreeProgreeUpload from "@/modules/report-parsing/components/degree-progress-upload";
+import type { UserCourse } from "@/modules/report-parsing/types";
 import {
   Table,
   TableBody,
@@ -22,6 +34,7 @@ import {
   getAcademicYearLabel,
   makeTermKey,
 } from "@/utils/term";
+import { toast } from "sonner";
 
 interface PlanTableProps {
   courses:
@@ -40,8 +53,49 @@ export default function PlanTable({ courses, student }: PlanTableProps) {
   const allTerms = ["fall", "j-term", "spring", "summer"] as const;
 
   const [courseSearch, setCourseSearch] = useState<string>("");
+  const [isUploadOpen, setIsUploadOpen] = useState(false);
+
+  const importUserCourses = useMutation(api.userCourses.importUserCourses);
 
   const courseSearchId = useId();
+
+  const handleImportConfirm = async (coursesToImport: UserCourse[]) => {
+    if (coursesToImport.length === 0) {
+      setIsUploadOpen(false);
+      return { inserted: 0, updated: 0, duplicates: 0 };
+    }
+
+    const result = await importUserCourses({
+      courses: coursesToImport,
+    });
+
+    const messages: string[] = [];
+    if (result) {
+      if (result.inserted > 0) {
+        messages.push(
+          `${result.inserted} new course${result.inserted !== 1 ? "s" : ""} imported`,
+        );
+      }
+      if (result.updated > 0) {
+        messages.push(
+          `${result.updated} course${result.updated !== 1 ? "s" : ""} updated with grades`,
+        );
+      }
+      if (result.duplicates > 0) {
+        messages.push(
+          `${result.duplicates} duplicate${result.duplicates !== 1 ? "s" : ""} skipped`,
+        );
+      }
+      setIsUploadOpen(false);
+    }
+
+    const successMessage =
+      messages.length > 0
+        ? `Import complete: ${messages.join(", ")}`
+        : "Import complete";
+
+    toast.success(successMessage);
+  };
 
   // Filter courses based on search
   const filteredData = useMemo(() => {
@@ -170,6 +224,22 @@ export default function PlanTable({ courses, student }: PlanTableProps) {
             </div>
           </div>
         </div>
+        <Dialog open={isUploadOpen} onOpenChange={setIsUploadOpen}>
+          <DialogTrigger asChild>
+            <Button className="self-end" variant="outline">
+              Import from report
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Import from Degree Progress Report</DialogTitle>
+              <DialogDescription>
+                Upload your report PDF to import courses.
+              </DialogDescription>
+            </DialogHeader>
+            <DegreeProgreeUpload onConfirm={handleImportConfirm} />
+          </DialogContent>
+        </Dialog>
       </div>
       <Table className="min-w-max">
         <TableHeader>

@@ -1,5 +1,3 @@
-"use client";
-
 import { FileTextIcon, UploadIcon, XIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -86,26 +84,6 @@ export default function DegreeProgreeUpload({
     setIsImporting(true);
     try {
       await onConfirm(parsedCourses);
-      // const result = await batchImport({ courses: parsedCourses });
-      //
-      // const messages = [];
-      // if (result.inserted > 0) {
-      //   messages.push(
-      //     `${result.inserted} new course${result.inserted !== 1 ? "s" : ""} imported`,
-      //   );
-      // }
-      // if (result.updated > 0) {
-      //   messages.push(
-      //     `${result.updated} course${result.updated !== 1 ? "s" : ""} updated with grades`,
-      //   );
-      // }
-      // if (result.duplicates > 0) {
-      //   messages.push(
-      //     `${result.duplicates} duplicate${result.duplicates !== 1 ? "s" : ""} skipped`,
-      //   );
-      // }
-
-      toast.success(`Import complete: ${messages.join(", ")}`);
 
       setIsModalOpen(false);
 
