@@ -206,19 +206,31 @@ export default {
               }
               case "discover-courses": {
                 const courseUrls = await discoverCourses(job.url);
-                const newJobs = await db
-                  .insert(jobs)
-                  .values(
-                    courseUrls.map((url) => ({
-                      url,
-                      jobType: "course" as const,
-                    })),
-                  )
-                  .returning();
+                // Cloudflare Queues has a limit of 100 messages per sendBatch()
+                console.log(`Discovered ${courseUrls.length} course URLs`);
 
-                await env.SCRAPING_QUEUE.sendBatch(
-                  newJobs.map((j) => ({ body: { jobId: j.id } })),
-                );
+                const BATCH_SIZE = 10;
+                for (let i = 0; i < courseUrls.length; i += BATCH_SIZE) {
+                  const batch = courseUrls.slice(i, i + BATCH_SIZE);
+
+                  const newJobs = await db
+                    .insert(jobs)
+                    .values(
+                      batch.map((url) => ({
+                        url,
+                        jobType: "course" as const,
+                      })),
+                    )
+                    .returning();
+
+                  await env.SCRAPING_QUEUE.sendBatch(
+                    newJobs.map((j) => ({ body: { jobId: j.id } })),
+                  );
+
+                  console.log(
+                    `Queued batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(courseUrls.length / BATCH_SIZE)} (${newJobs.length} jobs)`,
+                  );
+                }
                 break;
               }
               case "program": {

@@ -14,8 +14,29 @@ export type CoursePrerequisite =
   | Omit<Extract<PrerequisiteItem, { type: "options" }>, "courseId">;
 
 export async function discoverCourses(url: string): Promise<string[]> {
-  // TODO: implement this function
-  return [];
+  const courses: string[] = [];
+
+  const response = await fetch(url);
+
+  class CourseLinkHandler {
+    element(element: Element) {
+      const href = element.getAttribute("href");
+      if (href && href.startsWith("/courses/") && href !== "/courses/") {
+        const baseUrl = new URL(url);
+        const absoluteUrl = new URL(href, baseUrl).toString();
+        courses.push(absoluteUrl);
+      }
+    }
+  }
+
+  const rewriter = new HTMLRewriter().on(
+    'a[href^="/courses/"]',
+    new CourseLinkHandler(),
+  );
+
+  await rewriter.transform(response).arrayBuffer();
+
+  return courses;
 }
 
 export async function scrapeCourse(
