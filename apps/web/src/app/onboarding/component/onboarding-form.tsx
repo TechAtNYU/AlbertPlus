@@ -1,8 +1,19 @@
 "use client";
 
 import { api } from "@albert-plus/server/convex/_generated/api";
-import type { Doc } from "@albert-plus/server/convex/_generated/dataModel";
-//TanStack Form
+import type { Doc, Id } from "@albert-plus/server/convex/_generated/dataModel";
+import { useForm } from "@tanstack/react-form";
+import {
+  useConvexAuth,
+  useMutation,
+  usePaginatedQuery,
+  useQuery,
+} from "convex/react";
+import type { FunctionArgs } from "convex/server";
+import { useRouter } from "next/navigation";
+import React from "react";
+import { toast } from "sonner";
+import z from "zod";
 import { Button } from "@/components/ui/button";
 import {
   FieldContent,
@@ -22,17 +33,40 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import DegreeProgreeUpload from "@/modules/report-parsing/components/degree-progress-upload";
-import { useForm } from "@tanstack/react-form";
-import {
-  useConvexAuth,
-  useMutation,
-  usePaginatedQuery,
-  useQuery,
-} from "convex/react";
-import type { FunctionArgs } from "convex/server";
-import { useRouter } from "next/navigation";
-import React from "react";
-import { toast } from "sonner";
+import { schoolNameSchema, userCourseSchema } from "@/schemas/courses";
+
+const dateSchema = z.object({
+  year: z.number().int().min(2000).max(2100),
+  term: z.union([z.literal("spring"), z.literal("fall")]),
+});
+
+const onboardingFormSchema = z.object({
+  // Student data
+  school: schoolNameSchema,
+  programs: z.array(z.string()).min(1, "At least one program is required"),
+  startingDate: dateSchema,
+  expectedGraduationDate: dateSchema,
+  // User courses
+  userCourses: z.array(userCourseSchema).default([]),
+});
+// .refine(
+//   (data) => {
+//     const startYear = data.startingDate.year;
+//     const startTerm = data.startingDate.term;
+//     const endYear = data.expectedGraduationDate.year;
+//     const endTerm = data.expectedGraduationDate.term;
+//
+//     // Convert to comparable numbers (spring=0, fall=1)
+//     const startValue = startYear * 2 + (startTerm === "fall" ? 1 : 0);
+//     const endValue = endYear * 2 + (endTerm === "fall" ? 1 : 0);
+//
+//     return endValue > startValue;
+//   },
+//   {
+//     message: "Expected graduation date must be after starting date",
+//     path: ["expectedGraduationDate"],
+//   },
+// );
 
 export function OnboardingForm() {
   const router = useRouter();
@@ -63,7 +97,7 @@ export function OnboardingForm() {
   const programOptions = React.useMemo(
     () =>
       (programs ?? []).map((program) => ({
-        value: program.name,
+        value: program._id,
         label: program.name,
       })),
     [programs],
@@ -94,7 +128,7 @@ export function OnboardingForm() {
     defaultValues: {
       // student data
       school: "" as Doc<"students">["school"],
-      programs: [] as string[],
+      programs: [] as Id<"programs">[],
       startingDate: {
         year: currentYear,
         term: defaultTerm,
@@ -112,7 +146,7 @@ export function OnboardingForm() {
       try {
         await upsertStudent({
           school: value.school,
-          programs: [],
+          programs: value.programs,
           startingDate: value.startingDate,
           expectedGraduationDate: value.expectedGraduationDate,
         });
@@ -159,13 +193,13 @@ export function OnboardingForm() {
                     <Select
                       onValueChange={(val) => field.handleChange(val)}
                       value={field.state.value ?? ""}
-                      disabled={isLoadingSchools}
+                      disabled={!schools === undefined}
                     >
                       <SelectTrigger className="w-full" aria-invalid={invalid}>
                         <SelectValue placeholder="Select your school or college" />
                       </SelectTrigger>
                       <SelectContent className="w-full">
-                        {isLoadingSchools ? (
+                        {schools === undefined ? (
                           <div className="px-2 py-1.5 text-sm text-muted-foreground">
                             Loading schools...
                           </div>
