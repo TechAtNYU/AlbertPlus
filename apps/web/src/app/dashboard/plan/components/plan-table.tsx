@@ -1,12 +1,5 @@
 "use client";
 
-import { api } from "@albert-plus/server/convex/_generated/api";
-import { useMutation } from "convex/react";
-import type { FunctionReturnType } from "convex/server";
-import { FileTextIcon, SearchIcon } from "lucide-react";
-import Link from "next/link";
-import { useId, useMemo, useState } from "react";
-import { toast } from "sonner";
 import { useCurrentTerm, useCurrentYear } from "@/components/AppConfigProvider";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,6 +21,13 @@ import {
   getAcademicYearLabel,
   makeTermKey,
 } from "@/utils/term";
+import { api } from "@albert-plus/server/convex/_generated/api";
+import { useMutation } from "convex/react";
+import type { FunctionReturnType } from "convex/server";
+import { FileTextIcon, SearchIcon } from "lucide-react";
+import Link from "next/link";
+import { useId, useMemo, useState } from "react";
+import { toast } from "sonner";
 
 interface PlanTableProps {
   courses:
@@ -160,6 +160,11 @@ export default function PlanTable({ courses, student }: PlanTableProps) {
   }, [academicTimeline, currentTerm, currentYear]);
 
   const yearColumns = useMemo(() => {
+    if (timelineYearIndices && timelineYearIndices.size > 0) {
+      return Array.from(timelineYearIndices).sort((a, b) => a - b);
+    }
+
+    // Fallback: if no timeline, show years that have courses
     const yearSet = new Set<number>();
     filteredData?.forEach((userCourse) => {
       const term = userCourse.term as Term;
@@ -169,7 +174,7 @@ export default function PlanTable({ courses, student }: PlanTableProps) {
       yearSet.add(mappedYear);
     });
     return Array.from(yearSet).sort((a, b) => a - b);
-  }, [academicTimeline, filteredData]);
+  }, [academicTimeline, filteredData, timelineYearIndices]);
 
   const yearTermMap = useMemo(() => {
     const map = new Map<number, Map<Term, UserCourseEntry[]>>();
@@ -357,18 +362,7 @@ export default function PlanTable({ courses, student }: PlanTableProps) {
                             );
                           })}
                         </div>
-                      ) : (
-                        <div className="flex items-center justify-center min-h-[80px]">
-                          <div
-                            className={cn(
-                              "text-sm text-muted-foreground italic",
-                              isCurrentColumn && "text-foreground/80",
-                            )}
-                          >
-                            No courses
-                          </div>
-                        </div>
-                      )}
+                      ) : null}
                     </TableCell>
                   );
                 })}
