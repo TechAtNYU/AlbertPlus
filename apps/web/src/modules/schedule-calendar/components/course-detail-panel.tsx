@@ -88,15 +88,19 @@ export function CourseDetailPanel({
         >
           <ArrowLeft className="h-4 w-4" />
         </Button>
-        <h2 className="text-base md:text-base text-lg font-semibold">
-          Course Details
-        </h2>
+        <h2 className="md:text-base text-lg font-semibold">Course Details</h2>
       </div>
 
       <ScrollArea className="flex-1">
         <div className="p-6 md:p-6 space-y-6">
           <div>
-            <h3 className="text-lg font-semibold">{course.title}</h3>
+            <h3 className="text-lg font-semibold break-words">
+              {/*
+              schedule-calendar:171 is making title`${offering.courseCode} - ${offering.title}`
+              extract the title only here, or remove the courseCode addition in calendar if safe
+*/}
+              {course.title.split(" - ").slice(1).join(" - ") || course.title}
+            </h3>
           </div>
 
           <div className="space-y-4">
@@ -140,7 +144,7 @@ export function CourseDetailPanel({
               <p className="text-sm font-semibold text-foreground">
                 Instructor
               </p>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-muted-foreground break-words">
                 {course.instructor.join(", ") || "TBA"}
               </p>
             </div>
@@ -150,7 +154,7 @@ export function CourseDetailPanel({
                 <p className="text-sm font-semibold text-foreground">
                   Location
                 </p>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-muted-foreground break-words">
                   {course.location}
                 </p>
               </div>
@@ -162,7 +166,7 @@ export function CourseDetailPanel({
                 {course.times.map((slot, index) => (
                   <p
                     key={`${slot.start.toString()}-${index}`}
-                    className="text-sm text-muted-foreground"
+                    className="text-sm text-muted-foreground break-words"
                   >
                     {formatTimeSlot(slot)}
                   </p>
@@ -218,11 +222,11 @@ export function CourseDetailPanel({
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate">
+                          <p className="text-sm font-medium break-words">
                             {alt.courseOffering.courseCode} -{" "}
                             {alt.courseOffering.title}
                           </p>
-                          <p className="text-xs text-muted-foreground">
+                          <p className="text-xs text-muted-foreground break-words">
                             Section {alt.courseOffering.section.toUpperCase()} •{" "}
                             {alt.courseOffering.instructor.join(", ")}
                           </p>
@@ -234,7 +238,7 @@ export function CourseDetailPanel({
                             alt.courseOffering.status.slice(1)}
                         </span>
                       </div>
-                      <div className="text-xs text-muted-foreground">
+                      <div className="text-xs text-muted-foreground break-words">
                         {alt.courseOffering.days
                           .map(
                             (day) => day.charAt(0).toUpperCase() + day.slice(1),

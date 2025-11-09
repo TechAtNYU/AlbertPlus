@@ -5,6 +5,8 @@ import { useConvexAuth, usePaginatedQuery, useQuery } from "convex/react";
 import { useEffect, useRef, useState } from "react";
 import Selector from "@/app/dashboard/register/components/Selector";
 import { useNextTerm, useNextYear } from "@/components/AppConfigProvider";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { useSearchParam } from "@/hooks/use-search-param";
 import { CourseSelector } from "@/modules/course-selection";
 import CourseSelectorSkeleton from "@/modules/course-selection/components/CourseSelectorSkeleton";
@@ -13,9 +15,9 @@ import type {
   CourseOfferingWithCourse,
 } from "@/modules/course-selection/types";
 import {
+  type Class,
   getUserClassesByTerm,
   ScheduleCalendar,
-  type Class,
 } from "@/modules/schedule-calendar/schedule-calendar";
 
 const RegisterPage = () => {
@@ -34,6 +36,9 @@ const RegisterPage = () => {
     "selector" | "calendar"
   >("selector");
   const [isMobile, setIsMobile] = useState(false);
+
+  // TODO: save the state to cookie
+  const [showAlternatives, setShowAlternatives] = useState(true);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -104,7 +109,16 @@ const RegisterPage = () => {
     }
   }, [results, debouncedSearchValue, status]);
 
-  const classes = getUserClassesByTerm(allClasses, currentYear, currentTerm);
+  const allClassesForTerm = getUserClassesByTerm(
+    allClasses,
+    currentYear,
+    currentTerm,
+  );
+
+  // Filter out alternatives if toggle is off
+  const classes = showAlternatives
+    ? allClassesForTerm
+    : allClassesForTerm?.filter((c) => !c.alternativeOf);
 
   const isSearching =
     status === "LoadingFirstPage" &&
@@ -119,6 +133,23 @@ const RegisterPage = () => {
   ) {
     return <CourseSelectorSkeleton />;
   }
+
+  const AltToggle = () => (
+    <>
+      <Switch
+        id="alt-switcher"
+        className="order-1 h-4 w-6 after:absolute after:inset-0 [&_span]:size-3 data-[state=checked]:[&_span]:translate-x-2 data-[state=checked]:[&_span]:rtl:-translate-x-2"
+        checked={showAlternatives}
+        onCheckedChange={setShowAlternatives}
+      />
+      <div className="grid grow gap-2">
+        <Label htmlFor="alt-switcher">Show alternative courses</Label>
+        <p className="text-xs text-muted-foreground">
+          You can set one course as alternative for another.
+        </p>
+      </div>
+    </>
+  );
 
   return (
     <div className="flex flex-col gap-4 h-[calc(100vh-(--spacing(16))-(--spacing(12)))] w-full">
@@ -142,7 +173,10 @@ const RegisterPage = () => {
             onCourseSelect={handleCourseSelect}
           />
         ) : (
-          <div className="h-full">
+          <div className="h-full flex flex-col space-y-2">
+            <div className="md:hidden relative flex w-full items-start gap-2 rounded-md border border-input p-4 shadow-xs outline-none has-data-[state=checked]:border-primary/50">
+              <AltToggle />
+            </div>
             <ScheduleCalendar
               classes={classes}
               hoveredCourse={hoveredCourse}
@@ -155,17 +189,22 @@ const RegisterPage = () => {
 
       {/* Desktop view */}
       <div className="hidden md:flex gap-4 flex-1 min-h-0">
-        <CourseSelector
-          courseOfferingsWithCourses={displayedResults}
-          onHover={setHoveredCourse}
-          onSearchChange={setSearchValue}
-          searchQuery={searchValue}
-          loadMore={loadMore}
-          status={status}
-          isSearching={isSearching}
-          selectedCourse={selectedCourse}
-          onCourseSelect={handleCourseSelect}
-        />
+        <div className="flex flex-col space-y-4">
+          <div className="relative flex w-full items-start gap-2 rounded-md border border-input p-4 shadow-xs outline-none has-data-[state=checked]:border-primary/50">
+            <AltToggle />
+          </div>
+          <CourseSelector
+            courseOfferingsWithCourses={displayedResults}
+            onHover={setHoveredCourse}
+            onSearchChange={setSearchValue}
+            searchQuery={searchValue}
+            loadMore={loadMore}
+            status={status}
+            isSearching={isSearching}
+            selectedCourse={selectedCourse}
+            onCourseSelect={handleCourseSelect}
+          />
+        </div>
 
         <div className="flex-1 min-w-0">
           <div className="sticky top-0">

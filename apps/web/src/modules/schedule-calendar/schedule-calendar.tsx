@@ -29,6 +29,8 @@ export interface Class {
   times: TimeSlot[];
   description: string;
   isPreview?: boolean;
+  isAlternative?: boolean;
+  alternativeOf?: string;
   section: string;
   year: number;
   term: Term;
@@ -170,6 +172,8 @@ export function ScheduleCalendar({
       color,
       times: slots,
       description: `${offering.instructor.join(", ")} • ${offering.section.toUpperCase()} • ${offering.term} ${offering.year}`,
+      isAlternative: !!c.alternativeOf,
+      alternativeOf: c.alternativeOf,
       section: offering.section,
       year: offering.year,
       term: offering.term,

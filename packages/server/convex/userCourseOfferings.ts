@@ -118,6 +118,16 @@ export const removeUserCourseOffering = protectedMutation({
     }
 
     await ctx.db.delete(args.id);
+
+    const alternatives = await ctx.db
+      .query("userCourseOfferings")
+      .withIndex("by_user", (q) => q.eq("userId", ctx.user.subject))
+      .filter((q) => q.eq(q.field("alternativeOf"), args.id))
+      .collect();
+
+    for (const alternative of alternatives) {
+      await ctx.db.delete(alternative._id);
+    }
   },
 });
 

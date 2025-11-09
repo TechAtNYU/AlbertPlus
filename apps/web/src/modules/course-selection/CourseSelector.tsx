@@ -6,9 +6,9 @@ import { useMutation } from "convex/react";
 import { ConvexError } from "convex/values";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { CourseDetailPanel, type Class } from "@/modules/schedule-calendar";
 import { Button } from "@/components/ui/button";
 import { useSearchParam } from "@/hooks/use-search-param";
+import { type Class, CourseDetailPanel } from "@/modules/schedule-calendar";
 import { CourseCard, CourseFilters } from "./components";
 import { useCourseExpansion, useCourseFiltering } from "./hooks";
 import type { CourseOffering, CourseOfferingWithCourse } from "./types";
@@ -91,6 +91,38 @@ const CourseSelector = ({
           onClick: () => removeCourseOffering({ id }),
         },
       });
+    } catch (error) {
+      const errorMessage =
+        error instanceof ConvexError
+          ? (error.data as string)
+          : "Unexpected error occurred";
+      toast.error(errorMessage);
+    }
+  };
+
+  const handleSectionSelectAsAlternative = async (
+    offering: CourseOffering,
+    alternativeOf: Id<"userCourseOfferings">,
+  ) => {
+    if (offering.status === "closed") {
+      toast.error("This section is closed.");
+      return;
+    }
+    setHoveredSection(null);
+    try {
+      const id = await addCourseOffering({
+        classNumber: offering.classNumber,
+        alternativeOf,
+      });
+      toast.success(
+        `${offering.courseCode} ${offering.section} added as alternative`,
+        {
+          action: {
+            label: "Undo",
+            onClick: () => removeCourseOffering({ id }),
+          },
+        },
+      );
     } catch (error) {
       const errorMessage =
         error instanceof ConvexError
@@ -204,6 +236,9 @@ const CourseSelector = ({
                     isExpanded={isExpanded(course.code)}
                     onToggleExpand={toggleCourseExpansion}
                     onSectionSelect={handleSectionSelect}
+                    onSectionSelectAsAlternative={
+                      handleSectionSelectAsAlternative
+                    }
                     onSectionHover={setHoveredSection}
                   />
                 </div>
