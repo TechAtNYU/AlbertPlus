@@ -27,7 +27,12 @@ import {
 import { api } from "@albert-plus/server/convex/_generated/api";
 import type { Doc } from "@albert-plus/server/convex/_generated/dataModel";
 import { useUser } from "@clerk/nextjs";
-import { useMutation, useQuery } from "convex/react";
+import {
+  useConvexAuth,
+  useMutation,
+  usePaginatedQuery,
+  useQuery,
+} from "convex/react";
 import { useRouter } from "next/navigation";
 import React from "react";
 
@@ -35,8 +40,6 @@ import React from "react";
 import { useForm } from "@tanstack/react-form";
 
 import { toast } from "sonner";
-
-const programOptions: string[] = [];
 
 type OnboardingFormValues = AcademicInfoFormValues;
 
@@ -47,9 +50,43 @@ interface OnboardingFormProps {
 export function OnboardingForm({ student }: OnboardingFormProps) {
   const router = useRouter();
   const { user } = useUser();
+  const { isAuthenticated } = useConvexAuth();
   const upsertStudent = useMutation(api.students.upsertCurrentStudent);
   const schools = useQuery(api.schools.getSchools);
   const isLoadingSchools = schools === undefined;
+  const [programsQuery, setProgramsQuery] = React.useState<string | undefined>(
+    undefined,
+  );
+  const {
+    results: programs,
+    status: programsStatus,
+    loadMore: programsLoadMore,
+  } = usePaginatedQuery(
+    api.programs.getPrograms,
+    isAuthenticated ? { query: programsQuery } : ("skip" as const),
+    { initialNumItems: 20 },
+  );
+  const programOptions = React.useMemo(
+    () =>
+      (programs ?? []).map((program) => ({
+        value: program.name,
+        label: program.name,
+      })),
+    [programs],
+  );
+  const handleSearchPrograms = React.useCallback(
+    async (value: string) => {
+      const trimmed = value.trim();
+      setProgramsQuery(trimmed.length === 0 ? undefined : trimmed);
+      return programOptions;
+    },
+    [programOptions],
+  );
+  const handleLoadMorePrograms = React.useCallback(() => {
+    if (programsStatus === "CanLoadMore") {
+      void programsLoadMore(10);
+    }
+  }, [programsStatus, programsLoadMore]);
 
   const currentYear = React.useMemo(() => new Date().getFullYear(), []);
   const defaultTerm = React.useMemo<"spring" | "fall">(() => {
@@ -57,10 +94,10 @@ export function OnboardingForm({ student }: OnboardingFormProps) {
     return month >= 6 ? "fall" : "spring";
   }, []);
 
-  const form = useForm<OnboardingFormValues>({
-    defaultValues: {
+  const defaultValues = React.useMemo<OnboardingFormValues>(
+    () => ({
       school: student?.school ?? "",
-      programs: [],
+      programs: student?.programs ?? [],
       startingDate: student?.startingDate ?? {
         year: currentYear,
         term: defaultTerm,
@@ -69,14 +106,18 @@ export function OnboardingForm({ student }: OnboardingFormProps) {
         year: currentYear + 4,
         term: defaultTerm,
       },
-    },
+    }),
+    [student, currentYear, defaultTerm],
+  );
 
+  const form = useForm({
+    defaultValues,
     validators: { onSubmit: academicInfoSchema },
     onSubmit: async ({ value }) => {
       try {
         await upsertStudent({
           school: value.school as Doc<"students">["school"],
-          programs: [], // TODO: persist value.programs if backend supports it
+          programs: [],
           startingDate: value.startingDate,
           expectedGraduationDate: value.expectedGraduationDate,
           isOnboarded: true,
@@ -117,9 +158,8 @@ export function OnboardingForm({ student }: OnboardingFormProps) {
 
         <FieldSet className="space-y-6 text-start">
           {/* school */}
-          <form.Field
-            name="school"
-            children={(field) => {
+          <form.Field name="school">
+            {(field) => {
               const invalid =
                 field.state.meta.isTouched && !field.state.meta.isValid;
               return (
@@ -159,19 +199,14 @@ export function OnboardingForm({ student }: OnboardingFormProps) {
                 </UIField>
               );
             }}
-          />
+          </form.Field>
 
           {/* programs (multi-select) */}
-          <form.Field
-            name="programs"
-            children={(field) => {
+          <form.Field name="programs">
+            {(field) => {
               const invalid =
                 field.state.meta.isTouched && !field.state.meta.isValid;
               const selected = (field.state.value ?? []).map((p) => ({
-                value: p,
-                label: p,
-              }));
-              const defaultOpts = programOptions.map((p) => ({
                 value: p,
                 label: p,
               }));
@@ -186,19 +221,47 @@ export function OnboardingForm({ student }: OnboardingFormProps) {
                       onChange={(opts) =>
                         field.handleChange(opts.map((o) => o.value))
                       }
-                      defaultOptions={defaultOpts}
+                      defaultOptions={programOptions}
+                      options={programOptions}
+                      delay={300}
+                      onSearch={handleSearchPrograms}
+                      triggerSearchOnFocus
                       placeholder="Select your programs"
                       commandProps={{ label: "Select programs" }}
                       emptyIndicator={
                         <p className="text-center text-sm">No programs found</p>
                       }
                     />
+                    <div className="flex items-center justify-between pt-2 text-xs text-muted-foreground">
+                      <span>
+                        Loaded {programOptions.length} program
+                        {programOptions.length === 1 ? "" : "s"}
+                        {programsStatus === "CanLoadMore"
+                          ? " (more available)"
+                          : programsStatus === "LoadingMore"
+                            ? " (loading more...)"
+                            : ""}
+                      </span>
+                      {programsStatus && programsStatus !== "Exhausted" && (
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="ghost"
+                          onClick={handleLoadMorePrograms}
+                          disabled={programsStatus !== "CanLoadMore"}
+                        >
+                          {programsStatus === "LoadingMore"
+                            ? "Loading..."
+                            : "Load 10 more"}
+                        </Button>
+                      )}
+                    </div>
                   </FieldContent>
                   <FieldError errors={field.state.meta.errors} />
                 </UIField>
               );
             }}
-          />
+          </form.Field>
 
           {/* startingDate */}
           <FieldGroup className="space-y-4">
@@ -207,9 +270,8 @@ export function OnboardingForm({ student }: OnboardingFormProps) {
             </FieldLabel>
             <div className="grid grid-cols-2 gap-4">
               {/* startingDate.year */}
-              <form.Field
-                name="startingDate.year"
-                children={(field) => {
+              <form.Field name="startingDate.year">
+                {(field) => {
                   const invalid =
                     field.state.meta.isTouched && !field.state.meta.isValid;
                   return (
@@ -225,8 +287,8 @@ export function OnboardingForm({ student }: OnboardingFormProps) {
                           onBlur={field.handleBlur}
                           onChange={(e) => {
                             const v = e.target.value;
-                            field.handleChange(
-                              v === "" ? undefined : Number.parseInt(v, 10),
+                            field.handleChange((prev) =>
+                              v === "" ? prev : Number.parseInt(v, 10),
                             );
                           }}
                           aria-invalid={invalid}
@@ -236,11 +298,10 @@ export function OnboardingForm({ student }: OnboardingFormProps) {
                     </UIField>
                   );
                 }}
-              />
+              </form.Field>
               {/* startingDate.term */}
-              <form.Field
-                name="startingDate.term"
-                children={(field) => {
+              <form.Field name="startingDate.term">
+                {(field) => {
                   const invalid =
                     field.state.meta.isTouched && !field.state.meta.isValid;
                   return (
@@ -266,7 +327,7 @@ export function OnboardingForm({ student }: OnboardingFormProps) {
                     </UIField>
                   );
                 }}
-              />
+              </form.Field>
             </div>
           </FieldGroup>
 
@@ -277,9 +338,8 @@ export function OnboardingForm({ student }: OnboardingFormProps) {
             </FieldLabel>
             <div className="grid grid-cols-2 gap-4">
               {/* expectedGraduationDate.year */}
-              <form.Field
-                name="expectedGraduationDate.year"
-                children={(field) => {
+              <form.Field name="expectedGraduationDate.year">
+                {(field) => {
                   const invalid =
                     field.state.meta.isTouched && !field.state.meta.isValid;
                   return (
@@ -295,8 +355,8 @@ export function OnboardingForm({ student }: OnboardingFormProps) {
                           onBlur={field.handleBlur}
                           onChange={(e) => {
                             const v = e.target.value;
-                            field.handleChange(
-                              v === "" ? undefined : Number.parseInt(v, 10),
+                            field.handleChange((prev) =>
+                              v === "" ? prev : Number.parseInt(v, 10),
                             );
                           }}
                           aria-invalid={invalid}
@@ -306,11 +366,10 @@ export function OnboardingForm({ student }: OnboardingFormProps) {
                     </UIField>
                   );
                 }}
-              />
+              </form.Field>
               {/* expectedGraduationDate.term */}
-              <form.Field
-                name="expectedGraduationDate.term"
-                children={(field) => {
+              <form.Field name="expectedGraduationDate.term">
+                {(field) => {
                   const invalid =
                     field.state.meta.isTouched && !field.state.meta.isValid;
                   return (
@@ -336,16 +395,13 @@ export function OnboardingForm({ student }: OnboardingFormProps) {
                     </UIField>
                   );
                 }}
-              />
+              </form.Field>
             </div>
 
             {/* Aggregate object-level errors (from Zod refine, etc.) */}
-            <form.Field
-              name="expectedGraduationDate"
-              children={(field) => (
-                <FieldError errors={field.state.meta.errors} />
-              )}
-            />
+            <form.Field name="expectedGraduationDate">
+              {(field) => <FieldError errors={field.state.meta.errors} />}
+            </form.Field>
           </FieldGroup>
         </FieldSet>
       </section>
