@@ -14,11 +14,11 @@ import {
 import { useRouter } from "next/navigation";
 import React from "react";
 import { z } from "zod";
+import { AcademicInfoForm } from "./stepper-pages/academic-info-form";
 import {
-  AcademicInfoForm,
-  AcademicInfoFormValues,
   academicInfoSchema,
-} from "./stepper-pages/academic-info-form";
+  type AcademicInfoFormValues,
+} from "./academic-info-schema";
 import { ExtensionForm, extensionSchema } from "./stepper-pages/extention-form";
 import {
   reportSchema,
