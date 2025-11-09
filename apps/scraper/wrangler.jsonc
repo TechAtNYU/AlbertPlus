@@ -1,5 +1,5 @@
 {
-  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "albert-plus-scraper",
   "routes": [{ "pattern": "scraper.albertplus.com", "custom_domain": true }],
   "main": "src/index.ts",
@@ -36,6 +36,7 @@
     }
   ],
   "vars": {
-    "SCRAPING_BASE_URL": "https://bulletins.nyu.edu/"
+    "SCRAPING_BASE_URL": "https://bulletins.nyu.edu/",
+    "ALBERT_SCRAPING_BASE_URL": "https://bulletins.nyu.edu/class-search/"
   }
 }
