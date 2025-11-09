@@ -250,23 +250,23 @@ export function ProgramRequirementsChart({
       chartData.forEach((item, index) => {
         const baseColor = COLORS[index % COLORS.length];
 
-        // Add completed portion (lighter shade)
+        // Add completed portion (darker - original color)
         if (item.completedCredits > 0) {
           splitData.push({
             name: `${item.category} (Completed)`,
             value: item.completedCredits,
-            fill: lightenColor(baseColor),
+            fill: baseColor,
             isCompleted: true,
             category: item.category,
           });
         }
 
-        // Add remaining portion (original color)
+        // Add remaining portion (lighter shade)
         if (item.remainingCredits > 0) {
           splitData.push({
             name: `${item.category} (Remaining)`,
             value: item.remainingCredits,
-            fill: baseColor,
+            fill: lightenColor(baseColor),
             isCompleted: false,
             category: item.category,
           });
