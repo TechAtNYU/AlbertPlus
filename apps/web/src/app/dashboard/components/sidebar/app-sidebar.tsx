@@ -3,6 +3,7 @@
 import type * as React from "react";
 import { NavItems } from "@/app/dashboard/components/sidebar/nav-items";
 import { NavUser } from "@/app/dashboard/components/sidebar/nav-user";
+import { AlbertPlusLogo } from "@/components/Logo";
 import { Separator } from "@/components/ui/separator";
 import {
   Sidebar,
@@ -15,7 +16,6 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import config from "../../../../lib/config";
-import { AlbertPlusLogo } from "@/components/Logo";
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   user: {

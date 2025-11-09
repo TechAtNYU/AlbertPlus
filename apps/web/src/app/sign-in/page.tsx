@@ -1,7 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import { LoginForm } from "./components/login-form";
 import { AlbertPlusLogo } from "@/components/Logo";
+import { LoginForm } from "./components/login-form";
 
 export default async function LoginPage() {
   const { userId } = await auth();
