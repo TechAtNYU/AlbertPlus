@@ -369,6 +369,7 @@ export function ProgramRequirementsChart({
                 nameKey="name"
                 cx="50%"
                 cy="50%"
+                innerRadius={80}
                 outerRadius={120}
                 isAnimationActive={!hasAnimated}
               >
@@ -376,6 +377,27 @@ export function ProgramRequirementsChart({
                   <Cell key={`cell-${index}`} fill={entry.fill} />
                 ))}
               </Pie>
+              <text
+                x="50%"
+                y="50%"
+                textAnchor="middle"
+                dominantBaseline="middle"
+                className="fill-foreground text-2xl font-bold"
+              >
+                {showCompletion
+                  ? `${totalCompletedCredits}/${totalCredits}`
+                  : totalCredits}
+              </text>
+              <text
+                x="50%"
+                y="50%"
+                dy="1.5em"
+                textAnchor="middle"
+                dominantBaseline="middle"
+                className="fill-muted-foreground text-sm"
+              >
+                credits
+              </text>
               <Tooltip
                 content={({ active, payload }) => {
                   if (active && payload && payload.length) {
