@@ -249,10 +249,15 @@ export function ProgramRequirementsChart({
     }
   }, [chartData, showCompletion]);
 
-  // Mark as animated after first data load
+  // Mark as animated after first data load (with a delay to allow the animation to complete)
   useEffect(() => {
     if (pieChartData.length > 0 && !hasAnimated) {
-      setHasAnimated(true);
+      // Set a timeout to mark as animated after the animation completes
+      const timer = setTimeout(() => {
+        setHasAnimated(true);
+      }, 850); // Slightly longer than animationDuration (800ms)
+
+      return () => clearTimeout(timer);
     }
   }, [pieChartData, hasAnimated]);
 
@@ -329,6 +334,8 @@ export function ProgramRequirementsChart({
                 label={({ name, value }) => `${name}: ${value}`}
                 isAnimationActive={!hasAnimated}
                 animationDuration={800}
+                animationBegin={0}
+                animationEasing="ease-out"
               >
                 {pieChartData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.fill} />
