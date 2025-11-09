@@ -1,5 +1,12 @@
 "use client";
 
+import { api } from "@albert-plus/server/convex/_generated/api";
+import { useMutation } from "convex/react";
+import type { FunctionReturnType } from "convex/server";
+import { FileTextIcon, SearchIcon } from "lucide-react";
+import Link from "next/link";
+import { useId, useMemo, useState } from "react";
+import { toast } from "sonner";
 import { useCurrentTerm, useCurrentYear } from "@/components/AppConfigProvider";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,13 +28,6 @@ import {
   getAcademicYearLabel,
   makeTermKey,
 } from "@/utils/term";
-import { api } from "@albert-plus/server/convex/_generated/api";
-import { useMutation } from "convex/react";
-import type { FunctionReturnType } from "convex/server";
-import { FileTextIcon, SearchIcon } from "lucide-react";
-import Link from "next/link";
-import { useId, useMemo, useState } from "react";
-import { toast } from "sonner";
 
 interface PlanTableProps {
   courses:
