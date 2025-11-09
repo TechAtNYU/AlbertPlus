@@ -360,7 +360,7 @@ export function ProgramRequirementsChart({
         </div>
       </CardHeader>
       <CardContent>
-        <div className="flex justify-center">
+        <div className="flex justify-center relative">
           <ResponsiveContainer width="100%" height={400}>
             <PieChart>
               <Pie
@@ -369,8 +369,8 @@ export function ProgramRequirementsChart({
                 nameKey="name"
                 cx="50%"
                 cy="50%"
-                innerRadius={80}
-                outerRadius={120}
+                innerRadius={90}
+                outerRadius={130}
                 isAnimationActive={!hasAnimated}
               >
                 {pieChartData.map((entry, index) => (
@@ -380,9 +380,11 @@ export function ProgramRequirementsChart({
               <text
                 x="50%"
                 y="50%"
+                dy="-15"
                 textAnchor="middle"
                 dominantBaseline="middle"
-                className="fill-foreground text-2xl font-bold"
+                className="fill-foreground font-bold"
+                style={{ fontSize: '36px' }}
               >
                 {showCompletion
                   ? `${totalCompletedCredits}/${totalCredits}`
@@ -391,10 +393,11 @@ export function ProgramRequirementsChart({
               <text
                 x="50%"
                 y="50%"
-                dy="1.5em"
+                dy="25"
                 textAnchor="middle"
                 dominantBaseline="middle"
-                className="fill-muted-foreground text-sm"
+                className="fill-muted-foreground"
+                style={{ fontSize: '20px' }}
               >
                 credits
               </text>
