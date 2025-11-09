@@ -1,0 +1,18 @@
+:root {
+  --docs-header-logo-height: 1.75rem;
+}
+
+.header .site-title {
+  gap: 0.5rem;
+}
+
+.header .site-title img {
+  height: var(--docs-header-logo-height);
+  width: auto;
+}
+
+@media (min-width: 64rem) {
+  :root {
+    --docs-header-logo-height: 1.5rem;
+  }
+}
