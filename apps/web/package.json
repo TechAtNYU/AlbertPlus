@@ -7,7 +7,6 @@
     "dev": "doppler run -- next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "check": "biome check",
     "check:types": "tsc --noEmit"
   },
   "packageManager": "bun@1.2.23",

@@ -8,7 +8,6 @@
     "dev": "doppler run -- plasmo dev",
     "build": "plasmo build",
     "package": "plasmo package",
-    "check": "biome check",
     "check:types": "tsc -noEmit"
   },
   "dependencies": {

@@ -7,8 +7,7 @@
     "start": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro",
-    "check": "biome check"
+    "astro": "astro"
   },
   "dependencies": {
     "@astrojs/starlight": "^0.36.2",
