@@ -8,7 +8,6 @@
     "dev": "doppler run -- plasmo dev",
     "build": "plasmo build",
     "package": "plasmo package",
-    "check": "biome check",
     "check:types": "tsc -noEmit"
   },
   "dependencies": {
@@ -23,7 +22,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.548.0",
-    "@clerk/chrome-extension": "^2.7.12",
+    "@clerk/chrome-extension": "^2.7.14",
     "convex": "^1.28.2",
     "plasmo": "0.90.5",
     "react": "19.2.0",
