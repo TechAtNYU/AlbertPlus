@@ -1,13 +1,27 @@
 "use client";
 
+import { api } from "@albert-plus/server/convex/_generated/api";
+import type { Doc } from "@albert-plus/server/convex/_generated/dataModel";
+import { useUser } from "@clerk/nextjs";
+//TanStack Form
+import { useForm } from "@tanstack/react-form";
+import {
+  useConvexAuth,
+  useMutation,
+  usePaginatedQuery,
+  useQuery,
+} from "convex/react";
+import { useRouter } from "next/navigation";
+import React from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
-  Field as UIField,
   FieldContent,
   FieldError,
   FieldGroup,
   FieldLabel,
   FieldSet,
+  Field as UIField,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import MultipleSelector from "@/components/ui/multiselect";
@@ -23,23 +37,6 @@ import {
   type AcademicInfoFormValues,
   academicInfoSchema,
 } from "./academic-info-schema";
-
-import { api } from "@albert-plus/server/convex/_generated/api";
-import type { Doc } from "@albert-plus/server/convex/_generated/dataModel";
-import { useUser } from "@clerk/nextjs";
-import {
-  useConvexAuth,
-  useMutation,
-  usePaginatedQuery,
-  useQuery,
-} from "convex/react";
-import { useRouter } from "next/navigation";
-import React from "react";
-
-//TanStack Form
-import { useForm } from "@tanstack/react-form";
-
-import { toast } from "sonner";
 
 type OnboardingFormValues = AcademicInfoFormValues;
 

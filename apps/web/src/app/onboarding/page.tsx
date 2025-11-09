@@ -1,7 +1,7 @@
-import { OnboardingForm } from "./component/onboarding-form";
-import { fetchProtectedQuery } from "@/lib/convex";
 import { api } from "@albert-plus/server/convex/_generated/api";
 import { redirect } from "next/navigation";
+import { fetchProtectedQuery } from "@/lib/convex";
+import { OnboardingForm } from "./component/onboarding-form";
 
 export default async function Page() {
   const student = await fetchProtectedQuery(api.students.getCurrentStudent);
