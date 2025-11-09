@@ -72,7 +72,9 @@ export function OnboardingForm() {
   const router = useRouter();
   const { isAuthenticated } = useConvexAuth();
 
+  // actions
   const upsertStudent = useMutation(api.students.upsertCurrentStudent);
+  const importUserCourses = useMutation(api.userCourses.importUserCourses);
 
   // schools
   const schools = useQuery(
@@ -150,6 +152,8 @@ export function OnboardingForm() {
           startingDate: value.startingDate,
           expectedGraduationDate: value.expectedGraduationDate,
         });
+
+        await importUserCourses({ courses: value.userCourses });
 
         toast.success("Onboarding completed. Redirecting to dashboard...");
         router.push("/dashboard");
