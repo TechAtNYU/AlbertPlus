@@ -73,7 +73,10 @@ const getRequirementsByCategory = (
     string,
     FunctionReturnType<typeof api.programs.getProgramById> | undefined
   >,
-  courseLookup: Map<string, any>,
+  courseLookup: Map<
+    string,
+    FunctionReturnType<typeof api.courses.getCourseByCode>
+  >,
 ) => {
   if (!programs) return null;
 
@@ -149,7 +152,10 @@ export function ProgramRequirementsChart({
 
   // Create a lookup map from courses Record
   const courseLookup = useMemo(() => {
-    const lookup = new Map();
+    const lookup = new Map<
+      string,
+      FunctionReturnType<typeof api.courses.getCourseByCode>
+    >();
     for (const [code, courseData] of Object.entries(courses)) {
       if (courseData !== undefined) {
         lookup.set(code, courseData);
@@ -363,7 +369,11 @@ export function ProgramRequirementsChart({
               <Tooltip
                 content={({ active, payload }) => {
                   if (active && payload && payload.length) {
-                    const data = payload[0].payload as any;
+                    const data = payload[0].payload as {
+                      name: string;
+                      value: number;
+                      fill: string;
+                    };
                     return (
                       <div className="rounded-lg border bg-background p-2 shadow-sm">
                         <div className="flex flex-col gap-1">
