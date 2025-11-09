@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import type * as React from "react";
 import { NavItems } from "@/app/dashboard/components/sidebar/nav-items";
 import { NavUser } from "@/app/dashboard/components/sidebar/nav-user";
@@ -16,6 +15,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import config from "../../../../lib/config";
+import { AlbertPlusLogo } from "@/components/Logo";
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   user: {
@@ -39,16 +39,14 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
           <SidebarMenuItem>
             <SidebarMenuButton
               asChild
-              className="data-[slot=sidebar-menu-button]:p-1.5! "
+              className="data-[slot=sidebar-menu-button]:p-1.5! justify-center"
             >
-              <a href="/dashboard" className="flex items-center justify-center">
-                <Image
-                  src={isCollapsed ? "/logo_small.svg" : "/logo.svg"}
-                  alt="AlbertPlus Logo"
-                  width={isCollapsed ? 30 : 80}
-                  height={30}
-                />
-              </a>
+              <AlbertPlusLogo
+                variant={isCollapsed ? "icon" : "full"}
+                href="/dashboard"
+                width={isCollapsed ? 40 : 80}
+                height={40}
+              />
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
