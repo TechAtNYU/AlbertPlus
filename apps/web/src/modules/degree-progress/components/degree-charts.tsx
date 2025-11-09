@@ -170,8 +170,15 @@ export function ProgramRequirementsChart({
     [programs, courseLookup],
   );
 
-  const chartData = useMemo(() => {
-    if (!program || program === null) return [];
+  const { chartData, totalCredits, totalCompletedCredits, overallPercentage } = useMemo(() => {
+    if (!program || program === null) {
+      return {
+        chartData: [],
+        totalCredits: 0,
+        totalCompletedCredits: 0,
+        overallPercentage: 0,
+      };
+    }
 
     const completedCreditsByCategory: Record<string, number> = {};
     if (userCourses) {
@@ -198,7 +205,7 @@ export function ProgramRequirementsChart({
     }
 
     // Transform the data for the chart
-    return Object.entries(program.requirementsByCategory)
+    const data = Object.entries(program.requirementsByCategory)
       .map(([prefix, data]) => {
         const completed = completedCreditsByCategory[prefix] || 0;
         const percentage =
@@ -218,6 +225,24 @@ export function ProgramRequirementsChart({
         // Otherwise, maintain alphabetical order
         return a.category.localeCompare(b.category);
       });
+
+    // Calculate totals
+    const totalCredits = data.reduce((sum, item) => sum + item.credits, 0);
+    const totalCompletedCredits = data.reduce(
+      (sum, item) => sum + item.completedCredits,
+      0,
+    );
+    const overallPercentage =
+      totalCredits > 0
+        ? Math.round((totalCompletedCredits / totalCredits) * 100)
+        : 0;
+
+    return {
+      chartData: data,
+      totalCredits,
+      totalCompletedCredits,
+      overallPercentage,
+    };
   }, [program, userCourses]);
 
   // Prepare pie chart data based on toggle state
@@ -304,17 +329,6 @@ export function ProgramRequirementsChart({
       </Card>
     );
   }
-
-  // Calculate totals from chartData (already computed in useMemo above)
-  const totalCredits = chartData.reduce((sum, item) => sum + item.credits, 0);
-  const totalCompletedCredits = chartData.reduce(
-    (sum, item) => sum + item.completedCredits,
-    0,
-  );
-  const overallPercentage =
-    totalCredits > 0
-      ? Math.round((totalCompletedCredits / totalCredits) * 100)
-      : 0;
 
   return (
     <Card>
