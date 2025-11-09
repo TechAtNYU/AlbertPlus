@@ -127,6 +127,8 @@ export function ProgramRequirementsChart({
   userCourses,
   courses,
 }: ProgramRequirementsChartProps) {
+  const [showCompletion, setShowCompletion] = useState(false);
+
   // Create a lookup map from courses Record
   const courseLookup = useMemo(() => {
     const lookup = new Map();
@@ -225,9 +227,6 @@ export function ProgramRequirementsChart({
     totalCredits > 0
       ? Math.round((totalCompletedCredits / totalCredits) * 100)
       : 0;
-
-  // State for toggling completion view
-  const [showCompletion, setShowCompletion] = useState(false);
 
   // Prepare data based on toggle state
   const pieChartData = useMemo(() => {
