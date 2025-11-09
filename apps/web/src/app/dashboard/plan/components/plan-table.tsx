@@ -1,6 +1,7 @@
 "use client";
 
 import { useCurrentTerm, useCurrentYear } from "@/components/AppConfigProvider";
+import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -23,7 +24,7 @@ import {
 import { api } from "@albert-plus/server/convex/_generated/api";
 import { useMutation } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
-import { FileTextIcon, SearchIcon } from "lucide-react";
+import { AlertCircleIcon, FileTextIcon, SearchIcon } from "lucide-react";
 import Link from "next/link";
 import { useId, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -93,13 +94,13 @@ export default function PlanTable({ courses, student }: PlanTableProps) {
   // Filter courses based on search
   const filteredData = useMemo(() => {
     return courses?.filter((userCourse) => {
-      if (!userCourse.course) return false;
-
       const matchesSearch =
         !courseSearch ||
-        userCourse.course.code
-          .toLowerCase()
-          .includes(courseSearch.toLowerCase()) ||
+        (userCourse.course
+          ? userCourse.course.code
+              .toLowerCase()
+              .includes(courseSearch.toLowerCase())
+          : false) ||
         userCourse.title.toLowerCase().includes(courseSearch.toLowerCase());
       return matchesSearch;
     });
@@ -316,9 +317,28 @@ export default function PlanTable({ courses, student }: PlanTableProps) {
                       {userCourses.length > 0 ? (
                         <div className="space-y-3">
                           {userCourses.map((userCourse) => {
-                            if (!userCourse.course) return null;
+                            const key = userCourse.course
+                              ? `${year}-${term}-${userCourse.course.code}`
+                              : `${year}-${term}-${userCourse._id}`;
 
-                            const key = `${year}-${term}-${userCourse.course.code}`;
+                            if (!userCourse.course) {
+                              return (
+                                <div
+                                  key={key}
+                                  className="block p-2 border border-dashed border-amber-500/50 rounded-md bg-amber-500/5"
+                                >
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <span className="font-medium text-sm text-amber-900 dark:text-amber-300">
+                                      {userCourse.title}
+                                    </span>
+                                  </div>
+                                  <div className="text-xs text-muted-foreground mt-1">
+                                    {userCourse.courseCode}
+                                  </div>
+                                </div>
+                              );
+                            }
+
                             return (
                               <Link
                                 key={key}
@@ -329,23 +349,25 @@ export default function PlanTable({ courses, student }: PlanTableProps) {
                                 }
                               >
                                 <div className="font-medium text-sm">
-                                  {userCourse.course.code}
+                                  {userCourse.title}
                                 </div>
                                 <div className="text-xs text-muted-foreground mt-1">
-                                  {userCourse.title}
+                                  {userCourse.course.code}
                                 </div>
                               </Link>
                             );
                           })}
                         </div>
                       ) : (
-                        <div
-                          className={cn(
-                            "text-sm text-muted-foreground italic",
-                            isCurrentColumn && "text-foreground",
-                          )}
-                        >
-                          No courses
+                        <div className="flex items-center justify-center min-h-[80px]">
+                          <div
+                            className={cn(
+                              "text-sm text-muted-foreground italic",
+                              isCurrentColumn && "text-foreground/80",
+                            )}
+                          >
+                            No courses
+                          </div>
                         </div>
                       )}
                     </TableCell>
