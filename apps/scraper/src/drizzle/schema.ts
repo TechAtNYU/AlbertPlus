@@ -12,8 +12,16 @@ export const jobs = sqliteTable("jobs", {
     .notNull()
     .default("pending"),
   jobType: text("job_type", {
-    enum: ["discover-programs", "discover-courses", "program", "course"],
+    enum: [
+      "discover-programs",
+      "discover-courses",
+      "discover-course-offerings",
+      "program",
+      "course",
+      "course-offering",
+    ],
   }).notNull(),
+  metadata: text("metadata", { mode: "json" }),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .$defaultFn(() => new Date()),

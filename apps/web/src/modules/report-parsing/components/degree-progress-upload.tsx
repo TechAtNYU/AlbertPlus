@@ -1,7 +1,3 @@
-"use client";
-
-import { api } from "@albert-plus/server/convex/_generated/api";
-import { useMutation } from "convex/react";
 import { FileTextIcon, UploadIcon, XIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -18,16 +14,17 @@ import ConfirmModal from "./confirm-modal";
 
 type FileUploadButtonProps = {
   maxSizeMB?: number;
+  onConfirm: (courses: UserCourse[]) => Promise<void>;
 };
 
 export default function DegreeProgreeUpload({
   maxSizeMB = 20,
+  onConfirm,
 }: FileUploadButtonProps) {
   const maxSize = maxSizeMB * 1024 * 1024;
   const [parsedCourses, setParsedCourses] = useState<UserCourse[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
-  const batchImport = useMutation(api.userCourses.importUserCourses);
   const [
     { files, isDragging, errors },
     {
@@ -86,26 +83,7 @@ export default function DegreeProgreeUpload({
   const handleConfirm = async () => {
     setIsImporting(true);
     try {
-      const result = await batchImport({ courses: parsedCourses });
-
-      const messages = [];
-      if (result.inserted > 0) {
-        messages.push(
-          `${result.inserted} new course${result.inserted !== 1 ? "s" : ""} imported`,
-        );
-      }
-      if (result.updated > 0) {
-        messages.push(
-          `${result.updated} course${result.updated !== 1 ? "s" : ""} updated with grades`,
-        );
-      }
-      if (result.duplicates > 0) {
-        messages.push(
-          `${result.duplicates} duplicate${result.duplicates !== 1 ? "s" : ""} skipped`,
-        );
-      }
-
-      toast.success(`Import complete: ${messages.join(", ")}`);
+      await onConfirm(parsedCourses);
 
       setIsModalOpen(false);
 

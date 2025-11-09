@@ -2,7 +2,7 @@ import type { internal } from "@albert-plus/server/convex/_generated/api";
 import {
   ZGetAppConfig,
   type ZSetAppConfig,
-  ZUpsertCourseOffering,
+  ZUpsertCourseOfferings,
   ZUpsertCourseWithPrerequisites,
   ZUpsertProgramWithRequirements,
 } from "@albert-plus/server/convex/http";
@@ -73,12 +73,12 @@ export class ConvexApi {
     return res.data;
   }
 
-  async upsertCourseOffering(data: z.infer<typeof ZUpsertCourseOffering>) {
+  async upsertCourseOfferings(data: z.infer<typeof ZUpsertCourseOfferings>) {
     const res = await this.request<
       FunctionReturnType<
         typeof internal.courseOfferings.upsertCourseOfferingInternal
       >
-    >("/api/courseOfferings/upsert", ZUpsertCourseOffering, data);
+    >("/api/courseOfferings/upsert", ZUpsertCourseOfferings, data);
     return res.data;
   }
 

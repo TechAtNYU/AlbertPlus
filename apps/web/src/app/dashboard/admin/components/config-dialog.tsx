@@ -1,7 +1,4 @@
-import {
-  type AppConfigKey,
-  appConfigOptions,
-} from "@albert-plus/server/convex/schemas/appConfigs";
+import { appConfigOptions } from "@albert-plus/server/convex/schemas/appConfigs";
 import { useForm } from "@tanstack/react-form";
 import z from "zod";
 import { Button } from "@/components/ui/button";
@@ -20,28 +17,18 @@ import { Spinner } from "@/components/ui/spinner";
 type ConfigDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  mode: "add" | "edit";
-  initial?: {
-    key: z.infer<typeof AppConfigKey>;
-    value: string;
-  };
   onSubmit: (key: string, value: string) => Promise<void>;
 };
 
 export function ConfigDialog({
   open,
   onOpenChange,
-  mode,
-  initial = {
-    key: "",
-    value: "",
-  },
   onSubmit,
 }: ConfigDialogProps) {
   const form = useForm({
     defaultValues: {
-      key: initial.key,
-      value: initial.value,
+      key: "",
+      value: "",
     },
     onSubmit: async ({ value }) => {
       await onSubmit(value.key, value.value);
@@ -65,11 +52,9 @@ export function ConfigDialog({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>
-            {mode === "add" ? "Add Configuration" : "Edit Configuration"}
-          </DialogTitle>
+          <DialogTitle>Add Configuration</DialogTitle>
           <DialogDescription>
-            {mode === "edit" && `Update the value for "${initial.key}".`}
+            Provide a configuration key and value to add.
           </DialogDescription>
         </DialogHeader>
 
@@ -94,13 +79,10 @@ export function ConfigDialog({
                     placeholder="key"
                     onChange={(e) => field.handleChange(e.target.value)}
                     onBlur={field.handleBlur}
-                    disabled={mode === "edit"}
                   />
-                  {mode === "add" && (
-                    <p className="text-xs text-muted-foreground">
-                      Available options: {appConfigOptions.join(", ")}
-                    </p>
-                  )}
+                  <p className="text-xs text-muted-foreground">
+                    Available options: {appConfigOptions.join(", ")}
+                  </p>
                 </div>
               )}
             </form.Field>
@@ -136,13 +118,13 @@ export function ConfigDialog({
                   return (
                     <Button type="submit" disabled>
                       <Spinner />
-                      {mode === "add" ? "Adding..." : "Saving..."}
+                      Adding...
                     </Button>
                   );
                 }
                 return (
                   <Button type="submit" disabled={!canSubmit}>
-                    Save
+                    Add
                   </Button>
                 );
               }}

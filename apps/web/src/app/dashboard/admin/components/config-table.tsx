@@ -7,9 +7,10 @@ import {
   type SortingState,
   useReactTable,
 } from "@tanstack/react-table";
-import { Pencil, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -24,14 +25,18 @@ export type ConfigRow = Doc<"appConfigs">;
 
 type ConfigTableProps = {
   data: ConfigRow[];
-  onEdit: (config: ConfigRow) => void;
+  isEditing: boolean;
+  editingValues: Record<string, string>;
+  onValueChange: (key: string, value: string) => void;
   onDelete: (config: ConfigRow) => void;
   className?: string;
 };
 
 export function ConfigTable({
   data,
-  onEdit,
+  isEditing,
+  editingValues,
+  onValueChange,
   onDelete,
   className,
 }: ConfigTableProps) {
@@ -47,47 +52,15 @@ export function ConfigTable({
       {
         accessorKey: "key",
         header: "Key",
-        cell: ({ row }) => (
-          <span className="font-mono text-xs sm:text-sm">
-            {row.original.key}
-          </span>
-        ),
+        id: "key",
       },
       {
         accessorKey: "value",
         header: "Value",
-        cell: ({ row }) => (
-          <div className="group relative">
-            <div className="rounded-md bg-muted px-3 py-2 pr-12 font-mono text-xs sm:text-sm">
-              {row.original.value ? (
-                row.original.value
-              ) : (
-                <span className="italic text-muted-foreground">Not set</span>
-              )}
-            </div>
-            <Button
-              aria-label={`Edit ${row.original.key}`}
-              variant="ghost"
-              size="icon"
-              className="absolute right-10 top-1/2 -translate-y-1/2 opacity-0 pointer-events-none transition-opacity group-hover:opacity-100 group-hover:pointer-events-auto focus-visible:opacity-100 focus-visible:pointer-events-auto"
-              onClick={() => onEdit(row.original)}
-            >
-              <Pencil className="size-4" />
-            </Button>
-            <Button
-              aria-label={`Delete ${row.original.key}`}
-              variant="ghost"
-              size="icon"
-              className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 pointer-events-none transition-opacity group-hover:opacity-100 group-hover:pointer-events-auto focus-visible:opacity-100 focus-visible:pointer-events-auto"
-              onClick={() => onDelete(row.original)}
-            >
-              <Trash2 className="size-4 text-destructive" />
-            </Button>
-          </div>
-        ),
+        id: "value",
       },
     ],
-    [onEdit, onDelete],
+    [],
   );
 
   const table = useReactTable({
@@ -129,7 +102,45 @@ export function ConfigTable({
               >
                 {row.getVisibleCells().map((cell) => (
                   <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    {cell.column.id === "key" ? (
+                      <span className="font-mono text-xs sm:text-sm">
+                        {row.original.key}
+                      </span>
+                    ) : cell.column.id === "value" ? (
+                      isEditing ? (
+                        <Input
+                          key={row.original.key}
+                          aria-label={`Value for ${row.original.key}`}
+                          value={editingValues[row.original.key] ?? ""}
+                          onChange={(event) =>
+                            onValueChange(row.original.key, event.target.value)
+                          }
+                        />
+                      ) : (
+                        <div className="group relative">
+                          <div className="rounded-md bg-muted px-3 py-2 pr-12 font-mono text-xs sm:text-sm">
+                            {row.original.value ? (
+                              row.original.value
+                            ) : (
+                              <span className="italic text-muted-foreground">
+                                Not set
+                              </span>
+                            )}
+                          </div>
+                          <Button
+                            aria-label={`Delete ${row.original.key}`}
+                            variant="ghost"
+                            size="icon"
+                            className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 pointer-events-none transition-opacity group-hover:opacity-100 group-hover:pointer-events-auto focus-visible:opacity-100 focus-visible:pointer-events-auto"
+                            onClick={() => onDelete(row.original)}
+                          >
+                            <Trash2 className="size-4 text-destructive" />
+                          </Button>
+                        </div>
+                      )
+                    ) : (
+                      flexRender(cell.column.columnDef.cell, cell.getContext())
+                    )}
                   </TableCell>
                 ))}
               </TableRow>
