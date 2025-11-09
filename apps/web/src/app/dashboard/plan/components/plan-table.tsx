@@ -1,7 +1,13 @@
 "use client";
 
+import { api } from "@albert-plus/server/convex/_generated/api";
+import { useMutation } from "convex/react";
+import type { FunctionReturnType } from "convex/server";
+import { FileTextIcon, SearchIcon } from "lucide-react";
+import Link from "next/link";
+import { useId, useMemo, useState } from "react";
+import { toast } from "sonner";
 import { useCurrentTerm, useCurrentYear } from "@/components/AppConfigProvider";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -13,6 +19,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
+import DegreeProgreeUpload from "@/modules/report-parsing/components/degree-progress-upload";
 import type { UserCourse } from "@/modules/report-parsing/types";
 import type { Term, TermYear } from "@/utils/term";
 import {
@@ -21,14 +28,6 @@ import {
   getAcademicYearLabel,
   makeTermKey,
 } from "@/utils/term";
-import { api } from "@albert-plus/server/convex/_generated/api";
-import { useMutation } from "convex/react";
-import type { FunctionReturnType } from "convex/server";
-import { AlertCircleIcon, FileTextIcon, SearchIcon } from "lucide-react";
-import Link from "next/link";
-import { useId, useMemo, useState } from "react";
-import { toast } from "sonner";
-import DegreeProgreeUpload from "@/modules/report-parsing/components/degree-progress-upload";
 
 interface PlanTableProps {
   courses:
