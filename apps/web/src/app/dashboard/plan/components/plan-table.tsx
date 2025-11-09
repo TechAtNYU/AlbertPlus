@@ -67,7 +67,7 @@ export default function PlanTable({ courses, student }: PlanTableProps) {
   const handleImportConfirm = async (coursesToImport: UserCourse[]) => {
     if (coursesToImport.length === 0) {
       setIsUploadOpen(false);
-      return { inserted: 0, updated: 0, duplicates: 0 };
+      return;
     }
 
     const result = await importUserCourses({
