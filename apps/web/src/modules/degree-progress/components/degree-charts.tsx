@@ -170,80 +170,81 @@ export function ProgramRequirementsChart({
     [programs, courseLookup],
   );
 
-  const { chartData, totalCredits, totalCompletedCredits, overallPercentage } = useMemo(() => {
-    if (!program || program === null) {
-      return {
-        chartData: [],
-        totalCredits: 0,
-        totalCompletedCredits: 0,
-        overallPercentage: 0,
-      };
-    }
+  const { chartData, totalCredits, totalCompletedCredits, overallPercentage } =
+    useMemo(() => {
+      if (!program || program === null) {
+        return {
+          chartData: [],
+          totalCredits: 0,
+          totalCompletedCredits: 0,
+          overallPercentage: 0,
+        };
+      }
 
-    const completedCreditsByCategory: Record<string, number> = {};
-    if (userCourses) {
-      for (const userCourse of userCourses) {
-        for (const [prefix, data] of Object.entries(
-          program.requirementsByCategory,
-        )) {
-          // Check if the course code is in any of the nested course arrays
-          const isInRequirement = data.courses.some((courseGroup) =>
-            courseGroup.some(
-              (course) =>
-                course.toLowerCase() === userCourse.courseCode.toLowerCase(),
-            ),
-          );
+      const completedCreditsByCategory: Record<string, number> = {};
+      if (userCourses) {
+        for (const userCourse of userCourses) {
+          for (const [prefix, data] of Object.entries(
+            program.requirementsByCategory,
+          )) {
+            // Check if the course code is in any of the nested course arrays
+            const isInRequirement = data.courses.some((courseGroup) =>
+              courseGroup.some(
+                (course) =>
+                  course.toLowerCase() === userCourse.courseCode.toLowerCase(),
+              ),
+            );
 
-          if (isInRequirement) {
-            completedCreditsByCategory[prefix] =
-              (completedCreditsByCategory[prefix] || 0) +
-              (userCourse.course?.credits || 0);
-            break;
+            if (isInRequirement) {
+              completedCreditsByCategory[prefix] =
+                (completedCreditsByCategory[prefix] || 0) +
+                (userCourse.course?.credits || 0);
+              break;
+            }
           }
         }
       }
-    }
 
-    // Transform the data for the chart
-    const data = Object.entries(program.requirementsByCategory)
-      .map(([prefix, data]) => {
-        const completed = completedCreditsByCategory[prefix] || 0;
-        const percentage =
-          data.credits > 0 ? Math.round((completed / data.credits) * 100) : 0;
-        return {
-          category: prefix,
-          credits: data.credits,
-          completedCredits: completed,
-          remainingCredits: data.credits - completed,
-          percentage,
-        };
-      })
-      .sort((a, b) => {
-        // "Other" should always be at the bottom
-        if (a.category === "Other") return 1;
-        if (b.category === "Other") return -1;
-        // Otherwise, maintain alphabetical order
-        return a.category.localeCompare(b.category);
-      });
+      // Transform the data for the chart
+      const data = Object.entries(program.requirementsByCategory)
+        .map(([prefix, data]) => {
+          const completed = completedCreditsByCategory[prefix] || 0;
+          const percentage =
+            data.credits > 0 ? Math.round((completed / data.credits) * 100) : 0;
+          return {
+            category: prefix,
+            credits: data.credits,
+            completedCredits: completed,
+            remainingCredits: data.credits - completed,
+            percentage,
+          };
+        })
+        .sort((a, b) => {
+          // "Other" should always be at the bottom
+          if (a.category === "Other") return 1;
+          if (b.category === "Other") return -1;
+          // Otherwise, maintain alphabetical order
+          return a.category.localeCompare(b.category);
+        });
 
-    // Calculate totals
-    const totalCredits = data.reduce((sum, item) => sum + item.credits, 0);
-    const totalCompletedCredits = data.reduce(
-      (sum, item) => sum + item.completedCredits,
-      0,
-    );
-    const overallPercentage =
-      totalCredits > 0
-        ? Math.round((totalCompletedCredits / totalCredits) * 100)
-        : 0;
+      // Calculate totals
+      const totalCredits = data.reduce((sum, item) => sum + item.credits, 0);
+      const totalCompletedCredits = data.reduce(
+        (sum, item) => sum + item.completedCredits,
+        0,
+      );
+      const overallPercentage =
+        totalCredits > 0
+          ? Math.round((totalCompletedCredits / totalCredits) * 100)
+          : 0;
 
-    return {
-      chartData: data,
-      totalCredits,
-      totalCompletedCredits,
-      overallPercentage,
-    };
-  }, [program, userCourses]);
+      return {
+        chartData: data,
+        totalCredits,
+        totalCompletedCredits,
+        overallPercentage,
+      };
+    }, [program, userCourses]);
 
   // Prepare pie chart data based on toggle state
   const pieChartData = useMemo(() => {
@@ -296,13 +297,12 @@ export function ProgramRequirementsChart({
     }
   }, [chartData, showCompletion]);
 
-  // Mark as animated after first data load (with a delay to allow the animation to complete)
+  // Mark as animated after first data load
   useEffect(() => {
     if (pieChartData.length > 0 && !hasAnimated) {
-      // Set a timeout to mark as animated after the animation completes
       const timer = setTimeout(() => {
         setHasAnimated(true);
-      }, 850); // Slightly longer than animationDuration (800ms)
+      }, 2000); 
 
       return () => clearTimeout(timer);
     }
@@ -370,11 +370,7 @@ export function ProgramRequirementsChart({
                 cx="50%"
                 cy="50%"
                 outerRadius={120}
-                label={({ name, value }) => `${name}: ${value}`}
                 isAnimationActive={!hasAnimated}
-                animationDuration={800}
-                animationBegin={0}
-                animationEasing="ease-out"
               >
                 {pieChartData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.fill} />
