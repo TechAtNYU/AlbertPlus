@@ -1,10 +1,13 @@
 "use client";
 
-import type { api } from "@albert-plus/server/convex/_generated/api";
+import { api } from "@albert-plus/server/convex/_generated/api";
+import { useMutation } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
-import { SearchIcon } from "lucide-react";
+import { FileTextIcon, SearchIcon } from "lucide-react";
 import Link from "next/link";
 import { useId, useMemo, useState } from "react";
+import { toast } from "sonner";
+import { useCurrentTerm, useCurrentYear } from "@/components/AppConfigProvider";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -15,6 +18,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { cn } from "@/lib/utils";
+import DegreeProgreeUpload from "@/modules/report-parsing/components/degree-progress-upload";
+import type { UserCourse } from "@/modules/report-parsing/types";
 import type { Term, TermYear } from "@/utils/term";
 import {
   buildAcademicTimeline,
@@ -39,20 +45,61 @@ type UserCourseEntry = NonNullable<
 export default function PlanTable({ courses, student }: PlanTableProps) {
   const allTerms = ["fall", "j-term", "spring", "summer"] as const;
 
+  const currentTerm = useCurrentTerm();
+  const currentYear = useCurrentYear();
+
   const [courseSearch, setCourseSearch] = useState<string>("");
 
+  const importUserCourses = useMutation(api.userCourses.importUserCourses);
+
   const courseSearchId = useId();
+
+  const handleImportConfirm = async (coursesToImport: UserCourse[]) => {
+    if (coursesToImport.length === 0) {
+      return;
+    }
+
+    const result = await importUserCourses({
+      courses: coursesToImport,
+    });
+
+    const messages: string[] = [];
+    if (result) {
+      if (result.inserted > 0) {
+        messages.push(
+          `${result.inserted} new course${result.inserted !== 1 ? "s" : ""} imported`,
+        );
+      }
+      if (result.updated > 0) {
+        messages.push(
+          `${result.updated} course${result.updated !== 1 ? "s" : ""} updated with grades`,
+        );
+      }
+      if (result.duplicates > 0) {
+        messages.push(
+          `${result.duplicates} duplicate${result.duplicates !== 1 ? "s" : ""} skipped`,
+        );
+      }
+    }
+
+    const successMessage =
+      messages.length > 0
+        ? `Import complete: ${messages.join(", ")}`
+        : "Import complete";
+
+    toast.success(successMessage);
+  };
 
   // Filter courses based on search
   const filteredData = useMemo(() => {
     return courses?.filter((userCourse) => {
-      if (!userCourse.course) return false;
-
       const matchesSearch =
         !courseSearch ||
-        userCourse.course.code
-          .toLowerCase()
-          .includes(courseSearch.toLowerCase()) ||
+        (userCourse.course
+          ? userCourse.course.code
+              .toLowerCase()
+              .includes(courseSearch.toLowerCase())
+          : false) ||
         userCourse.title.toLowerCase().includes(courseSearch.toLowerCase());
       return matchesSearch;
     });
@@ -97,7 +144,27 @@ export default function PlanTable({ courses, student }: PlanTableProps) {
     return new Set(academicTimeline.termToYearIndex.values());
   }, [academicTimeline]);
 
+  const currentColumnKey = useMemo(() => {
+    if (!currentTerm || !currentYear) {
+      return null;
+    }
+
+    const key = makeTermKey(currentTerm, currentYear);
+    const mapped = academicTimeline?.termToYearIndex.get(key);
+
+    if (mapped !== undefined) {
+      return mapped;
+    }
+
+    return currentYear;
+  }, [academicTimeline, currentTerm, currentYear]);
+
   const yearColumns = useMemo(() => {
+    if (timelineYearIndices && timelineYearIndices.size > 0) {
+      return Array.from(timelineYearIndices).sort((a, b) => a - b);
+    }
+
+    // Fallback: if no timeline, show years that have courses
     const yearSet = new Set<number>();
     filteredData?.forEach((userCourse) => {
       const term = userCourse.term as Term;
@@ -107,7 +174,7 @@ export default function PlanTable({ courses, student }: PlanTableProps) {
       yearSet.add(mappedYear);
     });
     return Array.from(yearSet).sort((a, b) => a - b);
-  }, [academicTimeline, filteredData]);
+  }, [academicTimeline, filteredData, timelineYearIndices]);
 
   const yearTermMap = useMemo(() => {
     const map = new Map<number, Map<Term, UserCourseEntry[]>>();
@@ -147,6 +214,35 @@ export default function PlanTable({ courses, student }: PlanTableProps) {
   if (!courses) {
     // TODO: add skeletons for the page
     return null;
+  }
+
+  if (courses.length === 0) {
+    return (
+      <div className="flex items-center justify-center min-h-[calc(100vh-200px)]">
+        <div className="flex flex-col items-center gap-8 text-center max-w-xl w-full px-4">
+          <div className="space-y-4">
+            <div
+              className="flex size-20 mx-auto items-center justify-center rounded-full border-2 bg-gradient-to-br from-muted to-muted/50 shadow-sm"
+              aria-hidden="true"
+            >
+              <FileTextIcon className="size-10 opacity-70" />
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-2xl font-semibold tracking-tight">
+                No courses found
+              </h3>
+              <p className="text-muted-foreground max-w-md mx-auto leading-relaxed">
+                Upload your Degree Progress Report to import your course history
+                and start planning your academic journey.
+              </p>
+            </div>
+          </div>
+          <div className="w-full max-w-md">
+            <DegreeProgreeUpload onConfirm={handleImportConfirm} />
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -190,7 +286,7 @@ export default function PlanTable({ courses, student }: PlanTableProps) {
               return (
                 <TableHead
                   key={year}
-                  className="border-t min-w-[200px] w-[200px] "
+                  className={"border-t min-w-[200px] w-[200px]"}
                 >
                   <div className="px-2 flex flex-row justify-between">
                     <div className="font-semibold">{columnLabel}</div>
@@ -213,36 +309,60 @@ export default function PlanTable({ courses, student }: PlanTableProps) {
                 {yearColumns.map((year) => {
                   const termMap = yearTermMap.get(year);
                   const userCourses = termMap?.get(term) ?? [];
+                  const isCurrentColumn = currentColumnKey === year;
                   return (
-                    <TableCell key={year} className="align-top p-3">
+                    <TableCell
+                      key={year}
+                      className={cn(
+                        "align-top p-3",
+                        isCurrentColumn && "bg-primary/5",
+                      )}
+                    >
                       {userCourses.length > 0 ? (
                         <div className="space-y-3">
                           {userCourses.map((userCourse) => {
-                            if (!userCourse.course) return null;
+                            const key = userCourse.course
+                              ? `${year}-${term}-${userCourse.course.code}`
+                              : `${year}-${term}-${userCourse._id}`;
 
-                            const key = `${year}-${term}-${userCourse.course.code}`;
+                            if (!userCourse.course) {
+                              return (
+                                <div
+                                  key={key}
+                                  className="block p-2 border border-dashed border-amber-500/50 rounded-md bg-amber-500/5"
+                                >
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <span className="font-medium text-sm text-amber-900 dark:text-amber-300">
+                                      {userCourse.title}
+                                    </span>
+                                  </div>
+                                  <div className="text-xs text-muted-foreground mt-1">
+                                    {userCourse.courseCode}
+                                  </div>
+                                </div>
+                              );
+                            }
+
                             return (
                               <Link
                                 key={key}
                                 href={userCourse.course.courseUrl}
                                 target="_blank"
-                                className="block p-2 border rounded-md bg-card hover:bg-muted/50 transition-colors"
+                                className={
+                                  "block p-2 border rounded-md bg-card hover:bg-muted/50 transition-colors"
+                                }
                               >
                                 <div className="font-medium text-sm">
-                                  {userCourse.course.code}
+                                  {userCourse.title}
                                 </div>
                                 <div className="text-xs text-muted-foreground mt-1">
-                                  {userCourse.title}
+                                  {userCourse.course.code}
                                 </div>
                               </Link>
                             );
                           })}
                         </div>
-                      ) : (
-                        <div className="text-sm text-muted-foreground italic">
-                          No courses
-                        </div>
-                      )}
+                      ) : null}
                     </TableCell>
                   );
                 })}
