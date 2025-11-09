@@ -1,6 +1,10 @@
 <div align="center">
   <a href="https://albertplus.com">
-    <img src="https://raw.githubusercontent.com/TechAtNYU/AlbertPlus/main/apps/web/public/logo.svg" alt="Logo" width="100" height="50">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/TechAtNYU/AlbertPlus/main/apps/web/public/logo_dark.svg">
+      <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/TechAtNYU/AlbertPlus/main/apps/web/public/logo.svg">
+      <img src="https://raw.githubusercontent.com/TechAtNYU/AlbertPlus/main/apps/web/public/logo.svg" alt="Logo" width="120" height="50">
+    </picture>
   </a>
 
   <p align="center">
