@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import Image from "next/image"; 
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, BookOpen, Zap, Users, BarChart3, Clock, Search } from "lucide-react";
@@ -57,11 +58,11 @@ export default async function Home() {
                   A visual Degree Progress Report that shows completed and missing requirements at a glance.
                 </CardDescription>
                 <div className="mt-6 flex justify-center bg-none">
-                  <img
+                  <Image
                     src="/feature.png"
                     alt="Course Catalog"
-                    width="100%"
-                    height="100%"
+                      width={100}
+                    height={100}
                   />
                 </div>
               </CardHeader>
@@ -77,11 +78,11 @@ export default async function Home() {
                   A visual Degree Progress Report that shows completed and missing requirements at a glance.
                 </CardDescription>
                 <div className="mt-6 flex justify-center bg-none">
-                  <img
+                  <Image
                     src="/feature.png"
                     alt="Course Catalog"
-                    width="100%"
-                    height="100%"
+                    width={100}
+                    height={100}
                   />
                 </div>
               </CardHeader>
@@ -97,11 +98,11 @@ export default async function Home() {
                   An improved Course Search experience — clearer results, easier navigation, and instant add options.
                 </CardDescription>
                 <div className="mt-6 flex justify-center bg-none">
-                  <img
+                  <Image
                     src="/feature.png"
                     alt="Course Catalog"
-                    width="100%"
-                    height="100%"
+                    width={100}
+                    height={100}
                   />
                 </div>
               </CardHeader>
@@ -117,11 +118,11 @@ export default async function Home() {
                   Use the Sidebar to add courses and build your next semester plan seamlessly.
                 </CardDescription>
                 <div className="mt-6 flex justify-center bg-none">
-                  <img
+                  <Image
                     src="/feature.png"
                     alt="Course Catalog"
-                    width="100%"
-                    height="100%"
+                    width={100}
+                    height={100}
                   />
                 </div>
               </CardHeader>
@@ -137,11 +138,11 @@ export default async function Home() {
                   A visual Degree Progress Report that shows completed and missing requirements at a glance.
                 </CardDescription>
                 <div className="mt-6 flex justify-center bg-none">
-                  <img
+                  <Image
                     src="/feature.png"
                     alt="Course Catalog"
-                    width="100%"
-                    height="100%"
+                    width={100}
+                    height={100}
                   />
                 </div>
               </CardHeader>
@@ -165,11 +166,11 @@ export default async function Home() {
                   </CardDescription>
                 </div>
                 <div className="mt-6 flex justify-center bg-none">
-                  <img
+                  <Image
                     src="/features2.png"
                     alt="Course Catalog"
-                    width="100%"
-                    height="100%"
+                    width={100}
+                    height={100}
                   />
                 </div>
               </CardHeader>
@@ -186,11 +187,11 @@ export default async function Home() {
                   </CardDescription>
                 </div>
                 <div className="mt-6 flex justify-center bg-none">
-                  <img
+                  <Image
                     src="/features2.png"
                     alt="Course Catalog"
-                    width="100%"
-                    height="100%"
+                    width={100}
+                    height={100}
                   />
                 </div>
               </CardHeader>
@@ -207,11 +208,11 @@ export default async function Home() {
                   </CardDescription>
                 </div>
                 <div className="mt-6 flex justify-center bg-none">
-                  <img
+                  <Image
                     src="/features2.png"
                     alt="Course Catalog"
-                    width="100%"
-                    height="100%"
+                    width={100}
+                    height={100}
                   />
                 </div>
               </CardHeader>
