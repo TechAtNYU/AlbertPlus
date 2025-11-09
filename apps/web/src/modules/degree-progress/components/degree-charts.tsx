@@ -2,10 +2,15 @@
 
 import type { api } from "@albert-plus/server/convex/_generated/api";
 import type { FunctionReturnType } from "convex/server";
-import { useMemo, useState, useEffect, useRef } from "react";
-import { Cell, Legend, Pie, PieChart, Tooltip, ResponsiveContainer } from "recharts";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
+import { useEffect, useMemo, useState } from "react";
+import {
+  Cell,
+  Legend,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+} from "recharts";
 import {
   Card,
   CardContent,
@@ -13,6 +18,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
 interface ProgramRequirementsChartProps {
   programs: Record<
@@ -28,7 +35,6 @@ interface ProgramRequirementsChartProps {
   >;
 }
 
-// Color palette for pie chart slices
 const COLORS = [
   "#3b82f6", // blue
   "#10b981", // green
@@ -42,12 +48,23 @@ const COLORS = [
   "#6366f1", // indigo
 ];
 
-// Helper function to lighten a color (for completed portion)
+// Helper function to lighten a color (for uncompleted credits)
 const lightenColor = (color: string, percent: number = 40): string => {
   const num = parseInt(color.replace("#", ""), 16);
-  const r = Math.min(255, ((num >> 16) & 0xff) + Math.floor((255 - ((num >> 16) & 0xff)) * (percent / 100)));
-  const g = Math.min(255, ((num >> 8) & 0xff) + Math.floor((255 - ((num >> 8) & 0xff)) * (percent / 100)));
-  const b = Math.min(255, (num & 0xff) + Math.floor((255 - (num & 0xff)) * (percent / 100)));
+  const r = Math.min(
+    255,
+    ((num >> 16) & 0xff) +
+      Math.floor((255 - ((num >> 16) & 0xff)) * (percent / 100)),
+  );
+  const g = Math.min(
+    255,
+    ((num >> 8) & 0xff) +
+      Math.floor((255 - ((num >> 8) & 0xff)) * (percent / 100)),
+  );
+  const b = Math.min(
+    255,
+    (num & 0xff) + Math.floor((255 - (num & 0xff)) * (percent / 100)),
+  );
   return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, "0")}`;
 };
 
@@ -56,7 +73,7 @@ const getRequirementsByCategory = (
     string,
     FunctionReturnType<typeof api.programs.getProgramById> | undefined
   >,
-  courseLookup: Map<string, any>
+  courseLookup: Map<string, any>,
 ) => {
   if (!programs) return null;
 
@@ -144,10 +161,9 @@ export function ProgramRequirementsChart({
   // Get grouped requirements using the lookup
   const program = useMemo(
     () => getRequirementsByCategory(programs, courseLookup),
-    [programs, courseLookup]
+    [programs, courseLookup],
   );
 
-  // Calculate chart data - must be before any early returns
   const chartData = useMemo(() => {
     if (!program || program === null) return [];
 
@@ -285,7 +301,10 @@ export function ProgramRequirementsChart({
 
   // Calculate totals from chartData (already computed in useMemo above)
   const totalCredits = chartData.reduce((sum, item) => sum + item.credits, 0);
-  const totalCompletedCredits = chartData.reduce((sum, item) => sum + item.completedCredits, 0);
+  const totalCompletedCredits = chartData.reduce(
+    (sum, item) => sum + item.completedCredits,
+    0,
+  );
   const overallPercentage =
     totalCredits > 0
       ? Math.round((totalCompletedCredits / totalCredits) * 100)
