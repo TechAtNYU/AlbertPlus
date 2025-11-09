@@ -26,7 +26,7 @@ export default async function Layout({
 
   const user = await currentUser();
 
-  if (student == null || !student.isOnboarded) {
+  if (student == null) {
     redirect("/onboarding");
   }
 

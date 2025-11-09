@@ -16,7 +16,7 @@ import { schoolName } from "./schemas/schools";
  */
 export const clearAll = internalMutation({
   handler: async (ctx) => {
-    console.log("🗑️  Clearing all database tables...");
+    console.log("🗑  Clearing all database tables...");
 
     // Delete in reverse dependency order to maintain referential integrity
     const tables = [
@@ -185,7 +185,6 @@ export const seedAll = internalMutation({
           year: v.number(),
           term: v.union(v.literal("spring"), v.literal("fall")),
         }),
-        isOnboarded: v.boolean(),
       }),
     ),
     userCourses: v.array(
@@ -402,7 +401,6 @@ export const seedAll = internalMutation({
         school: student.school,
         startingDate: student.startingDate,
         expectedGraduationDate: student.expectedGraduationDate,
-        isOnboarded: student.isOnboarded,
       };
 
       if (existing) {

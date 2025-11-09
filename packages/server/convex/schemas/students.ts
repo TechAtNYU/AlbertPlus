@@ -13,8 +13,6 @@ const students = {
     year: v.number(),
     term: v.union(v.literal("spring"), v.literal("fall")),
   }),
-
-  isOnboarded: v.boolean(),
 };
 
 export { students };

@@ -6,7 +6,7 @@ import { OnboardingForm } from "./component/onboarding-form";
 export default async function Page() {
   const student = await fetchProtectedQuery(api.students.getCurrentStudent);
 
-  if (student?.isOnboarded) {
+  if (student != null) {
     redirect("/dashboard");
   }
 
