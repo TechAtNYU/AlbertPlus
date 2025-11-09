@@ -2,7 +2,7 @@
 
 import type { api } from "@albert-plus/server/convex/_generated/api";
 import type { FunctionReturnType } from "convex/server";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { Cell, Legend, Pie, PieChart, Tooltip, ResponsiveContainer } from "recharts";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -128,6 +128,7 @@ export function ProgramRequirementsChart({
   courses,
 }: ProgramRequirementsChartProps) {
   const [showCompletion, setShowCompletion] = useState(false);
+  const [hasAnimated, setHasAnimated] = useState(false);
 
   // Create a lookup map from courses Record
   const courseLookup = useMemo(() => {
@@ -146,90 +147,61 @@ export function ProgramRequirementsChart({
     [programs, courseLookup]
   );
 
-  if (program === undefined) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Program Requirements</CardTitle>
-          <CardDescription>Loading...</CardDescription>
-        </CardHeader>
-      </Card>
-    );
-  }
+  // Calculate chart data - must be before any early returns
+  const chartData = useMemo(() => {
+    if (!program || program === null) return [];
 
-  if (program === null) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Program Requirements</CardTitle>
-          <CardDescription>Program not found</CardDescription>
-        </CardHeader>
-      </Card>
-    );
-  }
+    const completedCreditsByCategory: Record<string, number> = {};
+    if (userCourses) {
+      for (const userCourse of userCourses) {
+        for (const [prefix, data] of Object.entries(
+          program.requirementsByCategory,
+        )) {
+          // Check if the course code is in any of the nested course arrays
+          const isInRequirement = data.courses.some((courseGroup) =>
+            courseGroup.some(
+              (course) =>
+                course.toLowerCase() === userCourse.courseCode.toLowerCase(),
+            ),
+          );
 
-  const completedCreditsByCategory: Record<string, number> = {};
-  if (userCourses) {
-    for (const userCourse of userCourses) {
-      for (const [prefix, data] of Object.entries(
-        program.requirementsByCategory,
-      )) {
-        // Check if the course code is in any of the nested course arrays
-        const isInRequirement = data.courses.some((courseGroup) =>
-          courseGroup.some(
-            (course) =>
-              course.toLowerCase() === userCourse.courseCode.toLowerCase(),
-          ),
-        );
-
-        if (isInRequirement) {
-          completedCreditsByCategory[prefix] =
-            (completedCreditsByCategory[prefix] || 0) +
-            (userCourse.course?.credits || 0);
-          break;
+          if (isInRequirement) {
+            completedCreditsByCategory[prefix] =
+              (completedCreditsByCategory[prefix] || 0) +
+              (userCourse.course?.credits || 0);
+            break;
+          }
         }
       }
     }
-  }
 
-  // Transform the data for the chart
-  const chartData = Object.entries(program.requirementsByCategory)
-    .map(([prefix, data]) => {
-      const completed = completedCreditsByCategory[prefix] || 0;
-      const percentage =
-        data.credits > 0 ? Math.round((completed / data.credits) * 100) : 0;
-      return {
-        category: prefix,
-        credits: data.credits,
-        completedCredits: completed,
-        remainingCredits: data.credits - completed,
-        percentage,
-      };
-    })
-    .sort((a, b) => {
-      // "Other" should always be at the bottom
-      if (a.category === "Other") return 1;
-      if (b.category === "Other") return -1;
-      // Otherwise, maintain alphabetical order
-      return a.category.localeCompare(b.category);
-    });
+    // Transform the data for the chart
+    return Object.entries(program.requirementsByCategory)
+      .map(([prefix, data]) => {
+        const completed = completedCreditsByCategory[prefix] || 0;
+        const percentage =
+          data.credits > 0 ? Math.round((completed / data.credits) * 100) : 0;
+        return {
+          category: prefix,
+          credits: data.credits,
+          completedCredits: completed,
+          remainingCredits: data.credits - completed,
+          percentage,
+        };
+      })
+      .sort((a, b) => {
+        // "Other" should always be at the bottom
+        if (a.category === "Other") return 1;
+        if (b.category === "Other") return -1;
+        // Otherwise, maintain alphabetical order
+        return a.category.localeCompare(b.category);
+      });
+  }, [program, userCourses]);
 
-  const totalCredits = Object.values(program.requirementsByCategory).reduce(
-    (sum, data) => sum + data.credits,
-    0,
-  );
-
-  const totalCompletedCredits = Object.values(
-    completedCreditsByCategory,
-  ).reduce((sum, credits) => sum + credits, 0);
-
-  const overallPercentage =
-    totalCredits > 0
-      ? Math.round((totalCompletedCredits / totalCredits) * 100)
-      : 0;
-
-  // Prepare data based on toggle state
+  // Prepare pie chart data based on toggle state
   const pieChartData = useMemo(() => {
+    if (chartData.length === 0) return [];
+
     if (!showCompletion) {
       // Default view: just total credits per category
       return chartData.map((item, index) => ({
@@ -277,6 +249,43 @@ export function ProgramRequirementsChart({
     }
   }, [chartData, showCompletion]);
 
+  // Mark as animated after first data load
+  useEffect(() => {
+    if (pieChartData.length > 0 && !hasAnimated) {
+      setHasAnimated(true);
+    }
+  }, [pieChartData, hasAnimated]);
+
+  if (program === undefined) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Program Requirements</CardTitle>
+          <CardDescription>Loading...</CardDescription>
+        </CardHeader>
+      </Card>
+    );
+  }
+
+  if (program === null) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Program Requirements</CardTitle>
+          <CardDescription>Program not found</CardDescription>
+        </CardHeader>
+      </Card>
+    );
+  }
+
+  // Calculate totals from chartData (already computed in useMemo above)
+  const totalCredits = chartData.reduce((sum, item) => sum + item.credits, 0);
+  const totalCompletedCredits = chartData.reduce((sum, item) => sum + item.completedCredits, 0);
+  const overallPercentage =
+    totalCredits > 0
+      ? Math.round((totalCompletedCredits / totalCredits) * 100)
+      : 0;
+
   return (
     <Card>
       <CardHeader>
@@ -318,6 +327,8 @@ export function ProgramRequirementsChart({
                 cy="50%"
                 outerRadius={120}
                 label={({ name, value }) => `${name}: ${value}`}
+                isAnimationActive={!hasAnimated}
+                animationDuration={800}
               >
                 {pieChartData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.fill} />
