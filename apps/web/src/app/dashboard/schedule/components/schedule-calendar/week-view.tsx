@@ -35,6 +35,8 @@ import { CourseInfoDialog } from "./info-dialog";
 interface WeekViewProps {
   classes: Class[];
   hoveredCourseId?: string | null;
+  selectedCourse?: Class | null;
+  onCourseSelect?: (course: Class | null) => void;
 }
 
 interface PositionedEvent {
@@ -50,12 +52,14 @@ interface PositionedEvent {
 export function WeekView({
   classes,
   hoveredCourseId: externalHoveredCourseId,
+  onCourseSelect,
 }: WeekViewProps) {
   const currentDate = new Date();
   const [internalHoveredCourseId, setInternalHoveredCourseId] = useState<
     string | null
   >(null);
-  const [selectedCourse, setSelectedCourse] = useState<Class | null>(null);
+  const [internalSelectedCourse, setInternalSelectedCourse] =
+    useState<Class | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 
   // Combine external hover (from selector) and internal hover (from calendar)
@@ -92,8 +96,12 @@ export function WeekView({
   };
 
   const handleEventClick = (event: Class) => {
-    setSelectedCourse(event);
-    setDialogOpen(true);
+    if (onCourseSelect) {
+      onCourseSelect(event);
+    } else {
+      setInternalSelectedCourse(event);
+      setDialogOpen(true);
+    }
   };
 
   const allDays = useMemo(() => {
@@ -351,7 +359,7 @@ export function WeekView({
       <CourseInfoDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
-        course={selectedCourse}
+        course={internalSelectedCourse}
         onDelete={handleRemove}
       />
     </div>

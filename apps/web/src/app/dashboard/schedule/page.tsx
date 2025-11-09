@@ -18,7 +18,7 @@ import {
 } from "@/components/AppConfigProvider";
 import { useSearchParam } from "@/hooks/use-search-param";
 import { formatTermTitle } from "@/utils/format-term";
-import { ScheduleCalendar } from "./components/schedule-calendar";
+import { type Class, ScheduleCalendar } from "./components/schedule-calendar";
 
 function getUserClassesByTerm(
   classes:
@@ -43,9 +43,47 @@ const SchedulePage = () => {
   const [hoveredCourse, setHoveredCourse] = useState<CourseOffering | null>(
     null,
   );
+  const [selectedCourse, setSelectedCourse] = useState<Class | null>(null);
   const [mobileView, setMobileView] = useState<"selector" | "calendar">(
     "selector",
   );
+  const [previousMobileView, setPreviousMobileView] = useState<
+    "selector" | "calendar"
+  >("selector");
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  useEffect(() => {
+    if (selectedCourse && isMobile && mobileView === "calendar") {
+      setPreviousMobileView("calendar");
+      setMobileView("selector");
+    }
+  }, [selectedCourse, isMobile, mobileView]);
+
+  const handleCourseSelect = (course: Class | null) => {
+    if (!course && isMobile && previousMobileView === "calendar") {
+      // When closing detail panel on mobile, return to calendar view
+      setMobileView("calendar");
+    }
+    setSelectedCourse(course);
+  };
+
+  // clear selected course when switching tabs
+  const handleMobileViewChange = (view: "selector" | "calendar") => {
+    setMobileView(view);
+    if (view === "calendar" && selectedCourse) {
+      setSelectedCourse(null);
+    }
+  };
 
   // Search param state with debouncing and URL sync
   const { searchValue, setSearchValue, debouncedSearchValue } = useSearchParam({
@@ -105,7 +143,7 @@ const SchedulePage = () => {
     <div className="flex flex-col gap-4 h-[calc(100vh-theme(spacing.16)-theme(spacing.12))] w-full">
       {/* Mobile toggle buttons */}
       <div className="md:hidden shrink-0 p-2">
-        <Selector value={mobileView} onValueChange={setMobileView} />
+        <Selector value={mobileView} onValueChange={handleMobileViewChange} />
       </div>
 
       {/* Mobile view */}
@@ -119,6 +157,8 @@ const SchedulePage = () => {
             loadMore={loadMore}
             status={status}
             isSearching={isSearching}
+            selectedCourse={selectedCourse}
+            onCourseSelect={handleCourseSelect}
           />
         ) : (
           <div className="h-full">
@@ -126,6 +166,8 @@ const SchedulePage = () => {
               classes={classes}
               title={title}
               hoveredCourse={hoveredCourse}
+              selectedCourse={selectedCourse}
+              onCourseSelect={handleCourseSelect}
             />
           </div>
         )}
@@ -141,6 +183,8 @@ const SchedulePage = () => {
           loadMore={loadMore}
           status={status}
           isSearching={isSearching}
+          selectedCourse={selectedCourse}
+          onCourseSelect={handleCourseSelect}
         />
 
         <div className="flex-1 min-w-0">
@@ -149,6 +193,8 @@ const SchedulePage = () => {
               classes={classes}
               title={title}
               hoveredCourse={hoveredCourse}
+              selectedCourse={selectedCourse}
+              onCourseSelect={handleCourseSelect}
             />
           </div>
         </div>

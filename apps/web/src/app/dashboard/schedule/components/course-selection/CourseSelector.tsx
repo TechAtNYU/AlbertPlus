@@ -1,10 +1,13 @@
 "use client";
 import { api } from "@albert-plus/server/convex/_generated/api";
+import type { Id } from "@albert-plus/server/convex/_generated/dataModel";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useMutation } from "convex/react";
 import { ConvexError } from "convex/values";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
+import type { Class } from "@/app/dashboard/schedule/components/schedule-calendar";
+import { CourseDetailPanel } from "@/app/dashboard/schedule/components/schedule-calendar/course-detail-panel";
 import { Button } from "@/components/ui/button";
 import { useSearchParam } from "@/hooks/use-search-param";
 import { CourseCard, CourseFilters } from "./components";
@@ -19,6 +22,8 @@ interface CourseSelectorComponentProps {
   loadMore: (numItems: number) => void;
   status: "LoadingFirstPage" | "CanLoadMore" | "LoadingMore" | "Exhausted";
   isSearching?: boolean;
+  selectedCourse?: Class | null;
+  onCourseSelect?: (course: Class | null) => void;
 }
 
 const CourseSelector = ({
@@ -29,6 +34,8 @@ const CourseSelector = ({
   loadMore,
   status,
   isSearching = false,
+  selectedCourse,
+  onCourseSelect,
 }: CourseSelectorComponentProps) => {
   const { searchValue: filtersParam, setSearchValue: setFiltersParam } =
     useSearchParam({ paramKey: "filters", debounceDelay: 0 });
@@ -93,6 +100,40 @@ const CourseSelector = ({
       toast.error(errorMessage);
     }
   };
+
+  const handleDelete = async (
+    id: Id<"userCourseOfferings">,
+    classNumber: number,
+    title: string,
+  ) => {
+    try {
+      await removeCourseOffering({ id });
+      toast.success(`${title} removed`, {
+        action: {
+          label: "Undo",
+          onClick: () => addCourseOffering({ classNumber }),
+        },
+      });
+    } catch (error) {
+      const errorMessage =
+        error instanceof ConvexError
+          ? (error.data as string)
+          : "Unexpected error occurred";
+      toast.error(errorMessage);
+    }
+  };
+
+  if (selectedCourse) {
+    return (
+      <div className="w-full md:w-[350px] h-full">
+        <CourseDetailPanel
+          course={selectedCourse}
+          onClose={() => onCourseSelect?.(null)}
+          onDelete={handleDelete}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-4 w-full md:w-[350px] h-full">

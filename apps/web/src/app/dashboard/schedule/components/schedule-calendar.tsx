@@ -76,12 +76,16 @@ export interface ScheduleCalendarProps {
     | undefined;
   title: string | undefined;
   hoveredCourse?: Doc<"courseOfferings"> | null;
+  selectedCourse?: Class | null;
+  onCourseSelect?: (course: Class | null) => void;
 }
 
 export function ScheduleCalendar({
   classes,
   title,
   hoveredCourse,
+  selectedCourse,
+  onCourseSelect,
 }: ScheduleCalendarProps) {
   if (!classes || !title) {
     return <Skeleton className="h-full w-full rounded-lg" />;
@@ -251,6 +255,8 @@ export function ScheduleCalendar({
         <WeekView
           classes={transformedClasses}
           hoveredCourseId={hoveredCourse?._id ?? null}
+          selectedCourse={selectedCourse}
+          onCourseSelect={onCourseSelect}
         />
       </div>
     </div>
