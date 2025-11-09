@@ -129,7 +129,7 @@ export const CourseSectionItem = ({
         </div>
         {showSelector && (
           <>
-            <div className="absolute inset-0 bg-black rounded-lg opacity-90" />
+            <div className="hidden dark:block dark:absolute inset-0 bg-black rounded-lg opacity-90" />
             <div className="absolute inset-0 flex flex-col rounded-lg  ">
               <Button
                 onClick={handleAddToCalendar}
