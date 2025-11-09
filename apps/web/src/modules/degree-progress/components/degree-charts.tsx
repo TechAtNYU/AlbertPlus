@@ -302,7 +302,7 @@ export function ProgramRequirementsChart({
     if (pieChartData.length > 0 && !hasAnimated) {
       const timer = setTimeout(() => {
         setHasAnimated(true);
-      }, 2000); 
+      }, 2000);
 
       return () => clearTimeout(timer);
     }
@@ -373,8 +373,8 @@ export function ProgramRequirementsChart({
                 outerRadius={130}
                 isAnimationActive={!hasAnimated}
               >
-                {pieChartData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.fill} />
+                {pieChartData.map((entry) => (
+                  <Cell key={entry.name} fill={entry.fill} />
                 ))}
               </Pie>
               <text
@@ -384,7 +384,7 @@ export function ProgramRequirementsChart({
                 textAnchor="middle"
                 dominantBaseline="middle"
                 className="fill-foreground font-bold"
-                style={{ fontSize: '36px' }}
+                style={{ fontSize: "36px" }}
               >
                 {showCompletion
                   ? `${totalCompletedCredits}/${totalCredits}`
@@ -397,7 +397,7 @@ export function ProgramRequirementsChart({
                 textAnchor="middle"
                 dominantBaseline="middle"
                 className="fill-muted-foreground"
-                style={{ fontSize: '20px' }}
+                style={{ fontSize: "20px" }}
               >
                 credits
               </text>
