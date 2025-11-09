@@ -1,26 +1,8 @@
 "use client";
 
-import { api } from "@albert-plus/server/convex/_generated/api";
-import type { FunctionReturnType } from "convex/server";
-import { useMutation } from "convex/react";
-import { SearchIcon } from "lucide-react";
-import Link from "next/link";
-import { useId, useMemo, useState } from "react";
 import { useCurrentTerm, useCurrentYear } from "@/components/AppConfigProvider";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
-import DegreeProgreeUpload from "@/modules/report-parsing/components/degree-progress-upload";
-import type { UserCourse } from "@/modules/report-parsing/types";
 import {
   Table,
   TableBody,
@@ -29,6 +11,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { cn } from "@/lib/utils";
+import type { UserCourse } from "@/modules/report-parsing/types";
 import type { Term, TermYear } from "@/utils/term";
 import {
   buildAcademicTimeline,
@@ -36,7 +20,14 @@ import {
   getAcademicYearLabel,
   makeTermKey,
 } from "@/utils/term";
+import { api } from "@albert-plus/server/convex/_generated/api";
+import { useMutation } from "convex/react";
+import type { FunctionReturnType } from "convex/server";
+import { FileTextIcon, SearchIcon } from "lucide-react";
+import Link from "next/link";
+import { useId, useMemo, useState } from "react";
 import { toast } from "sonner";
+import DegreeProgreeUpload from "@/modules/report-parsing/components/degree-progress-upload";
 
 interface PlanTableProps {
   courses:
@@ -58,7 +49,6 @@ export default function PlanTable({ courses, student }: PlanTableProps) {
   const currentYear = useCurrentYear();
 
   const [courseSearch, setCourseSearch] = useState<string>("");
-  const [isUploadOpen, setIsUploadOpen] = useState(false);
 
   const importUserCourses = useMutation(api.userCourses.importUserCourses);
 
@@ -66,7 +56,6 @@ export default function PlanTable({ courses, student }: PlanTableProps) {
 
   const handleImportConfirm = async (coursesToImport: UserCourse[]) => {
     if (coursesToImport.length === 0) {
-      setIsUploadOpen(false);
       return;
     }
 
@@ -91,7 +80,6 @@ export default function PlanTable({ courses, student }: PlanTableProps) {
           `${result.duplicates} duplicate${result.duplicates !== 1 ? "s" : ""} skipped`,
         );
       }
-      setIsUploadOpen(false);
     }
 
     const successMessage =
@@ -223,6 +211,35 @@ export default function PlanTable({ courses, student }: PlanTableProps) {
     return null;
   }
 
+  if (courses.length === 0) {
+    return (
+      <div className="flex items-center justify-center min-h-[calc(100vh-200px)]">
+        <div className="flex flex-col items-center gap-8 text-center max-w-xl w-full px-4">
+          <div className="space-y-4">
+            <div
+              className="flex size-20 mx-auto items-center justify-center rounded-full border-2 bg-gradient-to-br from-muted to-muted/50 shadow-sm"
+              aria-hidden="true"
+            >
+              <FileTextIcon className="size-10 opacity-70" />
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-2xl font-semibold tracking-tight">
+                No courses found
+              </h3>
+              <p className="text-muted-foreground max-w-md mx-auto leading-relaxed">
+                Upload your Degree Progress Report to import your course history
+                and start planning your academic journey.
+              </p>
+            </div>
+          </div>
+          <div className="w-full max-w-md">
+            <DegreeProgreeUpload onConfirm={handleImportConfirm} />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-3 overflow-x-auto">
       {/* Filters */}
@@ -244,22 +261,6 @@ export default function PlanTable({ courses, student }: PlanTableProps) {
             </div>
           </div>
         </div>
-        <Dialog open={isUploadOpen} onOpenChange={setIsUploadOpen}>
-          <DialogTrigger asChild>
-            <Button className="self-end" variant="outline">
-              Import from report
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Import from Degree Progress Report</DialogTitle>
-              <DialogDescription>
-                Upload your report PDF to import courses.
-              </DialogDescription>
-            </DialogHeader>
-            <DegreeProgreeUpload onConfirm={handleImportConfirm} />
-          </DialogContent>
-        </Dialog>
       </div>
       <Table className="min-w-max">
         <TableHeader>
