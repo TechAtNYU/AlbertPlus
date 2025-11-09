@@ -35,6 +35,41 @@ export const getUserCourseOfferings = protectedQuery({
   },
 });
 
+export const getScheduleCourseOfferings = protectedQuery({
+  args: {},
+  handler: async (ctx) => {
+    let userCourseOfferings = await ctx.db
+      .query("userCourseOfferings")
+      .withIndex("by_user", (q) => q.eq("userId", ctx.user.subject))
+      .collect();
+
+    userCourseOfferings = userCourseOfferings.filter(
+      (course) => course.alternativeOf === undefined,
+    );
+
+    return await Promise.all(
+      userCourseOfferings.map(async (userOffering) => {
+        const courseOffering = await getOneFrom(
+          ctx.db,
+          "courseOfferings",
+          "by_class_number",
+          userOffering.classNumber,
+          "classNumber",
+        );
+
+        if (!courseOffering) {
+          throw new Error("Course offering not found");
+        }
+
+        return {
+          ...userOffering,
+          courseOffering,
+        };
+      }),
+    );
+  },
+});
+
 export const addUserCourseOffering = protectedMutation({
   args: omit(userCourseOfferings, ["userId"]),
   handler: async (ctx, args) => {

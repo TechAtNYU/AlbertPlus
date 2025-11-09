@@ -1,7 +1,5 @@
-import DegreeProgreeUpload from "@/modules/report-parsing/components/degree-progress-upload";
-
 const HomePage = () => {
-  return <DegreeProgreeUpload />;
+  return;
 };
 
 export default HomePage;

@@ -1,4 +1,5 @@
-import type { Grade, Term, UserCourse } from "../types";
+import type { Term } from "@/utils/term";
+import type { Grade, UserCourse } from "../types";
 
 interface ParsedCourse {
   term: string;

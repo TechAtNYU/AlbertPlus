@@ -8,21 +8,39 @@ Understanding the flow of data is crucial to comprehending how AlbertPlus works.
 
 The primary data pipeline is responsible for collecting, storing, and serving course and program information.
 
+### Static Course & Program Data (Manual Trigger)
+
 1. **Scraping (Cloudflare Worker)**
-   - **Trigger**: The process begins with a scheduled job (cron trigger) or http handlers in the Cloudflare Worker.
-   - **Discovery**: The scraper first discovers the URLs for all available programs and courses from NYU's public course catalog.
-   - **Job Queuing**: For each discovered program and course, a new job is added to a Cloudflare D1 queue. This allows for resilient and distributed processing.
+   - **Admin Trigger**: Admin users initiate scraping by calling Convex actions (`api.scraper.triggerMajorsScraping` or `api.scraper.triggerCoursesScraping`).
+   - **Authenticated Request**: The Convex action makes a POST request to the scraper's HTTP endpoints (`/api/trigger-majors` or `/api/trigger-courses`) with the `CONVEX_API_KEY` in the `X-API-KEY` header.
+   - **API Key Validation**: The scraper validates the API key to ensure the request is from the trusted Convex backend.
+   - **Discovery**: The scraper discovers the URLs for all available programs or courses from NYU's public course catalog.
+   - **Job Queuing**: For each discovered program or course, a new job is added to a Cloudflare Queue. This allows for resilient and distributed processing.
    - **Data Extraction**: Each job in the queue is processed by the worker, which scrapes the detailed information for a specific course or program.
-   - **Upsert to Backend**: The scraped data is then sent to the Convex backend via an HTTP endpoint.
+   - **Upsert to Backend**: The scraped data is sent back to the Convex backend via authenticated HTTP endpoints.
+
+### Dynamic Course Offerings Data (Scheduled)
+
+1. **Automated Scraping (Cloudflare Worker Cronjob)**
+   - **Scheduled Trigger**: A cronjob runs at regular intervals (configured in `wrangler.jsonc`).
+   - **Config Check**: The worker reads app configuration from Convex to determine which terms to scrape (`is_scrape_current`, `is_scrape_next`, along with term/year information).
+   - **Albert Public Search**: For each enabled term, the worker scrapes Albert's public class search to discover all course offering URLs.
+   - **Job Queuing**: Each course offering URL is added to the queue as a `course-offering` job with metadata about the term and year.
+   - **Section Details**: Each job scrapes detailed information including:
+     - Class number, section, and status (open/closed/waitlist)
+     - Instructor names and location
+     - Meeting days, start time, and end time
+     - Corequisite relationships
+   - **Batch Upsert**: Scraped course offerings are sent to Convex in batches via the `/api/courseOfferings/upsert` endpoint.
 
 2. **Backend Processing (Convex)**
    - **Data Reception**: The Convex backend receives the scraped data from the Cloudflare Worker.
-   - **Database Storage**: The data is upserted into the Convex database, ensuring that existing records are updated and new ones are created. This includes courses, programs, requirements, and prerequisites.
+   - **Database Storage**: The data is upserted into the Convex database, ensuring that existing records are updated and new ones are created. This includes courses, programs, requirements, prerequisites, and course offerings.
    - **Real-time Updates**: Any clients connected to the Convex backend (such as the web app) will receive real-time updates as the new data is written to the database.
 
 3. **Client-side Consumption (Web App & Browser Extension)**
-   - **Data Fetching**: The Next.js web app and the browser extension query the Convex backend to fetch course and program data.
-   - **User Interface**: The data is then rendered in the user interface, allowing students to browse the course catalog, view program requirements, and build their schedules.
+   - **Data Fetching**: The Next.js web app and the browser extension query the Convex backend to fetch course, program, and course offering data.
+   - **User Interface**: The data is then rendered in the user interface, allowing students to browse the course catalog, view program requirements, check real-time class availability, and build their schedules.
 
 ## Degree Progress Report Parsing
 

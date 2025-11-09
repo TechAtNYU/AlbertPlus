@@ -9,6 +9,14 @@ export default defineConfig({
   integrations: [
     starlight({
       title: "AlbertPlus Docs",
+      logo: {
+        light: "./src/assets/logo.svg",
+        dark: "./src/assets/logo_dark.svg",
+        replacesTitle: true,
+        alt: "AlbertPlus logo",
+      },
+      customCss: ["./src/styles/theme.css"],
+      favicon: "/favicon.ico",
       social: [
         {
           icon: "github",
@@ -58,6 +66,10 @@ export default defineConfig({
             { label: "Convex", slug: "modules/convex" },
             { label: "Documentation", slug: "modules/documentation" },
           ],
+        },
+        {
+          label: "Contributing",
+          slug: "contributing",
         },
       ],
     }),
