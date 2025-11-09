@@ -2,18 +2,7 @@
 
 import { api } from "@albert-plus/server/convex/_generated/api";
 import type { Doc } from "@albert-plus/server/convex/_generated/dataModel";
-import { useUser } from "@clerk/nextjs";
 //TanStack Form
-import { useForm } from "@tanstack/react-form";
-import {
-  useConvexAuth,
-  useMutation,
-  usePaginatedQuery,
-  useQuery,
-} from "convex/react";
-import { useRouter } from "next/navigation";
-import React from "react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   FieldContent,
@@ -33,24 +22,31 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import DegreeProgreeUpload from "@/modules/report-parsing/components/degree-progress-upload";
+import { useForm } from "@tanstack/react-form";
 import {
-  type AcademicInfoFormValues,
-  academicInfoSchema,
-} from "./academic-info-schema";
+  useConvexAuth,
+  useMutation,
+  usePaginatedQuery,
+  useQuery,
+} from "convex/react";
+import type { FunctionArgs } from "convex/server";
+import { useRouter } from "next/navigation";
+import React from "react";
+import { toast } from "sonner";
 
-type OnboardingFormValues = AcademicInfoFormValues;
-
-interface OnboardingFormProps {
-  student: Doc<"students"> | null;
-}
-
-export function OnboardingForm({ student }: OnboardingFormProps) {
+export function OnboardingForm() {
   const router = useRouter();
-  const { user } = useUser();
   const { isAuthenticated } = useConvexAuth();
+
   const upsertStudent = useMutation(api.students.upsertCurrentStudent);
-  const schools = useQuery(api.schools.getSchools);
-  const isLoadingSchools = schools === undefined;
+
+  // schools
+  const schools = useQuery(
+    api.schools.getSchools,
+    isAuthenticated ? {} : ("skip" as const),
+  );
+
+  // Programs
   const [programsQuery, setProgramsQuery] = React.useState<string | undefined>(
     undefined,
   );
@@ -63,6 +59,7 @@ export function OnboardingForm({ student }: OnboardingFormProps) {
     isAuthenticated ? { query: programsQuery } : ("skip" as const),
     { initialNumItems: 20 },
   );
+
   const programOptions = React.useMemo(
     () =>
       (programs ?? []).map((program) => ({
@@ -71,6 +68,7 @@ export function OnboardingForm({ student }: OnboardingFormProps) {
       })),
     [programs],
   );
+
   const handleSearchPrograms = React.useCallback(
     async (value: string) => {
       const trimmed = value.trim();
@@ -79,6 +77,7 @@ export function OnboardingForm({ student }: OnboardingFormProps) {
     },
     [programOptions],
   );
+
   const handleLoadMorePrograms = React.useCallback(() => {
     if (programsStatus === "CanLoadMore") {
       void programsLoadMore(10);
@@ -91,40 +90,31 @@ export function OnboardingForm({ student }: OnboardingFormProps) {
     return month >= 6 ? "fall" : "spring";
   }, []);
 
-  const defaultValues = React.useMemo<OnboardingFormValues>(
-    () => ({
-      school: student?.school ?? "",
-      programs: student?.programs ?? [],
-      startingDate: student?.startingDate ?? {
+  const form = useForm({
+    defaultValues: {
+      // student data
+      school: "" as Doc<"students">["school"],
+      programs: [] as string[],
+      startingDate: {
         year: currentYear,
         term: defaultTerm,
-      },
-      expectedGraduationDate: student?.expectedGraduationDate ?? {
+      } as Doc<"students">["startingDate"],
+      expectedGraduationDate: {
         year: currentYear + 4,
         term: defaultTerm,
-      },
-    }),
-    [student, currentYear, defaultTerm],
-  );
-
-  const form = useForm({
-    defaultValues,
-    validators: { onSubmit: academicInfoSchema },
+      } as Doc<"students">["expectedGraduationDate"],
+      // user courses
+      userCourses: [] as FunctionArgs<
+        typeof api.userCourses.importUserCourses
+      >["courses"],
+    },
     onSubmit: async ({ value }) => {
       try {
         await upsertStudent({
-          school: value.school as Doc<"students">["school"],
+          school: value.school,
           programs: [],
           startingDate: value.startingDate,
           expectedGraduationDate: value.expectedGraduationDate,
-          isOnboarded: true,
-        });
-
-        await user?.update({
-          unsafeMetadata: {
-            ...user.unsafeMetadata,
-            onboarding_completed: true,
-          },
         });
 
         toast.success("Onboarding completed. Redirecting to dashboard...");
@@ -140,7 +130,8 @@ export function OnboardingForm({ student }: OnboardingFormProps) {
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        void form.handleSubmit();
+        e.stopPropagation();
+        form.handleSubmit();
       }}
       className="space-y-10"
     >

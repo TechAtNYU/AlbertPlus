@@ -13,7 +13,7 @@ export default async function Page() {
   return (
     <div className="flex min-h-screen items-center justify-center">
       <div className="w-full max-w-5xl px-8 py-10">
-        <OnboardingForm student={student ?? null} />
+        <OnboardingForm />
       </div>
     </div>
   );
