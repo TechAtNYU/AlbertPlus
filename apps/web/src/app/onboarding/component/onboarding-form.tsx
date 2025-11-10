@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import DegreeProgreeUpload from "@/modules/report-parsing/components/degree-progress-upload";
+import { UserCourse } from "@/modules/report-parsing/types";
 import { userCourseSchema } from "@/schemas/courses";
 import { api } from "@albert-plus/server/convex/_generated/api";
 import type { Doc, Id } from "@albert-plus/server/convex/_generated/dataModel";
@@ -164,6 +165,18 @@ export function OnboardingForm() {
     },
   });
 
+  async function handleConfirmImport(coursesToImport: UserCourse[]) {
+    if (coursesToImport.length === 0) {
+      return;
+    }
+
+    await importUserCourses({
+      courses: coursesToImport,
+    });
+
+    toast.success("Courses imported successfully");
+  }
+
   return (
     <form
       onSubmit={(e) => {
@@ -232,10 +245,11 @@ export function OnboardingForm() {
             {(field) => {
               const selected = (field.state.value ?? []).map((p) => ({
                 value: p,
-                label: p,
+                label: programOptions.find((val) => val.value === p)
+                  ?.label as string,
               }));
               return (
-                <UIField className="gap-2">
+                <UIField>
                   <FieldLabel htmlFor={field.name}>
                     Please select your majors and minors
                   </FieldLabel>
@@ -281,19 +295,15 @@ export function OnboardingForm() {
           </form.Field>
 
           {/* startingDate */}
-          <FieldGroup className="space-y-4">
-            <FieldLabel className="text-sm font-medium text-gray-700">
-              When did you start your program?
-            </FieldLabel>
+          <FieldGroup>
+            <FieldLabel>When did you start your program?</FieldLabel>
             <div className="grid grid-cols-2 gap-4">
               {/* startingDate.year */}
               <form.Field name="startingDate.year">
                 {(field) => {
-                  const invalid =
-                    field.state.meta.isTouched && !field.state.meta.isValid;
                   return (
-                    <UIField data-invalid={invalid}>
-                      <FieldLabel>Year</FieldLabel>
+                    <UIField>
+                      <FieldLabel htmlFor={field.name}>Year</FieldLabel>
                       <FieldContent>
                         <Input
                           type="number"
@@ -308,7 +318,7 @@ export function OnboardingForm() {
                               v === "" ? prev : Number.parseInt(v, 10),
                             );
                           }}
-                          aria-invalid={invalid}
+                          aria-invalid={!field.state.meta.isValid}
                         />
                       </FieldContent>
                       <FieldError errors={field.state.meta.errors} />
@@ -319,10 +329,8 @@ export function OnboardingForm() {
               {/* startingDate.term */}
               <form.Field name="startingDate.term">
                 {(field) => {
-                  const invalid =
-                    field.state.meta.isTouched && !field.state.meta.isValid;
                   return (
-                    <UIField data-invalid={invalid}>
+                    <UIField>
                       <FieldLabel>Term</FieldLabel>
                       <FieldContent>
                         <Select
@@ -331,7 +339,9 @@ export function OnboardingForm() {
                             field.handleChange(val as "spring" | "fall")
                           }
                         >
-                          <SelectTrigger aria-invalid={invalid}>
+                          <SelectTrigger
+                            aria-invalid={!field.state.meta.isValid}
+                          >
                             <SelectValue placeholder="Select term" />
                           </SelectTrigger>
                           <SelectContent>
@@ -349,18 +359,14 @@ export function OnboardingForm() {
           </FieldGroup>
 
           {/* expectedGraduationDate */}
-          <FieldGroup className="space-y-4">
-            <FieldLabel className="text-sm font-medium text-gray-700">
-              When do you expect to graduate?
-            </FieldLabel>
+          <FieldGroup>
+            <FieldLabel>When do you expect to graduate?</FieldLabel>
             <div className="grid grid-cols-2 gap-4">
               {/* expectedGraduationDate.year */}
               <form.Field name="expectedGraduationDate.year">
                 {(field) => {
-                  const invalid =
-                    field.state.meta.isTouched && !field.state.meta.isValid;
                   return (
-                    <UIField data-invalid={invalid}>
+                    <UIField>
                       <FieldLabel>Year</FieldLabel>
                       <FieldContent>
                         <Input
@@ -376,7 +382,7 @@ export function OnboardingForm() {
                               v === "" ? prev : Number.parseInt(v, 10),
                             );
                           }}
-                          aria-invalid={invalid}
+                          aria-invalid={!field.state.meta.isValid}
                         />
                       </FieldContent>
                       <FieldError errors={field.state.meta.errors} />
@@ -387,10 +393,8 @@ export function OnboardingForm() {
               {/* expectedGraduationDate.term */}
               <form.Field name="expectedGraduationDate.term">
                 {(field) => {
-                  const invalid =
-                    field.state.meta.isTouched && !field.state.meta.isValid;
                   return (
-                    <UIField data-invalid={invalid}>
+                    <UIField>
                       <FieldLabel>Term</FieldLabel>
                       <FieldContent>
                         <Select
@@ -399,7 +403,9 @@ export function OnboardingForm() {
                             field.handleChange(val as "spring" | "fall")
                           }
                         >
-                          <SelectTrigger aria-invalid={invalid}>
+                          <SelectTrigger
+                            aria-invalid={!field.state.meta.isValid}
+                          >
                             <SelectValue placeholder="Select term" />
                           </SelectTrigger>
                           <SelectContent>
@@ -425,55 +431,41 @@ export function OnboardingForm() {
 
       <section className="space-y-6">
         <header className="space-y-2">
-          <h2 className="text-2xl font-semibold">Degree Report</h2>
+          <h2 className="text-2xl font-semibold">Upload Degree Report</h2>
           <p className="text-muted-foreground text-sm">
-            Upload your degree progress report.
+            Upload your degree progress report (PDF) so we can help you track
+            your academic progress and suggest courses.
           </p>
         </header>
-        <div className="space-y-4 text-start">
-          <div className="space-y-4">
-            <div className="rounded-lg border p-4 bg-gray-50">
-              <h3 className="font-semibold text-black mb-2">
-                Upload Your Degree Progress Report
-              </h3>
-              <p className="text-sm text-black mb-4">
-                Upload your degree progress report (PDF) so we can help you
-                track your academic progress and suggest courses.
-              </p>
-              <div className="space-y-4">
-                <DegreeProgreeUpload maxSizeMB={20} />
-              </div>
-            </div>
-          </div>
-        </div>
+        <DegreeProgreeUpload onConfirm={handleConfirmImport} />
       </section>
 
-      <section className="space-y-6">
-        <header className="space-y-2">
-          <h2 className="text-2xl font-semibold">Chrome Extension</h2>
-          <p className="text-muted-foreground text-sm">
-            Install our Chrome extension to keep track of courses while browsing
-            your university catalog.
-          </p>
-        </header>
-        <div className="space-y-4 text-start">
-          <div className="space-y-4">
-            <div className="rounded-lg border p-4 bg-gray-50">
-              <h3 className="font-semibold text-gray-900 mb-2">
-                Chrome Extension
-              </h3>
-              <p className="text-sm text-gray-700 mb-4">
-                The Chrome extension will help you automatically track courses
-                and prerequisites while browsing your university&apos;s course
-                catalog.
-              </p>
-              <div className="px-4 py-2 bg-gray-200 text-gray-600 rounded-md inline-block">
-                Extension installation
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* <section className="space-y-6"> */}
+      {/*   <header className="space-y-2"> */}
+      {/*     <h2 className="text-2xl font-semibold">Chrome Extension</h2> */}
+      {/*     <p className="text-muted-foreground text-sm"> */}
+      {/*       Install our Chrome extension to keep track of courses while browsing */}
+      {/*       your university catalog. */}
+      {/*     </p> */}
+      {/*   </header> */}
+      {/*   <div className="space-y-4 text-start"> */}
+      {/*     <div className="space-y-4"> */}
+      {/*       <div className="rounded-lg border p-4 bg-gray-50"> */}
+      {/*         <h3 className="font-semibold text-gray-900 mb-2"> */}
+      {/*           Chrome Extension */}
+      {/*         </h3> */}
+      {/*         <p className="text-sm text-gray-700 mb-4"> */}
+      {/*           The Chrome extension will help you automatically track courses */}
+      {/*           and prerequisites while browsing your university&apos;s course */}
+      {/*           catalog. */}
+      {/*         </p> */}
+      {/*         <div className="px-4 py-2 bg-gray-200 text-gray-600 rounded-md inline-block"> */}
+      {/*           Extension installation */}
+      {/*         </div> */}
+      {/*       </div> */}
+      {/*     </div> */}
+      {/*   </div> */}
+      {/* </section> */}
 
       <div className="flex justify-end">
         <Button type="submit" disabled={form.state.isSubmitting}>
