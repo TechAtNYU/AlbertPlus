@@ -207,7 +207,7 @@ export function OnboardingForm() {
                 return (
                   <UIField>
                     <FieldLabel htmlFor={field.name}>
-                      What school or college do you go to?
+                      What school or college of NYU do you go to?
                     </FieldLabel>
                     <FieldContent>
                       <SchoolCombobox
@@ -234,7 +234,7 @@ export function OnboardingForm() {
                 return (
                   <UIField>
                     <FieldLabel htmlFor={field.name}>
-                      Please select your majors and minors
+                      What's your major(s) and minor(s)?
                     </FieldLabel>
                     <FieldContent>
                       <MultipleSelector
@@ -450,11 +450,9 @@ export function OnboardingForm() {
       {/*   </div> */}
       {/* </section> */}
 
-      <div className="flex justify-end">
-        <Button type="submit" disabled={form.state.isSubmitting}>
-          {form.state.isSubmitting ? "Completing..." : "Complete Onboarding"}
-        </Button>
-      </div>
+      <Button type="submit" disabled={form.state.isSubmitting}>
+        {form.state.isSubmitting ? "Saving..." : "Save"}
+      </Button>
     </form>
   );
 }
