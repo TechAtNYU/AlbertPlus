@@ -135,6 +135,15 @@ export function OnboardingForm() {
     return month >= 6 ? "fall" : "spring";
   }, []);
 
+  // Generate year options: currentYear ± 4 years
+  const yearOptions = React.useMemo(() => {
+    const years: number[] = [];
+    for (let i = currentYear - 5; i <= currentYear + 5; i++) {
+      years.push(i);
+    }
+    return years;
+  }, [currentYear]);
+
   const form = useForm({
     defaultValues: {
       // student data
@@ -265,131 +274,152 @@ export function OnboardingForm() {
               }}
             </form.Field>
 
-            {/* startingDate */}
+            {/* Program timeline - start and end dates in one row */}
             <FieldGroup>
-              <FieldLabel>When did you start your program?</FieldLabel>
-              <div className="grid grid-cols-2 gap-4">
-                {/* startingDate.year */}
-                <form.Field name="startingDate.year">
-                  {(field) => {
-                    return (
-                      <UIField>
-                        <FieldLabel htmlFor={field.name}>Year</FieldLabel>
-                        <FieldContent>
-                          <Input
-                            type="number"
-                            min="2000"
-                            max="2100"
-                            name={field.name}
-                            value={field.state.value ?? ""}
-                            onBlur={field.handleBlur}
-                            onChange={(e) => {
-                              const v = e.target.value;
-                              field.handleChange((prev) =>
-                                v === "" ? prev : Number.parseInt(v, 10),
-                              );
-                            }}
-                            aria-invalid={!field.state.meta.isValid}
-                          />
-                        </FieldContent>
-                        <FieldError errors={field.state.meta.errors} />
-                      </UIField>
-                    );
-                  }}
-                </form.Field>
-                {/* startingDate.term */}
-                <form.Field name="startingDate.term">
-                  {(field) => {
-                    return (
-                      <UIField>
-                        <FieldLabel>Term</FieldLabel>
-                        <FieldContent>
-                          <Select
-                            value={field.state.value ?? ""}
-                            onValueChange={(val) =>
-                              field.handleChange(val as "spring" | "fall")
-                            }
-                          >
-                            <SelectTrigger
-                              aria-invalid={!field.state.meta.isValid}
-                            >
-                              <SelectValue placeholder="Select term" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="fall">Fall</SelectItem>
-                              <SelectItem value="spring">Spring</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </FieldContent>
-                        <FieldError errors={field.state.meta.errors} />
-                      </UIField>
-                    );
-                  }}
-                </form.Field>
-              </div>
-            </FieldGroup>
+              <FieldLabel>When does your program start and end?</FieldLabel>
+              <div className="flex flex-col lg:flex-row gap-4 lg:items-end">
+                {/* Starting date section */}
+                <div className="flex-1 space-y-2">
+                  <div className="text-sm font-medium">Start date</div>
+                  <div className="flex gap-2">
+                    {/* startingDate.term */}
+                    <form.Field name="startingDate.term">
+                      {(field) => {
+                        return (
+                          <UIField className="w-28">
+                            <FieldContent>
+                              <Select
+                                value={field.state.value ?? ""}
+                                onValueChange={(val) =>
+                                  field.handleChange(val as "spring" | "fall")
+                                }
+                              >
+                                <SelectTrigger
+                                  aria-invalid={!field.state.meta.isValid}
+                                >
+                                  <SelectValue placeholder="Term" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="spring">Spring</SelectItem>
+                                  <SelectItem value="fall">Fall</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </FieldContent>
+                            <FieldError errors={field.state.meta.errors} />
+                          </UIField>
+                        );
+                      }}
+                    </form.Field>
+                    {/* startingDate.year */}
+                    <form.Field name="startingDate.year">
+                      {(field) => {
+                        return (
+                          <UIField className="flex-1">
+                            <FieldContent>
+                              <Select
+                                value={field.state.value?.toString() ?? ""}
+                                onValueChange={(val) =>
+                                  field.handleChange(Number.parseInt(val, 10))
+                                }
+                              >
+                                <SelectTrigger
+                                  aria-invalid={!field.state.meta.isValid}
+                                >
+                                  <SelectValue placeholder="Year" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {yearOptions.map((year) => (
+                                    <SelectItem
+                                      key={year}
+                                      value={year.toString()}
+                                    >
+                                      {year}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </FieldContent>
+                            <FieldError errors={field.state.meta.errors} />
+                          </UIField>
+                        );
+                      }}
+                    </form.Field>
+                  </div>
+                </div>
 
-            {/* expectedGraduationDate */}
-            <FieldGroup>
-              <FieldLabel>When do you expect to graduate?</FieldLabel>
-              <div className="grid grid-cols-2 gap-4">
-                {/* expectedGraduationDate.year */}
-                <form.Field name="expectedGraduationDate.year">
-                  {(field) => {
-                    return (
-                      <UIField>
-                        <FieldLabel>Year</FieldLabel>
-                        <FieldContent>
-                          <Input
-                            type="number"
-                            min="2000"
-                            max="2100"
-                            name={field.name}
-                            value={field.state.value ?? ""}
-                            onBlur={field.handleBlur}
-                            onChange={(e) => {
-                              const v = e.target.value;
-                              field.handleChange((prev) =>
-                                v === "" ? prev : Number.parseInt(v, 10),
-                              );
-                            }}
-                            aria-invalid={!field.state.meta.isValid}
-                          />
-                        </FieldContent>
-                        <FieldError errors={field.state.meta.errors} />
-                      </UIField>
-                    );
-                  }}
-                </form.Field>
-                {/* expectedGraduationDate.term */}
-                <form.Field name="expectedGraduationDate.term">
-                  {(field) => {
-                    return (
-                      <UIField>
-                        <FieldLabel>Term</FieldLabel>
-                        <FieldContent>
-                          <Select
-                            value={field.state.value ?? ""}
-                            onValueChange={(val) =>
-                              field.handleChange(val as "spring" | "fall")
-                            }
-                          >
-                            <SelectTrigger
-                              aria-invalid={!field.state.meta.isValid}
-                            >
-                              <SelectValue placeholder="Select term" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="spring">Spring</SelectItem>
-                              <SelectItem value="fall">Fall</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </FieldContent>
-                        <FieldError errors={field.state.meta.errors} />
-                      </UIField>
-                    );
-                  }}
-                </form.Field>
+                {/* "To" separator */}
+                <div className="hidden lg:flex items-center pb-2 text-sm text-muted-foreground">
+                  to
+                </div>
+
+                {/* Expected graduation date section */}
+                <div className="flex-1 space-y-2">
+                  <div className="text-sm font-medium">Expected graduation</div>
+                  <div className="flex gap-2">
+                    {/* expectedGraduationDate.term */}
+                    <form.Field name="expectedGraduationDate.term">
+                      {(field) => {
+                        return (
+                          <UIField className="w-28">
+                            <FieldContent>
+                              <Select
+                                value={field.state.value ?? ""}
+                                onValueChange={(val) =>
+                                  field.handleChange(val as "spring" | "fall")
+                                }
+                              >
+                                <SelectTrigger
+                                  aria-invalid={!field.state.meta.isValid}
+                                >
+                                  <SelectValue placeholder="Term" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="spring">Spring</SelectItem>
+                                  <SelectItem value="fall">Fall</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </FieldContent>
+                            <FieldError errors={field.state.meta.errors} />
+                          </UIField>
+                        );
+                      }}
+                    </form.Field>
+                    {/* expectedGraduationDate.year */}
+                    <form.Field name="expectedGraduationDate.year">
+                      {(field) => {
+                        return (
+                          <UIField className="flex-1">
+                            <FieldContent>
+                              <Select
+                                value={field.state.value?.toString() ?? ""}
+                                onValueChange={(val) =>
+                                  field.handleChange(Number.parseInt(val, 10))
+                                }
+                              >
+                                <SelectTrigger
+                                  aria-invalid={!field.state.meta.isValid}
+                                >
+                                  <SelectValue placeholder="Year" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {yearOptions.map((year) => (
+                                    <SelectItem
+                                      key={year}
+                                      value={year.toString()}
+                                    >
+                                      {year}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </FieldContent>
+                            <FieldError errors={field.state.meta.errors} />
+                          </UIField>
+                        );
+                      }}
+                    </form.Field>
+                  </div>
+                </div>
               </div>
 
               {/* Aggregate object-level errors (from Zod refine, etc.) */}
