@@ -4,6 +4,13 @@ import MultipleSelector from "@/app/onboarding/component/multiselect";
 import { SchoolCombobox } from "@/app/onboarding/component/school-combobox";
 import { Button } from "@/components/ui/button";
 import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
   FieldContent,
   FieldError,
   FieldGroup,
@@ -184,224 +191,232 @@ export function OnboardingForm() {
         e.stopPropagation();
         form.handleSubmit();
       }}
-      className="space-y-10"
+      className="space-y-6"
     >
-      <section className="space-y-6">
-        <header className="space-y-2">
-          <h2 className="text-2xl font-semibold">Onboarding</h2>
-          <p className="text-muted-foreground text-sm">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-2xl">Academic Information</CardTitle>
+          <CardDescription>
             Tell us about your academic background so we can personalize your
             experience.
-          </p>
-        </header>
-        <FieldGroup>
-          {/* school */}
-          <form.Field name="school">
-            {(field) => {
-              return (
-                <UIField>
-                  <FieldLabel htmlFor={field.name}>
-                    What school or college do you go to?
-                  </FieldLabel>
-                  <FieldContent>
-                    <SchoolCombobox
-                      id={field.name}
-                      schools={schools}
-                      value={field.state.value}
-                      onValueChange={(value) => field.handleChange(value)}
-                    />
-                  </FieldContent>
-                  <FieldError errors={field.state.meta.errors} />
-                </UIField>
-              );
-            }}
-          </form.Field>
-
-          {/* programs (multi-select) */}
-          <form.Field name="programs">
-            {(field) => {
-              const selected = (field.state.value ?? []).map((p) => ({
-                value: p,
-                label: programOptions.find((val) => val.value === p)
-                  ?.label as string,
-              }));
-              return (
-                <UIField>
-                  <FieldLabel htmlFor={field.name}>
-                    Please select your majors and minors
-                  </FieldLabel>
-                  <FieldContent>
-                    <MultipleSelector
-                      value={selected}
-                      onChange={(opts) =>
-                        field.handleChange(
-                          opts.map((o) => o.value as Id<"programs">),
-                        )
-                      }
-                      defaultOptions={programOptions}
-                      options={programOptions}
-                      delay={300}
-                      onSearch={handleSearchPrograms}
-                      triggerSearchOnFocus
-                      placeholder="Select your programs"
-                      commandProps={{ label: "Select programs" }}
-                      onListReachEnd={handleLoadMorePrograms}
-                      emptyIndicator={
-                        <p className="text-center text-sm">No programs found</p>
-                      }
-                    />
-                  </FieldContent>
-                  <FieldError errors={field.state.meta.errors} />
-                </UIField>
-              );
-            }}
-          </form.Field>
-
-          {/* startingDate */}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
           <FieldGroup>
-            <FieldLabel>When did you start your program?</FieldLabel>
-            <div className="grid grid-cols-2 gap-4">
-              {/* startingDate.year */}
-              <form.Field name="startingDate.year">
-                {(field) => {
-                  return (
-                    <UIField>
-                      <FieldLabel htmlFor={field.name}>Year</FieldLabel>
-                      <FieldContent>
-                        <Input
-                          type="number"
-                          min="2000"
-                          max="2100"
-                          name={field.name}
-                          value={field.state.value ?? ""}
-                          onBlur={field.handleBlur}
-                          onChange={(e) => {
-                            const v = e.target.value;
-                            field.handleChange((prev) =>
-                              v === "" ? prev : Number.parseInt(v, 10),
-                            );
-                          }}
-                          aria-invalid={!field.state.meta.isValid}
-                        />
-                      </FieldContent>
-                      <FieldError errors={field.state.meta.errors} />
-                    </UIField>
-                  );
-                }}
-              </form.Field>
-              {/* startingDate.term */}
-              <form.Field name="startingDate.term">
-                {(field) => {
-                  return (
-                    <UIField>
-                      <FieldLabel>Term</FieldLabel>
-                      <FieldContent>
-                        <Select
-                          value={field.state.value ?? ""}
-                          onValueChange={(val) =>
-                            field.handleChange(val as "spring" | "fall")
-                          }
-                        >
-                          <SelectTrigger
-                            aria-invalid={!field.state.meta.isValid}
-                          >
-                            <SelectValue placeholder="Select term" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="fall">Fall</SelectItem>
-                            <SelectItem value="spring">Spring</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </FieldContent>
-                      <FieldError errors={field.state.meta.errors} />
-                    </UIField>
-                  );
-                }}
-              </form.Field>
-            </div>
-          </FieldGroup>
-
-          {/* expectedGraduationDate */}
-          <FieldGroup>
-            <FieldLabel>When do you expect to graduate?</FieldLabel>
-            <div className="grid grid-cols-2 gap-4">
-              {/* expectedGraduationDate.year */}
-              <form.Field name="expectedGraduationDate.year">
-                {(field) => {
-                  return (
-                    <UIField>
-                      <FieldLabel>Year</FieldLabel>
-                      <FieldContent>
-                        <Input
-                          type="number"
-                          min="2000"
-                          max="2100"
-                          name={field.name}
-                          value={field.state.value ?? ""}
-                          onBlur={field.handleBlur}
-                          onChange={(e) => {
-                            const v = e.target.value;
-                            field.handleChange((prev) =>
-                              v === "" ? prev : Number.parseInt(v, 10),
-                            );
-                          }}
-                          aria-invalid={!field.state.meta.isValid}
-                        />
-                      </FieldContent>
-                      <FieldError errors={field.state.meta.errors} />
-                    </UIField>
-                  );
-                }}
-              </form.Field>
-              {/* expectedGraduationDate.term */}
-              <form.Field name="expectedGraduationDate.term">
-                {(field) => {
-                  return (
-                    <UIField>
-                      <FieldLabel>Term</FieldLabel>
-                      <FieldContent>
-                        <Select
-                          value={field.state.value ?? ""}
-                          onValueChange={(val) =>
-                            field.handleChange(val as "spring" | "fall")
-                          }
-                        >
-                          <SelectTrigger
-                            aria-invalid={!field.state.meta.isValid}
-                          >
-                            <SelectValue placeholder="Select term" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="spring">Spring</SelectItem>
-                            <SelectItem value="fall">Fall</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </FieldContent>
-                      <FieldError errors={field.state.meta.errors} />
-                    </UIField>
-                  );
-                }}
-              </form.Field>
-            </div>
-
-            {/* Aggregate object-level errors (from Zod refine, etc.) */}
-            <form.Field name="expectedGraduationDate">
-              {(field) => <FieldError errors={field.state.meta.errors} />}
+            {/* school */}
+            <form.Field name="school">
+              {(field) => {
+                return (
+                  <UIField>
+                    <FieldLabel htmlFor={field.name}>
+                      What school or college do you go to?
+                    </FieldLabel>
+                    <FieldContent>
+                      <SchoolCombobox
+                        id={field.name}
+                        schools={schools}
+                        value={field.state.value}
+                        onValueChange={(value) => field.handleChange(value)}
+                      />
+                    </FieldContent>
+                    <FieldError errors={field.state.meta.errors} />
+                  </UIField>
+                );
+              }}
             </form.Field>
-          </FieldGroup>
-        </FieldGroup>
-      </section>
 
-      <section className="space-y-6">
-        <header className="space-y-2">
-          <h2 className="text-2xl font-semibold">Upload Degree Report</h2>
-          <p className="text-muted-foreground text-sm">
+            {/* programs (multi-select) */}
+            <form.Field name="programs">
+              {(field) => {
+                const selected = (field.state.value ?? []).map((p) => ({
+                  value: p,
+                  label: programOptions.find((val) => val.value === p)
+                    ?.label as string,
+                }));
+                return (
+                  <UIField>
+                    <FieldLabel htmlFor={field.name}>
+                      Please select your majors and minors
+                    </FieldLabel>
+                    <FieldContent>
+                      <MultipleSelector
+                        value={selected}
+                        onChange={(opts) =>
+                          field.handleChange(
+                            opts.map((o) => o.value as Id<"programs">),
+                          )
+                        }
+                        defaultOptions={programOptions}
+                        options={programOptions}
+                        delay={300}
+                        onSearch={handleSearchPrograms}
+                        triggerSearchOnFocus
+                        placeholder="Select your programs"
+                        commandProps={{ label: "Select programs" }}
+                        onListReachEnd={handleLoadMorePrograms}
+                        emptyIndicator={
+                          <p className="text-center text-sm">
+                            No programs found
+                          </p>
+                        }
+                      />
+                    </FieldContent>
+                    <FieldError errors={field.state.meta.errors} />
+                  </UIField>
+                );
+              }}
+            </form.Field>
+
+            {/* startingDate */}
+            <FieldGroup>
+              <FieldLabel>When did you start your program?</FieldLabel>
+              <div className="grid grid-cols-2 gap-4">
+                {/* startingDate.year */}
+                <form.Field name="startingDate.year">
+                  {(field) => {
+                    return (
+                      <UIField>
+                        <FieldLabel htmlFor={field.name}>Year</FieldLabel>
+                        <FieldContent>
+                          <Input
+                            type="number"
+                            min="2000"
+                            max="2100"
+                            name={field.name}
+                            value={field.state.value ?? ""}
+                            onBlur={field.handleBlur}
+                            onChange={(e) => {
+                              const v = e.target.value;
+                              field.handleChange((prev) =>
+                                v === "" ? prev : Number.parseInt(v, 10),
+                              );
+                            }}
+                            aria-invalid={!field.state.meta.isValid}
+                          />
+                        </FieldContent>
+                        <FieldError errors={field.state.meta.errors} />
+                      </UIField>
+                    );
+                  }}
+                </form.Field>
+                {/* startingDate.term */}
+                <form.Field name="startingDate.term">
+                  {(field) => {
+                    return (
+                      <UIField>
+                        <FieldLabel>Term</FieldLabel>
+                        <FieldContent>
+                          <Select
+                            value={field.state.value ?? ""}
+                            onValueChange={(val) =>
+                              field.handleChange(val as "spring" | "fall")
+                            }
+                          >
+                            <SelectTrigger
+                              aria-invalid={!field.state.meta.isValid}
+                            >
+                              <SelectValue placeholder="Select term" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="fall">Fall</SelectItem>
+                              <SelectItem value="spring">Spring</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </FieldContent>
+                        <FieldError errors={field.state.meta.errors} />
+                      </UIField>
+                    );
+                  }}
+                </form.Field>
+              </div>
+            </FieldGroup>
+
+            {/* expectedGraduationDate */}
+            <FieldGroup>
+              <FieldLabel>When do you expect to graduate?</FieldLabel>
+              <div className="grid grid-cols-2 gap-4">
+                {/* expectedGraduationDate.year */}
+                <form.Field name="expectedGraduationDate.year">
+                  {(field) => {
+                    return (
+                      <UIField>
+                        <FieldLabel>Year</FieldLabel>
+                        <FieldContent>
+                          <Input
+                            type="number"
+                            min="2000"
+                            max="2100"
+                            name={field.name}
+                            value={field.state.value ?? ""}
+                            onBlur={field.handleBlur}
+                            onChange={(e) => {
+                              const v = e.target.value;
+                              field.handleChange((prev) =>
+                                v === "" ? prev : Number.parseInt(v, 10),
+                              );
+                            }}
+                            aria-invalid={!field.state.meta.isValid}
+                          />
+                        </FieldContent>
+                        <FieldError errors={field.state.meta.errors} />
+                      </UIField>
+                    );
+                  }}
+                </form.Field>
+                {/* expectedGraduationDate.term */}
+                <form.Field name="expectedGraduationDate.term">
+                  {(field) => {
+                    return (
+                      <UIField>
+                        <FieldLabel>Term</FieldLabel>
+                        <FieldContent>
+                          <Select
+                            value={field.state.value ?? ""}
+                            onValueChange={(val) =>
+                              field.handleChange(val as "spring" | "fall")
+                            }
+                          >
+                            <SelectTrigger
+                              aria-invalid={!field.state.meta.isValid}
+                            >
+                              <SelectValue placeholder="Select term" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="spring">Spring</SelectItem>
+                              <SelectItem value="fall">Fall</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </FieldContent>
+                        <FieldError errors={field.state.meta.errors} />
+                      </UIField>
+                    );
+                  }}
+                </form.Field>
+              </div>
+
+              {/* Aggregate object-level errors (from Zod refine, etc.) */}
+              <form.Field name="expectedGraduationDate">
+                {(field) => <FieldError errors={field.state.meta.errors} />}
+              </form.Field>
+            </FieldGroup>
+          </FieldGroup>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-2xl">
+            Degree Progress Report (Optional)
+          </CardTitle>
+          <CardDescription>
             Upload your degree progress report (PDF) so we can help you track
             your academic progress and suggest courses.
-          </p>
-        </header>
-        <DegreeProgreeUpload onConfirm={handleConfirmImport} />
-      </section>
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <DegreeProgreeUpload onConfirm={handleConfirmImport} />
+        </CardContent>
+      </Card>
 
       {/* <section className="space-y-6"> */}
       {/*   <header className="space-y-2"> */}
