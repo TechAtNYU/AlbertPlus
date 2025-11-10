@@ -1,10 +1,9 @@
 import { v } from "convex/values";
-import { schoolName } from "./schools";
 
 const students = {
   userId: v.string(),
   programs: v.array(v.id("programs")),
-  school: schoolName,
+  school: v.id("schools"),
   startingDate: v.object({
     year: v.number(),
     term: v.union(v.literal("spring"), v.literal("fall")),
