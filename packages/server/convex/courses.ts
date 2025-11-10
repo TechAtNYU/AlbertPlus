@@ -97,7 +97,7 @@ export const getCourses = protectedQuery({
         return {
           page: allCourses,
           isDone: results.every((result) => result.isDone),
-          continueCursor: continueCursor ?? null,
+          continueCursor: continueCursor ?? "",
         };
       }
 
@@ -121,7 +121,7 @@ export const getCourses = protectedQuery({
       return {
         page: allCourses,
         isDone: results.every((result) => result.isDone),
-        continueCursor: continueCursor ?? null,
+        continueCursor: continueCursor ?? "",
       };
     }
 
