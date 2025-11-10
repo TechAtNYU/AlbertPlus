@@ -8,7 +8,6 @@ import {
   useQuery,
 } from "convex/react";
 import { ProgramRequirementsChart } from "@/modules/degree-progress/components/degree-charts";
-import DegreeProgreeUpload from "@/modules/report-parsing/components/degree-progress-upload";
 
 const HomePage = () => {
   const { isAuthenticated } = useConvexAuth();
@@ -60,8 +59,6 @@ const HomePage = () => {
   return (
     <div className="container mx-auto space-y-6 p-6">
       <h1 className="text-3xl font-bold">Dashboard</h1>
-
-      <DegreeProgreeUpload />
 
       <ProgramRequirementsChart
         programs={programs}
