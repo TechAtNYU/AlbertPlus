@@ -450,9 +450,11 @@ export function OnboardingForm() {
       {/*   </div> */}
       {/* </section> */}
 
-      <Button type="submit" disabled={form.state.isSubmitting}>
-        {form.state.isSubmitting ? "Saving..." : "Save"}
-      </Button>
+      <div className="flex justify-end">
+        <Button type="submit" disabled={form.state.isSubmitting}>
+          {form.state.isSubmitting ? "Saving..." : "Save"}
+        </Button>
+      </div>
     </form>
   );
 }

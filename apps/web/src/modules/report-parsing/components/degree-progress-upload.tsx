@@ -175,6 +175,7 @@ export default function DegreeProgreeUpload({
                   Degree Progress Report
                 </p>
                 <Button
+                  type="button"
                   variant="outline"
                   className="mt-4"
                   onClick={openFileDialog}
