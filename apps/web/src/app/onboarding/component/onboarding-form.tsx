@@ -79,6 +79,7 @@ const onboardingFormSchema = z.object({
 export function OnboardingForm() {
   const router = useRouter();
   const { isAuthenticated } = useConvexAuth();
+  const [isFileLoaded, setIsFileLoaded] = React.useState(false);
 
   // actions
   const upsertStudent = useMutation(api.students.upsertCurrentStudent);
@@ -172,16 +173,13 @@ export function OnboardingForm() {
     },
   });
 
-  async function handleConfirmImport(coursesToImport: UserCourse[]) {
+  function handleConfirmImport(coursesToImport: UserCourse[]) {
     if (coursesToImport.length === 0) {
       return;
     }
 
-    await importUserCourses({
-      courses: coursesToImport,
-    });
-
-    toast.success("Courses imported successfully");
+    form.setFieldValue("userCourses", coursesToImport);
+    setIsFileLoaded(true);
   }
 
   return (
@@ -414,7 +412,14 @@ export function OnboardingForm() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <DegreeProgreeUpload onConfirm={handleConfirmImport} />
+          <DegreeProgreeUpload
+            onConfirm={handleConfirmImport}
+            showFileLoaded={isFileLoaded}
+            onFileClick={() => {
+              form.setFieldValue("userCourses", []);
+              setIsFileLoaded(false);
+            }}
+          />
         </CardContent>
       </Card>
 
