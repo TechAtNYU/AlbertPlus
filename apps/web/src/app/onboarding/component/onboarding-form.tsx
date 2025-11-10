@@ -1,6 +1,7 @@
 "use client";
 
 import MultipleSelector from "@/app/onboarding/component/multiselect";
+import { SchoolCombobox } from "@/app/onboarding/component/school-combobox";
 import { Button } from "@/components/ui/button";
 import {
   FieldContent,
@@ -203,35 +204,12 @@ export function OnboardingForm() {
                     What school or college do you go to?
                   </FieldLabel>
                   <FieldContent>
-                    <Select
-                      name={field.name}
-                      onValueChange={(val) =>
-                        field.handleChange(val as Id<"schools">)
-                      }
+                    <SchoolCombobox
+                      id={field.name}
+                      schools={schools}
                       value={field.state.value}
-                      disabled={!schools === undefined}
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select your school or college" />
-                      </SelectTrigger>
-                      <SelectContent className="w-full">
-                        {schools === undefined ? (
-                          <div className="px-2 py-1.5 text-sm text-muted-foreground">
-                            Loading schools...
-                          </div>
-                        ) : schools?.length ? (
-                          schools.map((s) => (
-                            <SelectItem key={s._id} value={s._id}>
-                              {`${s.name} - ${s.level.charAt(0).toUpperCase() + s.level.slice(1)}`}
-                            </SelectItem>
-                          ))
-                        ) : (
-                          <div className="px-2 py-1.5 text-sm text-muted-foreground">
-                            No schools available
-                          </div>
-                        )}
-                      </SelectContent>
-                    </Select>
+                      onValueChange={(value) => field.handleChange(value)}
+                    />
                   </FieldContent>
                   <FieldError errors={field.state.meta.errors} />
                 </UIField>
