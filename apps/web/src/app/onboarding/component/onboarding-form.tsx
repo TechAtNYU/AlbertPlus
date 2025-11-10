@@ -1,19 +1,5 @@
 "use client";
 
-import { api } from "@albert-plus/server/convex/_generated/api";
-import type { Doc, Id } from "@albert-plus/server/convex/_generated/dataModel";
-import { useForm } from "@tanstack/react-form";
-import {
-  useConvexAuth,
-  useMutation,
-  usePaginatedQuery,
-  useQuery,
-} from "convex/react";
-import type { FunctionArgs } from "convex/server";
-import { useRouter } from "next/navigation";
-import React from "react";
-import { toast } from "sonner";
-import z from "zod";
 import { Button } from "@/components/ui/button";
 import {
   FieldContent,
@@ -33,7 +19,21 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import DegreeProgreeUpload from "@/modules/report-parsing/components/degree-progress-upload";
-import { schoolNameSchema, userCourseSchema } from "@/schemas/courses";
+import { userCourseSchema } from "@/schemas/courses";
+import { api } from "@albert-plus/server/convex/_generated/api";
+import type { Doc, Id } from "@albert-plus/server/convex/_generated/dataModel";
+import { useForm } from "@tanstack/react-form";
+import {
+  useConvexAuth,
+  useMutation,
+  usePaginatedQuery,
+  useQuery,
+} from "convex/react";
+import type { FunctionArgs } from "convex/server";
+import { useRouter } from "next/navigation";
+import React from "react";
+import { toast } from "sonner";
+import z from "zod";
 
 const dateSchema = z.object({
   year: z.number().int().min(2000).max(2100),
@@ -42,7 +42,7 @@ const dateSchema = z.object({
 
 const onboardingFormSchema = z.object({
   // Student data
-  school: schoolNameSchema,
+  school: z.string().transform((value) => value as Id<"schools">),
   programs: z.array(z.string()).min(1, "At least one program is required"),
   startingDate: dateSchema,
   expectedGraduationDate: dateSchema,
@@ -129,7 +129,7 @@ export function OnboardingForm() {
   const form = useForm({
     defaultValues: {
       // student data
-      school: "" as Doc<"students">["school"],
+      school: undefined as Id<"schools"> | undefined,
       programs: [] as Id<"programs">[],
       startingDate: {
         year: currentYear,
@@ -175,31 +175,31 @@ export function OnboardingForm() {
     >
       <section className="space-y-6">
         <header className="space-y-2">
-          <h2 className="text-2xl font-semibold">Academic Information</h2>
+          <h2 className="text-2xl font-semibold">Onboarding</h2>
           <p className="text-muted-foreground text-sm">
             Tell us about your academic background so we can personalize your
             experience.
           </p>
         </header>
-
-        <FieldSet className="space-y-6 text-start">
+        <FieldGroup>
           {/* school */}
           <form.Field name="school">
             {(field) => {
-              const invalid =
-                field.state.meta.isTouched && !field.state.meta.isValid;
               return (
-                <UIField data-invalid={invalid}>
-                  <FieldLabel className="text-sm font-medium text-gray-700">
+                <UIField>
+                  <FieldLabel htmlFor={field.name}>
                     What school or college do you go to?
                   </FieldLabel>
                   <FieldContent>
                     <Select
-                      onValueChange={(val) => field.handleChange(val)}
-                      value={field.state.value ?? ""}
+                      name={field.name}
+                      onValueChange={(val) =>
+                        field.handleChange(val as Id<"schools">)
+                      }
+                      value={field.state.value}
                       disabled={!schools === undefined}
                     >
-                      <SelectTrigger className="w-full" aria-invalid={invalid}>
+                      <SelectTrigger className="w-full">
                         <SelectValue placeholder="Select your school or college" />
                       </SelectTrigger>
                       <SelectContent className="w-full">
@@ -209,8 +209,8 @@ export function OnboardingForm() {
                           </div>
                         ) : schools?.length ? (
                           schools.map((s) => (
-                            <SelectItem key={s._id} value={s.name}>
-                              {s.name}
+                            <SelectItem key={s._id} value={s._id}>
+                              {`${s.name} - ${s.level.charAt(0).toUpperCase() + s.level.slice(1)}`}
                             </SelectItem>
                           ))
                         ) : (
@@ -230,22 +230,22 @@ export function OnboardingForm() {
           {/* programs (multi-select) */}
           <form.Field name="programs">
             {(field) => {
-              const invalid =
-                field.state.meta.isTouched && !field.state.meta.isValid;
               const selected = (field.state.value ?? []).map((p) => ({
                 value: p,
                 label: p,
               }));
               return (
-                <UIField data-invalid={invalid} className="gap-2">
-                  <FieldLabel className="text-sm font-medium text-gray-700">
-                    Please select your program (major and minor)
+                <UIField className="gap-2">
+                  <FieldLabel htmlFor={field.name}>
+                    Please select your majors and minors
                   </FieldLabel>
                   <FieldContent>
                     <MultipleSelector
                       value={selected}
                       onChange={(opts) =>
-                        field.handleChange(opts.map((o) => o.value))
+                        field.handleChange(
+                          opts.map((o) => o.value as Id<"programs">),
+                        )
                       }
                       defaultOptions={programOptions}
                       options={programOptions}
@@ -259,15 +259,6 @@ export function OnboardingForm() {
                       }
                     />
                     <div className="flex items-center justify-between pt-2 text-xs text-muted-foreground">
-                      <span>
-                        Loaded {programOptions.length} program
-                        {programOptions.length === 1 ? "" : "s"}
-                        {programsStatus === "CanLoadMore"
-                          ? " (more available)"
-                          : programsStatus === "LoadingMore"
-                            ? " (loading more...)"
-                            : ""}
-                      </span>
                       {programsStatus && programsStatus !== "Exhausted" && (
                         <Button
                           type="button"
@@ -429,7 +420,7 @@ export function OnboardingForm() {
               {(field) => <FieldError errors={field.state.meta.errors} />}
             </form.Field>
           </FieldGroup>
-        </FieldSet>
+        </FieldGroup>
       </section>
 
       <section className="space-y-6">
