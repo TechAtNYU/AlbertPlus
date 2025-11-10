@@ -1,5 +1,19 @@
 "use client";
 
+import { api } from "@albert-plus/server/convex/_generated/api";
+import type { Doc, Id } from "@albert-plus/server/convex/_generated/dataModel";
+import { useForm } from "@tanstack/react-form";
+import {
+  useConvexAuth,
+  useMutation,
+  usePaginatedQuery,
+  useQuery,
+} from "convex/react";
+import type { FunctionArgs } from "convex/server";
+import { useRouter } from "next/navigation";
+import React from "react";
+import { toast } from "sonner";
+import z from "zod";
 import MultipleSelector from "@/app/onboarding/component/multiselect";
 import { SchoolCombobox } from "@/app/onboarding/component/school-combobox";
 import { Button } from "@/components/ui/button";
@@ -17,7 +31,6 @@ import {
   FieldLabel,
   Field as UIField,
 } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -27,54 +40,40 @@ import {
 } from "@/components/ui/select";
 import DegreeProgreeUpload from "@/modules/report-parsing/components/degree-progress-upload";
 import type { UserCourse } from "@/modules/report-parsing/types";
-import { userCourseSchema } from "@/schemas/courses";
-import { api } from "@albert-plus/server/convex/_generated/api";
-import type { Doc, Id } from "@albert-plus/server/convex/_generated/dataModel";
-import { useForm } from "@tanstack/react-form";
-import {
-  useConvexAuth,
-  useMutation,
-  usePaginatedQuery,
-  useQuery,
-} from "convex/react";
-import type { FunctionArgs } from "convex/server";
-import { useRouter } from "next/navigation";
-import React from "react";
-import { toast } from "sonner";
-import z from "zod";
 
 const dateSchema = z.object({
   year: z.number().int().min(2000).max(2100),
   term: z.union([z.literal("spring"), z.literal("fall")]),
 });
 
-const onboardingFormSchema = z.object({
-  // Student data
-  school: z.string().transform((value) => value as Id<"schools">),
-  programs: z.array(z.string()).min(1, "At least one program is required"),
-  startingDate: dateSchema,
-  expectedGraduationDate: dateSchema,
-  // User courses
-  userCourses: z.array(userCourseSchema).default([]),
-});
-// .refine(
-//   (data) => {
-//     const startYear = data.startingDate.year;
-//     const startTerm = data.startingDate.term;
-//     const endYear = data.expectedGraduationDate.year;
-//     const endTerm = data.expectedGraduationDate.term;
-//
-//     // Convert to comparable numbers (spring=0, fall=1)
-//     const startValue = startYear * 2 + (startTerm === "fall" ? 1 : 0);
-//     const endValue = endYear * 2 + (endTerm === "fall" ? 1 : 0);
-//
-//     return endValue > startValue;
-//   },
-//   {
-//     message: "Expected graduation date must be after starting date",
-//     path: ["expectedGraduationDate"],
-//   },
-// );
+const onboardingFormSchema = z
+  .object({
+    // Student data
+    school: z.string().min(1, "Please select a school"),
+    programs: z.array(z.string()).min(1, "At least one program is required"),
+    startingDate: dateSchema,
+    expectedGraduationDate: dateSchema,
+    // User courses
+    userCourses: z.array(z.object()).optional(),
+  })
+  .refine(
+    (data) => {
+      const startYear = data.startingDate.year;
+      const startTerm = data.startingDate.term;
+      const endYear = data.expectedGraduationDate.year;
+      const endTerm = data.expectedGraduationDate.term;
+
+      // Convert to comparable numbers (spring=0, fall=1)
+      const startValue = startYear * 2 + (startTerm === "fall" ? 1 : 0);
+      const endValue = endYear * 2 + (endTerm === "fall" ? 1 : 0);
+
+      return endValue > startValue;
+    },
+    {
+      message: "Expected graduation date must be after starting date",
+      path: ["expectedGraduationDate"],
+    },
+  );
 
 export function OnboardingForm() {
   const router = useRouter();
@@ -147,7 +146,7 @@ export function OnboardingForm() {
   const form = useForm({
     defaultValues: {
       // student data
-      school: undefined as Id<"schools"> | undefined,
+      school: "" as Id<"schools">,
       programs: [] as Id<"programs">[],
       startingDate: {
         year: currentYear,
@@ -158,9 +157,25 @@ export function OnboardingForm() {
         term: defaultTerm,
       } as Doc<"students">["expectedGraduationDate"],
       // user courses
-      userCourses: [] as FunctionArgs<
-        typeof api.userCourses.importUserCourses
-      >["courses"],
+      userCourses: undefined as
+        | FunctionArgs<typeof api.userCourses.importUserCourses>["courses"]
+        | undefined,
+    },
+    validators: {
+      onSubmit: ({ value }) => {
+        const result = onboardingFormSchema.safeParse(value);
+        if (!result.success) {
+          const fieldErrors: Record<string, { message: string }[]> = {};
+          for (const issue of result.error.issues) {
+            const path = issue.path.join(".");
+            fieldErrors[path] = [{ message: issue.message }];
+          }
+          return {
+            fields: fieldErrors,
+          };
+        }
+        return undefined;
+      },
     },
     onSubmit: async ({ value }) => {
       try {
@@ -171,9 +186,11 @@ export function OnboardingForm() {
           expectedGraduationDate: value.expectedGraduationDate,
         });
 
-        await importUserCourses({ courses: value.userCourses });
+        if (value.userCourses) {
+          await importUserCourses({ courses: value.userCourses });
+        }
 
-        toast.success("Onboarding completed. Redirecting to dashboard...");
+        toast.success("Onboarding completed.");
         router.push("/dashboard");
       } catch (error) {
         console.error("Error completing onboarding:", error);
@@ -413,7 +430,7 @@ export function OnboardingForm() {
             onConfirm={handleConfirmImport}
             showFileLoaded={isFileLoaded}
             onFileClick={() => {
-              form.setFieldValue("userCourses", []);
+              form.setFieldValue("userCourses", undefined);
               setIsFileLoaded(false);
             }}
           />
