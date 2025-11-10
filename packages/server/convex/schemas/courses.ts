@@ -4,7 +4,7 @@ import { schoolName } from "./schools";
 const courses = {
   code: v.string(), // CSCI-UA 101
   program: v.string(), // CSCI-UA
-  level: v.number(), // 100
+  level: v.number(), // 1
   title: v.string(), // Intro to Computer Science
   credits: v.number(), // 4
   school: schoolName,
