@@ -172,21 +172,6 @@ export const seedAll = internalMutation({
         }),
       ),
     ),
-    students: v.array(
-      v.object({
-        userId: v.string(),
-        programNames: v.array(v.string()),
-        school: schoolName,
-        startingDate: v.object({
-          year: v.number(),
-          term: v.union(v.literal("spring"), v.literal("fall")),
-        }),
-        expectedGraduationDate: v.object({
-          year: v.number(),
-          term: v.union(v.literal("spring"), v.literal("fall")),
-        }),
-      }),
-    ),
     userCourses: v.array(
       v.object({
         userId: v.string(),
@@ -378,39 +363,7 @@ export const seedAll = internalMutation({
       }
     }
 
-    // 7. Seed students
-    console.log("👥 Seeding students...");
-    for (const student of args.students) {
-      const programIds = student.programNames
-        .map((name) => programMap.get(name))
-        .filter((id) => id !== undefined);
-
-      if (programIds.length === 0) {
-        console.warn(`No valid programs found for student ${student.userId}`);
-        continue;
-      }
-
-      const existing = await ctx.db
-        .query("students")
-        .withIndex("by_user_id", (q) => q.eq("userId", student.userId))
-        .first();
-
-      const studentData = {
-        userId: student.userId,
-        programs: programIds,
-        school: student.school,
-        startingDate: student.startingDate,
-        expectedGraduationDate: student.expectedGraduationDate,
-      };
-
-      if (existing) {
-        await ctx.db.patch(existing._id, studentData);
-      } else {
-        await ctx.db.insert("students", studentData);
-      }
-    }
-
-    // 8. Seed user courses
+    // 7. Seed user courses
     console.log("📚 Seeding user courses...");
     for (const userCourse of args.userCourses) {
       const existing = await ctx.db
