@@ -48,5 +48,5 @@ export default defineSchema({
     "userId",
   ]),
   students: defineTable(students).index("by_user_id", ["userId"]),
-  schools: defineTable(schools).index("by_school_name", ["name"]),
+  schools: defineTable(schools),
 });

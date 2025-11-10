@@ -9,7 +9,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import type { Term } from "@/utils/term";
+import { formatTermTitle, type Term } from "@/utils/term";
 import type { UserCourse } from "../types";
 
 type ConfirmModalProps = {
@@ -19,13 +19,6 @@ type ConfirmModalProps = {
   onConfirm: () => void;
   onCancel: () => void;
   isImporting?: boolean;
-};
-
-const termLabels: Record<Term, string> = {
-  spring: "Spring",
-  summer: "Summer",
-  fall: "Fall",
-  "j-term": "J-Term",
 };
 
 function groupCoursesByYearAndTerm(courses: UserCourse[]) {
@@ -94,7 +87,7 @@ export default function ConfirmModal({
               return (
                 <div key={key} className="space-y-2">
                   <h3 className="text-sm font-semibold text-foreground">
-                    {termLabels[term as Term]} {year}
+                    {formatTermTitle(term as Term, Number(year))}
                   </h3>
                   <div className="space-y-2">
                     {termCourses.map((course, idx) => (
