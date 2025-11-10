@@ -7,7 +7,7 @@ import {
   useQueries,
   useQuery,
 } from "convex/react";
-import { ProgramRequirementsChart } from "@/modules/degree-progress/components/degree-charts";
+import { ProgramRequirementsChart } from "@/app/dashboard/components/degree-charts";
 
 const HomePage = () => {
   const { isAuthenticated } = useConvexAuth();
