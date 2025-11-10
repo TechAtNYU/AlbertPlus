@@ -1,16 +1,15 @@
 "use client";
 
+import MultipleSelector from "@/app/onboarding/component/multiselect";
 import { Button } from "@/components/ui/button";
 import {
   FieldContent,
   FieldError,
   FieldGroup,
   FieldLabel,
-  FieldSet,
   Field as UIField,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import MultipleSelector from "@/components/ui/multiselect";
 import {
   Select,
   SelectContent,
@@ -19,7 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import DegreeProgreeUpload from "@/modules/report-parsing/components/degree-progress-upload";
-import { UserCourse } from "@/modules/report-parsing/types";
+import type { UserCourse } from "@/modules/report-parsing/types";
 import { userCourseSchema } from "@/schemas/courses";
 import { api } from "@albert-plus/server/convex/_generated/api";
 import type { Doc, Id } from "@albert-plus/server/convex/_generated/dataModel";
@@ -268,25 +267,11 @@ export function OnboardingForm() {
                       triggerSearchOnFocus
                       placeholder="Select your programs"
                       commandProps={{ label: "Select programs" }}
+                      onListReachEnd={handleLoadMorePrograms}
                       emptyIndicator={
                         <p className="text-center text-sm">No programs found</p>
                       }
                     />
-                    <div className="flex items-center justify-between pt-2 text-xs text-muted-foreground">
-                      {programsStatus && programsStatus !== "Exhausted" && (
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="ghost"
-                          onClick={handleLoadMorePrograms}
-                          disabled={programsStatus !== "CanLoadMore"}
-                        >
-                          {programsStatus === "LoadingMore"
-                            ? "Loading..."
-                            : "Load 10 more"}
-                        </Button>
-                      )}
-                    </div>
                   </FieldContent>
                   <FieldError errors={field.state.meta.errors} />
                 </UIField>
