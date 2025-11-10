@@ -277,147 +277,114 @@ export function OnboardingForm() {
             {/* Program timeline - start and end dates in one row */}
             <FieldGroup>
               <FieldLabel>When does your program start and end?</FieldLabel>
-              <div className="flex flex-col lg:flex-row gap-4 lg:items-end">
-                {/* Starting date section */}
-                <div className="flex-1 space-y-2">
-                  <div className="text-sm font-medium">Start date</div>
-                  <div className="flex gap-2">
-                    {/* startingDate.term */}
-                    <form.Field name="startingDate.term">
-                      {(field) => {
-                        return (
-                          <UIField className="w-28">
-                            <FieldContent>
-                              <Select
-                                value={field.state.value ?? ""}
-                                onValueChange={(val) =>
-                                  field.handleChange(val as "spring" | "fall")
-                                }
-                              >
-                                <SelectTrigger
-                                  aria-invalid={!field.state.meta.isValid}
-                                >
-                                  <SelectValue placeholder="Term" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="spring">Spring</SelectItem>
-                                  <SelectItem value="fall">Fall</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </FieldContent>
-                            <FieldError errors={field.state.meta.errors} />
-                          </UIField>
-                        );
-                      }}
-                    </form.Field>
-                    {/* startingDate.year */}
-                    <form.Field name="startingDate.year">
-                      {(field) => {
-                        return (
-                          <UIField className="flex-1">
-                            <FieldContent>
-                              <Select
-                                value={field.state.value?.toString() ?? ""}
-                                onValueChange={(val) =>
-                                  field.handleChange(Number.parseInt(val, 10))
-                                }
-                              >
-                                <SelectTrigger
-                                  aria-invalid={!field.state.meta.isValid}
-                                >
-                                  <SelectValue placeholder="Year" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {yearOptions.map((year) => (
-                                    <SelectItem
-                                      key={year}
-                                      value={year.toString()}
-                                    >
-                                      {year}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </FieldContent>
-                            <FieldError errors={field.state.meta.errors} />
-                          </UIField>
-                        );
-                      }}
-                    </form.Field>
+              <div className="rounded-lg border border-border/40 bg-muted/5 p-4">
+                <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-8">
+                  {/* Starting date section */}
+                  <div className="flex-1 space-y-3">
+                    <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      Start date
+                    </div>
+                    <div className="flex gap-2">
+                      {/* startingDate.term */}
+                      <form.Field name="startingDate.term">
+                        {(field) => (
+                          <Select
+                            value={field.state.value ?? ""}
+                            onValueChange={(val) =>
+                              field.handleChange(val as "spring" | "fall")
+                            }
+                          >
+                            <SelectTrigger
+                              aria-invalid={!field.state.meta.isValid}
+                            >
+                              <SelectValue placeholder="Term" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="spring">Spring</SelectItem>
+                              <SelectItem value="fall">Fall</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        )}
+                      </form.Field>
+                      {/* startingDate.year */}
+                      <form.Field name="startingDate.year">
+                        {(field) => (
+                          <Select
+                            value={field.state.value?.toString() ?? ""}
+                            onValueChange={(val) =>
+                              field.handleChange(Number.parseInt(val, 10))
+                            }
+                          >
+                            <SelectTrigger
+                              aria-invalid={!field.state.meta.isValid}
+                            >
+                              <SelectValue placeholder="Year" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {yearOptions.map((year) => (
+                                <SelectItem key={year} value={year.toString()}>
+                                  {year}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        )}
+                      </form.Field>
+                    </div>
                   </div>
-                </div>
 
-                {/* "To" separator */}
-                <div className="hidden lg:flex items-center pb-2 text-sm text-muted-foreground">
-                  to
-                </div>
-
-                {/* Expected graduation date section */}
-                <div className="flex-1 space-y-2">
-                  <div className="text-sm font-medium">Expected graduation</div>
-                  <div className="flex gap-2">
-                    {/* expectedGraduationDate.term */}
-                    <form.Field name="expectedGraduationDate.term">
-                      {(field) => {
-                        return (
-                          <UIField className="w-28">
-                            <FieldContent>
-                              <Select
-                                value={field.state.value ?? ""}
-                                onValueChange={(val) =>
-                                  field.handleChange(val as "spring" | "fall")
-                                }
-                              >
-                                <SelectTrigger
-                                  aria-invalid={!field.state.meta.isValid}
-                                >
-                                  <SelectValue placeholder="Term" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="spring">Spring</SelectItem>
-                                  <SelectItem value="fall">Fall</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </FieldContent>
-                            <FieldError errors={field.state.meta.errors} />
-                          </UIField>
-                        );
-                      }}
-                    </form.Field>
-                    {/* expectedGraduationDate.year */}
-                    <form.Field name="expectedGraduationDate.year">
-                      {(field) => {
-                        return (
-                          <UIField className="flex-1">
-                            <FieldContent>
-                              <Select
-                                value={field.state.value?.toString() ?? ""}
-                                onValueChange={(val) =>
-                                  field.handleChange(Number.parseInt(val, 10))
-                                }
-                              >
-                                <SelectTrigger
-                                  aria-invalid={!field.state.meta.isValid}
-                                >
-                                  <SelectValue placeholder="Year" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {yearOptions.map((year) => (
-                                    <SelectItem
-                                      key={year}
-                                      value={year.toString()}
-                                    >
-                                      {year}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </FieldContent>
-                            <FieldError errors={field.state.meta.errors} />
-                          </UIField>
-                        );
-                      }}
-                    </form.Field>
+                  {/* Expected graduation date section */}
+                  <div className="flex-1 space-y-3">
+                    <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      Expected graduation
+                    </div>
+                    <div className="flex gap-2">
+                      {/* expectedGraduationDate.term */}
+                      <form.Field name="expectedGraduationDate.term">
+                        {(field) => (
+                          <Select
+                            value={field.state.value ?? ""}
+                            onValueChange={(val) =>
+                              field.handleChange(val as "spring" | "fall")
+                            }
+                          >
+                            <SelectTrigger
+                              aria-invalid={!field.state.meta.isValid}
+                            >
+                              <SelectValue placeholder="Term" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="spring">Spring</SelectItem>
+                              <SelectItem value="fall">Fall</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        )}
+                      </form.Field>
+                      {/* expectedGraduationDate.year */}
+                      <form.Field name="expectedGraduationDate.year">
+                        {(field) => (
+                          <Select
+                            value={field.state.value?.toString() ?? ""}
+                            onValueChange={(val) =>
+                              field.handleChange(Number.parseInt(val, 10))
+                            }
+                          >
+                            <SelectTrigger
+                              aria-invalid={!field.state.meta.isValid}
+                            >
+                              <SelectValue placeholder="Year" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {yearOptions.map((year) => (
+                                <SelectItem key={year} value={year.toString()}>
+                                  {year}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        )}
+                      </form.Field>
+                    </div>
                   </div>
                 </div>
               </div>
