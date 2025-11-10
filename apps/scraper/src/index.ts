@@ -206,7 +206,7 @@ export default {
               }
               case "discover-courses": {
                 const courseUrls = await discoverCourses(job.url);
-                // Cloudflare Queues has a limit of 100 messages per sendBatch()
+                // NOTE: Cloudflare Queues has a limit of 100 messages per sendBatch()
                 console.log(`Discovered ${courseUrls.length} course URLs`);
 
                 const BATCH_SIZE = 10;

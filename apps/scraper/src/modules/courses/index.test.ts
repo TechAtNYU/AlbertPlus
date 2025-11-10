@@ -54,7 +54,7 @@ describe("Courses Scraper", () => {
       const mockDb = createMockDb();
       const mockEnv = createMockEnv();
 
-      await expect(
+      expect(
         scrapeCourse(
           "https://bulletins.nyu.edu/courses/nonexistent/",
           mockDb,
