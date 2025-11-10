@@ -15,7 +15,7 @@ const ConvexWithClerkProvider = ({ children }) => {
     <ClerkProvider
       publishableKey={PUBLISHABLE_KEY}
       syncHost={SYNC_HOST}
-      afterSignOutUrl={chrome.runtime.getURL("popup.html")}
+      afterSignOutUrl={chrome.runtime.getURL("sidepanel.html")}
     >
       <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
         {children}
