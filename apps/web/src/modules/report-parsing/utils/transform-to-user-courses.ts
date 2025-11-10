@@ -1,6 +1,6 @@
+import { gradeSchema } from "@/schemas/courses";
 import type { Term } from "@/utils/term";
 import type { Grade, UserCourse } from "../types";
-import { gradeSchema } from "@/schemas/courses";
 
 interface ParsedCourse {
   term: string;

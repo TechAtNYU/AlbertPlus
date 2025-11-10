@@ -1,5 +1,8 @@
 "use client";
 
+import type { Doc, Id } from "@albert-plus/server/convex/_generated/dataModel";
+import { CheckIcon, ChevronDownIcon } from "lucide-react";
+import { useId, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -15,9 +18,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import type { Doc, Id } from "@albert-plus/server/convex/_generated/dataModel";
-import { CheckIcon, ChevronDownIcon } from "lucide-react";
-import { useId, useState } from "react";
 
 type School = Doc<"schools">;
 

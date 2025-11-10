@@ -1,7 +1,7 @@
 import { omit } from "convex-helpers";
+import { getOneFrom } from "convex-helpers/server/relationships";
 import { protectedMutation, protectedQuery } from "./helpers/auth";
 import { students } from "./schemas/students";
-import { getOneFrom } from "convex-helpers/server/relationships";
 
 export const getCurrentStudent = protectedQuery({
   args: {},
