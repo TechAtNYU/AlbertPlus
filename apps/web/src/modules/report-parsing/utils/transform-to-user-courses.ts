@@ -78,19 +78,18 @@ export function transformToUserCourses(
     const courseCode = `${course.subject} ${course.catalogNumber}`;
 
     let title = course.title;
-    if (course.meta && Object.keys(course.meta).length > 0) {
-      const formattedMeta = Object.entries(course.meta)
-        .map(([key, value]) => {
-          const readableKey = key.replace(/([A-Z])/g, " $1").trim();
-          return `${readableKey}: ${value}`;
-        })
-        .join(" • ");
-      title = `${title} (${formattedMeta})`;
+
+    if (course.meta?.CourseTopic) {
+      const topic = course.meta.CourseTopic.trim();
+      console.log(topic);
+      if (topic) {
+        title = `${title} ${topic}`;
+      }
     }
 
     const userCourse: UserCourse = {
       courseCode,
-      title,
+      title: title,
       year,
       term,
     };
