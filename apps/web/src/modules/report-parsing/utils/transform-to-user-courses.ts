@@ -77,9 +77,20 @@ export function transformToUserCourses(
     const { year, term } = normalizeTerm(course.term);
     const courseCode = `${course.subject} ${course.catalogNumber}`;
 
+    let title = course.title;
+    if (course.meta && Object.keys(course.meta).length > 0) {
+      const formattedMeta = Object.entries(course.meta)
+        .map(([key, value]) => {
+          const readableKey = key.replace(/([A-Z])/g, " $1").trim();
+          return `${readableKey}: ${value}`;
+        })
+        .join(" • ");
+      title = `${title} (${formattedMeta})`;
+    }
+
     const userCourse: UserCourse = {
       courseCode,
-      title: course.title,
+      title,
       year,
       term,
     };
