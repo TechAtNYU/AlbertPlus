@@ -84,7 +84,13 @@ export function transformToUserCourses(
       topic = topic.replace(/^\s*\d+\s*-\s*/, "").trim();
       console.log(topic);
       if (topic) {
-        title = `${title} ${topic}`;
+        if (title.endsWith(":")) {
+          title = `${title} ${topic}`;
+        } else if (title.includes(":")) {
+          title = `${title} ${topic}`;
+        } else {
+          title = `${title}: ${topic}`;
+        }
       }
     }
 
