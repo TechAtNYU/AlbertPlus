@@ -11,6 +11,7 @@ import {
 import { parseCourseHistory } from "../utils/parse-course-history";
 import { transformToUserCourses } from "../utils/transform-to-user-courses";
 import ConfirmModal from "./confirm-modal";
+import { extractStartingTerm } from "../utils/parse-starting-term";
 
 type FileUploadButtonProps = {
   maxSizeMB?: number;
