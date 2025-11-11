@@ -40,6 +40,7 @@ import {
 } from "@/components/ui/select";
 import DegreeProgreeUpload from "@/modules/report-parsing/components/degree-progress-upload";
 import type { UserCourse } from "@/modules/report-parsing/types";
+import type { StartingTerm } from "@/modules/report-parsing/utils/parse-starting-term";
 
 const dateSchema = z.object({
   year: z.number().int().min(2000).max(2100),
@@ -199,9 +200,16 @@ export function OnboardingForm() {
     },
   });
 
-  function handleConfirmImport(coursesToImport: UserCourse[]) {
+  function handleConfirmImport(
+    coursesToImport: UserCourse[],
+    startingTerm: StartingTerm | null,
+  ) {
     if (coursesToImport.length === 0) {
       return;
+    }
+
+    if (startingTerm) {
+      form.setFieldValue("startingDate", startingTerm);
     }
 
     form.setFieldValue("userCourses", coursesToImport);
