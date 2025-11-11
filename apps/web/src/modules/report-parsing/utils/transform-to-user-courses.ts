@@ -80,7 +80,8 @@ export function transformToUserCourses(
     let title = course.title;
 
     if (course.meta?.CourseTopic) {
-      const topic = course.meta.CourseTopic.trim();
+      let topic = course.meta.CourseTopic.trim();
+      topic = topic.replace(/^\s*\d+\s*-\s*/, "").trim();
       console.log(topic);
       if (topic) {
         title = `${title} ${topic}`;
