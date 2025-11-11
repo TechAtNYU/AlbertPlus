@@ -60,6 +60,13 @@ export default function DegreeProgreeUpload({
           removeFile(fileData.id);
           return;
         }
+        //console log the starting term
+        try {
+          const startingTerm = await extractStartingTerm(file);
+          console.log("Starting Term:", startingTerm);
+        } catch (e) {
+          console.warn("Could not find starting term:", e);
+        }
       } catch (err) {
         console.error("Error verifying PDF:", err);
         toast.error("Could not verify the PDF file.");
