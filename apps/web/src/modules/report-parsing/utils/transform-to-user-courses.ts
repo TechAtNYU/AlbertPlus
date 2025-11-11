@@ -86,7 +86,6 @@ export function transformToUserCourses(
     if (course.meta?.CourseTopic) {
       let topic = course.meta.CourseTopic.trim();
       topic = topic.replace(/^\s*\d+\s*-\s*/, "").trim();
-      console.log(topic);
 
       if (topic) {
         if (title.includes(":")) {
