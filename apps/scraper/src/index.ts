@@ -106,11 +106,11 @@ export default {
       `Cronjob: Scraping flags - current: ${isScrapeCurrent}, next: ${isScrapeNext}`
     );
 
-    // Collect terms to scrape
-    const termsToScrape: Array<{
-      term: "spring" | "summer" | "fall" | "j-term";
-      year: number;
-    }> = [];
+    // Collect unique terms to scrape using a Map to deduplicate
+    const termsMap = new Map<
+      string,
+      { term: "spring" | "summer" | "fall" | "j-term"; year: number }
+    >();
 
     if (isScrapeCurrent) {
       const currentTerm = (await convex.getAppConfig({
@@ -119,7 +119,8 @@ export default {
       const currentYearStr = await convex.getAppConfig({ key: "current_year" });
       if (currentYearStr) {
         const currentYear = Number.parseInt(currentYearStr, 10);
-        termsToScrape.push({ term: currentTerm, year: currentYear });
+        const key = `${currentTerm}-${currentYear}`;
+        termsMap.set(key, { term: currentTerm, year: currentYear });
       }
     }
 
@@ -132,9 +133,12 @@ export default {
       const nextYearStr = await convex.getAppConfig({ key: "next_year" });
       if (nextYearStr) {
         const nextYear = Number.parseInt(nextYearStr, 10);
-        termsToScrape.push({ term: nextTerm, year: nextYear });
+        const key = `${nextTerm}-${nextYear}`;
+        termsMap.set(key, { term: nextTerm, year: nextYear });
       }
     }
+
+    const termsToScrape = Array.from(termsMap.values());
 
     // Trigger course offerings discovery for each enabled term
     const courseOfferingsUrl = new URL(env.SCRAPING_BASE_URL).toString();

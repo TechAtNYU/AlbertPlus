@@ -5,13 +5,12 @@
   "scripts": {
     "dev": "doppler run -- convex dev",
     "dashboard": "convex dashboard",
-    "check": "biome check",
     "check:types": "tsc --noEmit",
     "seed:configs": "convex import --table appConfigs --replace seed/appConfigs.json",
     "seed": "bun seed/seed.ts"
   },
   "dependencies": {
-    "convex": "^1.28.2",
+    "convex": "^1.29.0",
     "convex-helpers": "^0.1.104",
     "zod": "^4.1.12"
   },

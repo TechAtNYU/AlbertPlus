@@ -11,6 +11,42 @@ import { internalMutation } from "./_generated/server";
 import { schoolName } from "./schemas/schools";
 
 /**
+ * Clear all data from all tables
+ * WARNING: This will delete all data in the database
+ */
+export const clearAll = internalMutation({
+  handler: async (ctx) => {
+    console.log("🗑  Clearing all database tables...");
+
+    // Delete in reverse dependency order to maintain referential integrity
+    const tables = [
+      "userCourseOfferings",
+      "userCourses",
+      "students",
+      "courseOfferings",
+      "requirements",
+      "prerequisites",
+      "courses",
+      "programs",
+      "schools",
+      "appConfigs",
+    ] as const;
+
+    for (const tableName of tables) {
+      console.log(`  Clearing ${tableName}...`);
+      const documents = await ctx.db.query(tableName).collect();
+      for (const doc of documents) {
+        await ctx.db.delete(doc._id);
+      }
+      console.log(`  ✓ Cleared ${documents.length} records from ${tableName}`);
+    }
+
+    console.log("✅ All tables cleared successfully!");
+    return { success: true, message: "All tables cleared" };
+  },
+});
+
+/**
  * Seed all data from JSON files
  * This is the main seeding function that handles all tables with proper relationships
  */
@@ -135,21 +171,6 @@ export const seedAll = internalMutation({
           creditsRequired: v.number(),
         }),
       ),
-    ),
-    students: v.array(
-      v.object({
-        userId: v.string(),
-        programNames: v.array(v.string()),
-        school: schoolName,
-        startingDate: v.object({
-          year: v.number(),
-          term: v.union(v.literal("spring"), v.literal("fall")),
-        }),
-        expectedGraduationDate: v.object({
-          year: v.number(),
-          term: v.union(v.literal("spring"), v.literal("fall")),
-        }),
-      }),
     ),
     userCourses: v.array(
       v.object({
@@ -342,39 +363,7 @@ export const seedAll = internalMutation({
       }
     }
 
-    // 7. Seed students
-    console.log("👥 Seeding students...");
-    for (const student of args.students) {
-      const programIds = student.programNames
-        .map((name) => programMap.get(name))
-        .filter((id) => id !== undefined);
-
-      if (programIds.length === 0) {
-        console.warn(`No valid programs found for student ${student.userId}`);
-        continue;
-      }
-
-      const existing = await ctx.db
-        .query("students")
-        .withIndex("by_user_id", (q) => q.eq("userId", student.userId))
-        .first();
-
-      const studentData = {
-        userId: student.userId,
-        programs: programIds,
-        school: student.school,
-        startingDate: student.startingDate,
-        expectedGraduationDate: student.expectedGraduationDate,
-      };
-
-      if (existing) {
-        await ctx.db.patch(existing._id, studentData);
-      } else {
-        await ctx.db.insert("students", studentData);
-      }
-    }
-
-    // 8. Seed user courses
+    // 7. Seed user courses
     console.log("📚 Seeding user courses...");
     for (const userCourse of args.userCourses) {
       const existing = await ctx.db

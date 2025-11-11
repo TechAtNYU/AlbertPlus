@@ -35,15 +35,8 @@ async function seedDatabase() {
     const courseOfferings = await readJSON("courseOfferings.json");
     const prerequisites = await readJSON("prerequisites.json");
     const requirements = await readJSON("requirements.json");
-    const studentsData = await readJSON("students.json");
     const userCoursesData = await readJSON("userCourses.json");
     const userCourseOfferingsData = await readJSON("userCourseOfferings.json");
-
-    // biome-ignore lint/suspicious/noExplicitAny: JSON data doesn't have types
-    const students = studentsData.map((student: any) => ({
-      ...student,
-      userId: TEST_USER_ID,
-    }));
 
     // biome-ignore lint/suspicious/noExplicitAny: JSON data doesn't have types
     const userCourses = userCoursesData.map((course: any) => ({
@@ -67,11 +60,29 @@ async function seedDatabase() {
     console.log(`  - ${courseOfferings.length} course offerings`);
     console.log(`  - ${prerequisites.length} prerequisites`);
     console.log(`  - ${requirements.length} requirements`);
-    console.log(`  - ${students.length} students`);
     console.log(`  - ${userCourses.length} user courses`);
     console.log(`  - ${userCourseOfferings.length} user course offerings`);
     console.log(`\n🔑 Using TEST_USER_ID: ${TEST_USER_ID}\n`);
 
+    // Step 1: Clear all existing data
+    console.log("🗑  Clearing existing database...\n");
+    const clearCommand = "npx convex run seed:clearAll --no-push";
+
+    const { stdout: clearStdout, stderr: clearStderr } = await execAsync(
+      clearCommand,
+      {
+        cwd: new URL("..", import.meta.url).pathname,
+        maxBuffer: 10 * 1024 * 1024,
+      },
+    );
+
+    if (clearStderr) {
+      console.error("stderr:", clearStderr);
+    }
+
+    console.log(clearStdout);
+
+    // Step 2: Seed new data
     const data = JSON.stringify({
       appConfigs,
       schools,
@@ -80,12 +91,11 @@ async function seedDatabase() {
       courseOfferings,
       prerequisites,
       requirements,
-      students,
       userCourses,
       userCourseOfferings,
     });
 
-    console.log("🚀 Calling Convex internal mutation via CLI...\n");
+    console.log("\n🚀 Seeding new data via Convex CLI...\n");
 
     const command = `npx convex run seed:seedAll --no-push '${data.replace(/'/g, "'\\''")}'`;
 

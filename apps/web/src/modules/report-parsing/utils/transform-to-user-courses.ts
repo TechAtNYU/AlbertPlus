@@ -1,4 +1,5 @@
-import type { Term } from "@/components/AppConfigProvider";
+import { gradeSchema } from "@/schemas/courses";
+import type { Term } from "@/utils/term";
 import type { Grade, UserCourse } from "../types";
 
 interface ParsedCourse {
@@ -57,28 +58,11 @@ function normalizeGrade(gradeStr: string): Grade | undefined {
     return undefined;
   }
 
-  const normalized = gradeStr.toLowerCase().trim() as Grade;
-  const validGrades: Grade[] = [
-    "a",
-    "a-",
-    "b+",
-    "b",
-    "b-",
-    "c+",
-    "c",
-    "c-",
-    "d+",
-    "d",
-    "p",
-    "f",
-    "w",
-  ];
+  const normalized = gradeStr.toLowerCase().trim();
 
-  if (validGrades.includes(normalized)) {
-    return normalized;
-  }
+  const grade = gradeSchema.parse(normalized);
 
-  return undefined;
+  return grade;
 }
 
 /**
