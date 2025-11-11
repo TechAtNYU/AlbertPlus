@@ -21,7 +21,7 @@ export async function discoverCourses(url: string): Promise<string[]> {
 export async function scrapeCourse(
   url: string,
   db: DrizzleD1Database,
-  env: CloudflareBindings
+  env: CloudflareBindings,
 ): Promise<{
   course: Omit<z.infer<typeof ZUpsertCourseWithPrerequisites>, "prerequisites">;
   prerequisites: CoursePrerequisite[];

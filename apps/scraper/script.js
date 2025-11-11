@@ -1,11 +1,12 @@
 /** biome-ignore-all lint/correctness/noUnusedFunctionParameters: bypass for now */
+
+import util from "node:util";
 import {
   ZUpsertProgramWithRequirements,
   ZUpsertRequirements,
 } from "@albert-plus/server/convex/http";
 import { DrizzleD1Database } from "drizzle-orm/d1";
 import * as z from "zod/mini";
-import util from "node:util";
 
 export async function bulletinDiscoverSchools(url) {
   const res = await fetch(url, {
@@ -20,7 +21,7 @@ export async function bulletinDiscoverSchools(url) {
   const linkRegex = /<a[^>]*href=["']([^"']+)["'][^>]*>(.*?)<\/a>/gi;
   const hrefs = [];
   const validSchools = Object.values(
-    ZUpsertProgramWithRequirements.shape.school.options
+    ZUpsertProgramWithRequirements.shape.school.options,
   );
   for (const section of matches) {
     let match;
@@ -46,7 +47,7 @@ export async function scrapeProgramsListFromSchool(urlarray, db, env) {
     programUrl: "",
     requirements: [],
   });
-  let programlist = [];
+  const programlist = [];
   if (urlarray[1].startsWith("/undergraduate")) {
     schoolbaseinfo.level = "undergraduate";
   } else {
@@ -62,7 +63,7 @@ export async function scrapeProgramsListFromSchool(urlarray, db, env) {
     const res = await fetch(target);
     const html = await res.text();
     const sitemapMatch = html.match(
-      /<div\s+class=["']sitemap["'][^>]*>[\s\S]*?<\/div>/i
+      /<div\s+class=["']sitemap["'][^>]*>[\s\S]*?<\/div>/i,
     );
     if (!sitemapMatch) {
       return [schoolbaseinfo, []];
@@ -158,7 +159,7 @@ export async function scrapeRequirements(programdet, db, env) {
     if (/<b\b[^>]*>[\s\S]*?<\/b>/i.test(trHtml)) return true;
     if (
       /<span\b[^>]*\bcourselistcomment\b[^"']*\bareaheader\b[^"']*["'][^>]*>[\s\S]*?<\/span>/i.test(
-        trHtml
+        trHtml,
       )
     )
       return true;
@@ -171,7 +172,7 @@ export async function scrapeRequirements(programdet, db, env) {
     m = trHtml.match(/<b\b[^>]*>([\s\S]*?)<\/b>/i);
     if (m) return cleanText(m[1]);
     m = trHtml.match(
-      /<span\b[^>]*\bcourselistcomment\b[^"']*\bareaheader\b[^"']*["'][^>]*>([\s\S]*?)<\/span>/i
+      /<span\b[^>]*\bcourselistcomment\b[^"']*\bareaheader\b[^"']*["'][^>]*>([\s\S]*?)<\/span>/i,
     );
     if (m) return cleanText(m[1]);
     return cleanText(trHtml);
@@ -208,7 +209,7 @@ export async function scrapeRequirements(programdet, db, env) {
           tableOpenTag,
           colgroup,
           thead,
-          currentRows.join("")
+          currentRows.join(""),
         );
         sections.push([currentName, sectionTable]);
       }
@@ -267,7 +268,7 @@ export async function scrapeRequirements(programdet, db, env) {
       let title = "";
       if (titleMatch) title = cleanText(titleMatch[0]);
       const creditsMatch = tr.match(
-        /<td[^>]*class=["'][^"']*\bhourscol\b[^"']*["'][^>]*>([\s\S]*?)<\/td>/i
+        /<td[^>]*class=["'][^"']*\bhourscol\b[^"']*["'][^>]*>([\s\S]*?)<\/td>/i,
       );
       const creditsRaw = creditsMatch ? cleanText(creditsMatch[1]) : "";
       const credits = creditsRaw ? parseFloat(creditsRaw) || null : null;
@@ -291,7 +292,7 @@ export async function scrapeRequirements(programdet, db, env) {
 
 async function main() {
   const message = await bulletinDiscoverSchools("https://bulletins.nyu.edu");
-  let finalarray = [];
+  const finalarray = [];
   for (const item of message) {
     const plist = await scrapeProgramsListFromSchool(item);
     const programs = await scrapeProgramsFromProgramsList(plist);
@@ -304,7 +305,7 @@ async function main() {
       depth: null,
       maxArrayLength: null,
       colors: true,
-    })
+    }),
   );
 }
 

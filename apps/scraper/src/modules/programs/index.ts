@@ -24,7 +24,7 @@ export async function discoverPrograms(url: string): Promise<string[]> {
 export async function scrapeProgram(
   url: string,
   db: DrizzleD1Database,
-  env: CloudflareBindings
+  env: CloudflareBindings,
 ): Promise<{
   program: Omit<z.infer<typeof ZUpsertProgramWithRequirements>, "requirements">;
   requirements: ProgramRequirement[];
