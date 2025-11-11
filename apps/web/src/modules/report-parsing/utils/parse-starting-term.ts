@@ -1,9 +1,8 @@
 import { extractPdfText } from "./extract-pdf-text";
 
 export interface StartingTerm {
-  career: string;
   year: number;
-  term: string;
+  term: "spring" | "fall";
 }
 
 /**
@@ -21,42 +20,32 @@ export async function extractStartingTerm(
 
   //only look for patter like: "undergraduate/graduate career fall 2023"
   const match = normalized.match(
-    /(undergraduate|graduate)\s+career\s+(fall|spr|sum|win)(?:g)?\s*(20\d{2})/,
+    /(undergraduate|graduate)\s+career\s+(fall|spr)(?:g)?\s*(20\d{2})/,
   );
 
   if (!match) {
     return null;
   }
 
-  const [, career, termAbbr, yearStr] = match;
+  const [termAbbr, yearStr] = match;
 
   const year = parseInt(yearStr, 10);
   const lower = termAbbr.toLowerCase();
 
-  let term: string;
+  let term: "spring" | "fall";
   switch (lower) {
     case "spr":
     case "spring":
       term = "spring";
       break;
-    case "sum":
-    case "summer":
-      term = "summer";
-      break;
     case "fall":
       term = "fall";
       break;
-    case "win":
-    case "winter":
-    case "j-term":
-      term = "j-term";
-      break;
     default:
-      term = lower;
+      term = "fall";
   }
 
   return {
-    career,
     year,
     term,
   };

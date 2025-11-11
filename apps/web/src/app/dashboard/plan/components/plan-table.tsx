@@ -28,6 +28,7 @@ import {
   getAcademicYearLabel,
   makeTermKey,
 } from "@/utils/term";
+import { StartingTerm } from "@/modules/report-parsing/utils/parse-starting-term";
 
 interface PlanTableProps {
   courses:
@@ -52,11 +53,20 @@ export default function PlanTable({ courses, student }: PlanTableProps) {
 
   const importUserCourses = useMutation(api.userCourses.importUserCourses);
 
+  const updateStudent = useMutation(api.students.updateCurrentStudent);
+
   const courseSearchId = useId();
 
-  const handleImportConfirm = async (coursesToImport: UserCourse[]) => {
+  const handleImportConfirm = async (
+    coursesToImport: UserCourse[],
+    startingTerm: StartingTerm | null,
+  ) => {
     if (coursesToImport.length === 0) {
       return;
+    }
+
+    if (startingTerm) {
+      await updateStudent({ startingDate: startingTerm });
     }
 
     const result = await importUserCourses({

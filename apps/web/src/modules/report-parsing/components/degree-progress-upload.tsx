@@ -11,11 +11,17 @@ import {
 import { parseCourseHistory } from "../utils/parse-course-history";
 import { transformToUserCourses } from "../utils/transform-to-user-courses";
 import ConfirmModal from "./confirm-modal";
-import { extractStartingTerm } from "../utils/parse-starting-term";
+import {
+  extractStartingTerm,
+  StartingTerm,
+} from "../utils/parse-starting-term";
 
 type FileUploadButtonProps = {
   maxSizeMB?: number;
-  onConfirm: (courses: UserCourse[]) => Promise<void> | void;
+  onConfirm: (
+    courses: UserCourse[],
+    startingTerm: StartingTerm | null,
+  ) => Promise<void> | void;
   showFileLoaded?: boolean;
   onFileClick?: () => void;
 };
@@ -28,6 +34,7 @@ export default function DegreeProgreeUpload({
 }: FileUploadButtonProps) {
   const maxSize = maxSizeMB * 1024 * 1024;
   const [parsedCourses, setParsedCourses] = useState<UserCourse[]>([]);
+  const [startingTerm, setStartingTerm] = useState<StartingTerm | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [fileName, setFileName] = useState("");
@@ -52,6 +59,8 @@ export default function DegreeProgreeUpload({
       const file = fileData.file;
       if (!(file instanceof File)) return;
 
+      setStartingTerm(null);
+
       // Verify it's a Degree Progress Report
       try {
         const ok = await isDegreeProgressReport(file);
@@ -60,10 +69,12 @@ export default function DegreeProgreeUpload({
           removeFile(fileData.id);
           return;
         }
-        //console log the starting term
+
         try {
           const startingTerm = await extractStartingTerm(file);
-          console.log("Starting Term:", startingTerm);
+          console.log(startingTerm);
+
+          setStartingTerm(startingTerm);
         } catch (e) {
           console.warn("Could not find starting term:", e);
         }
@@ -93,7 +104,7 @@ export default function DegreeProgreeUpload({
   const handleConfirm = async () => {
     setIsImporting(true);
     try {
-      await onConfirm(parsedCourses);
+      await onConfirm(parsedCourses, startingTerm);
 
       setIsModalOpen(false);
 
