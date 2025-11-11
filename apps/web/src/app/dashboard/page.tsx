@@ -8,6 +8,7 @@ import {
   useQuery,
 } from "convex/react";
 import { ProgramRequirementsChart } from "@/app/dashboard/components/degree-charts";
+import { FunctionReturnType } from "convex/server";
 
 const HomePage = () => {
   const { isAuthenticated } = useConvexAuth();
@@ -32,7 +33,10 @@ const HomePage = () => {
     }
   }
 
-  const programs = useQueries(programQueries);
+  const programs: Record<
+    string,
+    FunctionReturnType<typeof api.programs.getProgramById>
+  > = useQueries(programQueries);
 
   // Collect all unique course codes from all programs
   const allCourseCodes = new Set<string>();
