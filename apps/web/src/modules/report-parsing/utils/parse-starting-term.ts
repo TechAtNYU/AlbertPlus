@@ -27,7 +27,7 @@ export async function extractStartingTerm(
     return null;
   }
 
-  const [termAbbr, yearStr] = match;
+  const [, , termAbbr, yearStr] = match;
 
   const year = parseInt(yearStr, 10);
   const lower = termAbbr.toLowerCase();
