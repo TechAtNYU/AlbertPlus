@@ -22,6 +22,7 @@ const HomePage = () => {
   );
 
   const programQueries: RequestForQueries = {};
+
   if (isAuthenticated && student) {
     for (const programId of student.programs) {
       programQueries[programId] = {
@@ -57,15 +58,11 @@ const HomePage = () => {
   const courses = useQueries(courseQueries);
 
   return (
-    <div className="container mx-auto space-y-6 p-6">
-      <h1 className="text-3xl font-bold">Dashboard</h1>
-
-      <ProgramRequirementsChart
-        programs={programs}
-        userCourses={userCourses}
-        courses={courses}
-      />
-    </div>
+    <ProgramRequirementsChart
+      programs={programs}
+      userCourses={userCourses}
+      courses={courses}
+    />
   );
 };
 
