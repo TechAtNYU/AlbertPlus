@@ -1,9 +1,9 @@
+import { ConvexError } from "convex/values";
 import { omit } from "convex-helpers";
 import { getOneFrom } from "convex-helpers/server/relationships";
+import { partial } from "convex-helpers/validators";
 import { protectedMutation, protectedQuery } from "./helpers/auth";
 import { students } from "./schemas/students";
-import { partial } from "convex-helpers/validators";
-import { ConvexError } from "convex/values";
 
 export const getCurrentStudent = protectedQuery({
   args: {},

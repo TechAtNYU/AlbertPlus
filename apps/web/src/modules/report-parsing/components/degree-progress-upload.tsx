@@ -9,12 +9,12 @@ import {
   isDegreeProgressReport,
 } from "../utils/extract-pdf-text";
 import { parseCourseHistory } from "../utils/parse-course-history";
-import { transformToUserCourses } from "../utils/transform-to-user-courses";
-import ConfirmModal from "./confirm-modal";
 import {
   extractStartingTerm,
-  StartingTerm,
+  type StartingTerm,
 } from "../utils/parse-starting-term";
+import { transformToUserCourses } from "../utils/transform-to-user-courses";
+import ConfirmModal from "./confirm-modal";
 
 type FileUploadButtonProps = {
   maxSizeMB?: number;

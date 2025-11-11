@@ -21,6 +21,7 @@ import {
 import { cn } from "@/lib/utils";
 import DegreeProgreeUpload from "@/modules/report-parsing/components/degree-progress-upload";
 import type { UserCourse } from "@/modules/report-parsing/types";
+import type { StartingTerm } from "@/modules/report-parsing/utils/parse-starting-term";
 import type { Term, TermYear } from "@/utils/term";
 import {
   buildAcademicTimeline,
@@ -28,7 +29,6 @@ import {
   getAcademicYearLabel,
   makeTermKey,
 } from "@/utils/term";
-import { StartingTerm } from "@/modules/report-parsing/utils/parse-starting-term";
 
 interface PlanTableProps {
   courses:
