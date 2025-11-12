@@ -56,8 +56,10 @@ const dateSchema = z.object({
 
 const onboardingFormSchema = z
   .object({
-    // Student data
-    school: z.string().min(1, "Please select a school"),
+    school: z.string({
+      error: (issue) =>
+        issue.input === undefined ? "Please select a school" : "Invalid input",
+    }),
     programs: z.array(z.string()).min(1, "At least one program is required"),
     startingDate: dateSchema,
     expectedGraduationDate: dateSchema,
@@ -166,7 +168,7 @@ export function OnboardingForm() {
   const form = useForm({
     defaultValues: {
       // student data
-      school: "" as Id<"schools">,
+      school: undefined as Id<"schools"> | undefined,
       programs: [] as Id<"programs">[],
       startingDate: defaultStartingDate as Doc<"students">["startingDate"],
       expectedGraduationDate:
@@ -194,8 +196,11 @@ export function OnboardingForm() {
     },
     onSubmit: async ({ value }) => {
       try {
+        toast.success("Onboarding completed.");
+        router.push("/dashboard");
+
         await upsertStudent({
-          school: value.school,
+          school: value.school as Id<"schools">,
           programs: value.programs,
           startingDate: value.startingDate,
           expectedGraduationDate: value.expectedGraduationDate,
@@ -204,9 +209,6 @@ export function OnboardingForm() {
         if (value.userCourses) {
           await importUserCourses({ courses: value.userCourses });
         }
-
-        toast.success("Onboarding completed.");
-        router.push("/dashboard");
       } catch (error) {
         console.error("Error completing onboarding:", error);
         toast.error("Could not complete onboarding. Please try again.");
