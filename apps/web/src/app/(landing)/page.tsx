@@ -1,6 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -16,18 +17,19 @@ export default async function Home() {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="max-w-6xl mx-auto px-4 py-20 sm:py-32 w-full bg-background">
+      <section className="max-w-6xl mx-auto px-4 py-32 sm:py-32 w-full bg-background">
         <div className="text-center space-y-8">
-          <Badge variant="outline" className="mx-auto">
+          {/* <Badge variant="outline" className="mx-auto">
             Albert Plus
-          </Badge>
+          </Badge> */}
 
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-foreground">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-foreground mt-10">
             Plan better. Track easier. <br />Graduate smarter.
           </h1>
 
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            A smarter student dashboard & course helper for NYU students          </p>
+            A smarter student dashboard & course helper for NYU students          
+            </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button asChild size="lg" className="gap-2 bg-[#9043FF] hover:bg-[#6d44a7] dark:bg-[#9043FF] dark:hover:bg-[#af77ff] dark:text-white">
@@ -56,12 +58,13 @@ export default async function Home() {
                 <CardDescription className="text-lg mt-4 dark:text-gray-400">
                   A visual Degree Progress Report that shows completed and missing requirements at a glance.
                 </CardDescription>
-                <div className="mt-6 flex justify-center bg-none">
-                  <img
+                <div className="mt-6 flex-1 relative w-full min-h-[400px]">
+                  <Image
                     src="/feature.png"
                     alt="Course Catalog"
-                    width="100%"
-                    height="100%"
+                    fill
+                    style={{ objectFit: "contain" }}
+                    sizes="100vw"
                   />
                 </div>
               </CardHeader>
@@ -76,12 +79,13 @@ export default async function Home() {
                 <CardDescription className="text-lg mt-4">
                   A visual Degree Progress Report that shows completed and missing requirements at a glance.
                 </CardDescription>
-                <div className="mt-6 flex justify-center bg-none">
-                  <img
+                <div className="mt-6 flex-1 relative w-full min-h-[400px]">
+                  <Image
                     src="/feature.png"
                     alt="Course Catalog"
-                    width="100%"
-                    height="100%"
+                    fill
+                    style={{ objectFit: "contain" }}
+                    sizes="100vw"
                   />
                 </div>
               </CardHeader>
