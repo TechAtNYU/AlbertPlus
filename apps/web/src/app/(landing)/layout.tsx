@@ -1,7 +1,3 @@
-import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-
 export default function HomeLayout({
   children,
 }: Readonly<{
@@ -22,20 +18,6 @@ export default function HomeLayout({
             className="h-8 hidden dark:block"
           />
         </div>
-
-        <SignedOut>
-          <Button
-            asChild
-            variant="outline"
-            className="bg-[#9043FF] hover:bg-[#6d44a7] dark:bg-[#9043FF] dark:hover:bg-[#af77ff] text-white"
-          >
-            <Link href="/sign-in">Sign In</Link>
-          </Button>
-        </SignedOut>
-
-        <SignedIn>
-          <UserButton />
-        </SignedIn>
       </header>
 
       {children}
