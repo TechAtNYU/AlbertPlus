@@ -1,0 +1,16 @@
+[
+  {
+    "userId": "user_test_123",
+    "programs": ["Computer Science (BS)"],
+    "school": "College of Arts and Science",
+    "schoolLevel": "undergraduate",
+    "startingDate": {
+      "year": 2023,
+      "term": "fall"
+    },
+    "expectedGraduationDate": {
+      "year": 2027,
+      "term": "spring"
+    }
+  }
+]

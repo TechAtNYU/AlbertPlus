@@ -69,20 +69,21 @@ export default function DegreeProgreeUpload({
           removeFile(fileData.id);
           return;
         }
-
-        try {
-          const startingTerm = await extractStartingTerm(file);
-          console.log(startingTerm);
-
-          setStartingTerm(startingTerm);
-        } catch (e) {
-          console.warn("Could not find starting term:", e);
-        }
       } catch (err) {
         console.error("Error verifying PDF:", err);
         toast.error("Could not verify the PDF file.");
         removeFile(fileData.id);
         return;
+      }
+
+      // try extract starting term
+      try {
+        const startingTerm = await extractStartingTerm(file);
+        console.log(startingTerm);
+
+        setStartingTerm(startingTerm);
+      } catch (e) {
+        console.warn("Could not find starting term:", e);
       }
 
       // Extract and parse course history
@@ -113,6 +114,7 @@ export default function DegreeProgreeUpload({
       // wait for modal close before clearing state
       // otherwise the modal will flicker with empty data
       setTimeout(() => {
+        setStartingTerm(null);
         setParsedCourses([]);
         setFileName(files[0].file.name);
         if (files[0]) {
@@ -129,6 +131,7 @@ export default function DegreeProgreeUpload({
 
   const handleCancel = () => {
     setIsModalOpen(false);
+    setStartingTerm(null);
     setParsedCourses([]);
     // Remove the uploaded file
     if (files[0]) {

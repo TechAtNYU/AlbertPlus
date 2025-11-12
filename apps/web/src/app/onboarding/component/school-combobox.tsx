@@ -1,5 +1,3 @@
-"use client";
-
 import type { Doc, Id } from "@albert-plus/server/convex/_generated/dataModel";
 import { CheckIcon, ChevronDownIcon } from "lucide-react";
 import { useId, useState } from "react";
@@ -35,7 +33,7 @@ export function SchoolCombobox({
   value,
   onValueChange,
   disabled = false,
-  placeholder = "Select your school or college",
+  placeholder = "Select your school",
   id: providedId,
 }: SchoolComboboxProps) {
   const generatedId = useId();
