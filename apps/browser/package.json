@@ -8,12 +8,11 @@
     "dev": "doppler run -- plasmo dev",
     "build": "plasmo build",
     "package": "plasmo package",
-    "check": "biome check",
     "check:types": "tsc -noEmit"
   },
   "dependencies": {
-    "@clerk/chrome-extension": "^2.7.12",
-    "convex": "^1.28.2",
+    "@clerk/chrome-extension": "^2.8.0",
+    "convex": "^1.29.0",
     "plasmo": "0.90.5",
     "react": "19.2.0",
     "react-dom": "19.2.0",

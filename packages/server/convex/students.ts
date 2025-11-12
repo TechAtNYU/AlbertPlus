@@ -1,5 +1,11 @@
+import { ConvexError } from "convex/values";
 import { omit } from "convex-helpers";
+
 import { getAll } from "convex-helpers/server/relationships";
+
+import { getOneFrom } from "convex-helpers/server/relationships";
+import { partial } from "convex-helpers/validators";
+
 import { protectedMutation, protectedQuery } from "./helpers/auth";
 import { students } from "./schemas/students";
 
@@ -10,13 +16,22 @@ export const getCurrentStudent = protectedQuery({
       .query("students")
       .withIndex("by_user_id", (q) => q.eq("userId", ctx.user.subject))
       .unique();
-    if (!student) return null;
 
-    const programs = await getAll(ctx.db, student.programs);
+    if (student === null) {
+      return null;
+    }
+
+    const school = await getOneFrom(
+      ctx.db,
+      "schools",
+      "by_id",
+      student.school,
+      "_id",
+    );
 
     return {
       ...student,
-      programs,
+      school,
     };
   },
 });
@@ -38,5 +53,22 @@ export const upsertCurrentStudent = protectedMutation({
         userId: ctx.user.subject,
       });
     }
+  },
+});
+
+export const updateCurrentStudent = protectedMutation({
+  args: partial(omit(students, ["userId"])),
+  handler: async (ctx, args) => {
+    const existing = await ctx.db
+      .query("students")
+      .withIndex("by_user_id", (q) => q.eq("userId", ctx.user.subject))
+      .unique();
+
+    if (!existing) {
+      throw new ConvexError("Student not found");
+    }
+
+    await ctx.db.patch(existing._id, args);
+    return existing._id;
   },
 });
