@@ -9,20 +9,35 @@ export default function HomeLayout({
 }>) {
   return (
     <>
-      <header className="flex justify-end items-center p-4 gap-4 h-16">
+      <header className="flex justify-between w-full items-center p-10 px-12 gap-4 h-16">
+        <div>
+          <img
+            src="/logo.png"
+            alt="AlbertPlus"
+            className="h-8 block dark:hidden"
+          />
+          <img
+            src="/logo-dark.png"
+            alt="AlbertPlus"
+            className="h-8 hidden dark:block"
+          />
+        </div>
+
         <SignedOut>
           <Button
             asChild
             variant="outline"
-            className="bg-white hover:bg-gray-50"
+            className="bg-[#9043FF] hover:bg-[#6d44a7] dark:bg-[#9043FF] dark:hover:bg-[#af77ff] text-white"
           >
             <Link href="/sign-in">Sign In</Link>
           </Button>
         </SignedOut>
+
         <SignedIn>
           <UserButton />
         </SignedIn>
       </header>
+
       {children}
     </>
   );
