@@ -44,7 +44,12 @@ import type { StartingTerm } from "@/modules/report-parsing/utils/parse-starting
 
 const dateSchema = z.object({
   year: z.number().int().min(2000).max(2100),
-  term: z.union([z.literal("spring"), z.literal("fall")]),
+  term: z.union([
+    z.literal("spring"),
+    z.literal("fall"),
+    z.literal("j-term"),
+    z.literal("summer"),
+  ]),
 });
 
 const onboardingFormSchema = z
@@ -130,10 +135,21 @@ export function OnboardingForm() {
   }, [programsStatus, programsLoadMore]);
 
   const currentYear = React.useMemo(() => new Date().getFullYear(), []);
-  const defaultTerm = React.useMemo<"spring" | "fall">(() => {
+  const defaultTerm = React.useMemo<Term>(() => {
     const month = new Date().getMonth();
     return month >= 6 ? "fall" : "spring";
   }, []);
+  const defaultStartingDate = {
+    year: currentYear,
+    term: defaultTerm,
+  };
+  const defaultExpectedGraduation = getTermAfterSemesters(
+    {
+      term: defaultTerm,
+      year: currentYear,
+    },
+    15,
+  );
 
   // Generate year options: currentYear ± 4 years
   const yearOptions = React.useMemo(() => {
@@ -149,14 +165,9 @@ export function OnboardingForm() {
       // student data
       school: "" as Id<"schools">,
       programs: [] as Id<"programs">[],
-      startingDate: {
-        year: currentYear,
-        term: defaultTerm,
-      } as Doc<"students">["startingDate"],
-      expectedGraduationDate: {
-        year: currentYear + 4,
-        term: defaultTerm,
-      } as Doc<"students">["expectedGraduationDate"],
+      startingDate: defaultStartingDate as Doc<"students">["startingDate"],
+      expectedGraduationDate:
+        defaultExpectedGraduation as Doc<"students">["expectedGraduationDate"],
       // user courses
       userCourses: undefined as
         | FunctionArgs<typeof api.userCourses.importUserCourses>["courses"]
