@@ -58,7 +58,7 @@ export default async function Home() {
                 <CardDescription className="text-lg mt-4 dark:text-gray-400">
                   A visual Degree Progress Report that shows completed and missing requirements at a glance.
                 </CardDescription>
-                <div className="mt-6 flex-1 relative w-full min-h-[400px]">
+                <div className="mt-6 flex justify-center bg-none relative w-full aspect-video">
                   <Image
                     src="/feature.png"
                     alt="Course Catalog"
@@ -79,7 +79,7 @@ export default async function Home() {
                 <CardDescription className="text-lg mt-4">
                   A visual Degree Progress Report that shows completed and missing requirements at a glance.
                 </CardDescription>
-                <div className="mt-6 flex-1 relative w-full min-h-[400px]">
+                <div className="mt-6 flex justify-center bg-none relative w-full aspect-video">
                   <Image
                     src="/feature.png"
                     alt="Course Catalog"
@@ -100,12 +100,13 @@ export default async function Home() {
                 <CardDescription className="text-lg mt-4">
                   An improved Course Search experience — clearer results, easier navigation, and instant add options.
                 </CardDescription>
-                <div className="mt-6 flex justify-center bg-none">
-                  <img
+                <div className="mt-6 flex justify-center bg-none relative w-full aspect-video">
+                  <Image
                     src="/feature.png"
                     alt="Course Catalog"
-                    width="100%"
-                    height="100%"
+                    fill
+                    style={{ objectFit: "contain" }}
+                    sizes="100vw"
                   />
                 </div>
               </CardHeader>
@@ -120,12 +121,13 @@ export default async function Home() {
                 <CardDescription className="text-lg mt-4">
                   Use the Sidebar to add courses and build your next semester plan seamlessly.
                 </CardDescription>
-                <div className="mt-6 flex justify-center bg-none">
-                  <img
+                <div className="mt-6 flex justify-center bg-none relative w-full aspect-video">
+                  <Image
                     src="/feature.png"
                     alt="Course Catalog"
-                    width="100%"
-                    height="100%"
+                    fill
+                    style={{ objectFit: "contain" }}
+                    sizes="100vw"
                   />
                 </div>
               </CardHeader>
@@ -140,12 +142,13 @@ export default async function Home() {
                 <CardDescription className="text-lg mt-4 dark:text-gray-400">
                   A visual Degree Progress Report that shows completed and missing requirements at a glance.
                 </CardDescription>
-                <div className="mt-6 flex justify-center bg-none">
-                  <img
+                <div className="mt-6 flex justify-center bg-none relative w-full aspect-video">
+                  <Image
                     src="/feature.png"
                     alt="Course Catalog"
-                    width="100%"
-                    height="100%"
+                    fill
+                    style={{ objectFit: "contain" }}
+                    sizes="100vw"
                   />
                 </div>
               </CardHeader>
@@ -156,7 +159,7 @@ export default async function Home() {
       </section>
 
       <section className="w-full bg-background">
-        <h2 className="text-3xl font-bold mb-4 text-center text-foreground">Explore More Features in Albert+</h2>
+        <h2 className="text-3xl font-bold mb-4 text-center text-foreground mt-20">Explore More Features in Albert+</h2>
         <div className="grid grid-cols-1 gap-0 scroll-snap-y scroll-snap-mandatory">
           {/* Feature Card 1 */}
           <div className="flex items-center justify-center scroll-snap-align-start border-none">
@@ -168,12 +171,13 @@ export default async function Home() {
                     Show friends or advisors your upcoming semester with one click.
                   </CardDescription>
                 </div>
-                <div className="mt-6 flex justify-center bg-none">
-                  <img
+                <div className="mt-6 flex justify-center bg-none relative w-full aspect-video">
+                  <Image
                     src="/features2.png"
                     alt="Course Catalog"
-                    width="100%"
-                    height="100%"
+                    fill
+                    style={{ objectFit: "contain" }}
+                    sizes="100vw"
                   />
                 </div>
               </CardHeader>
@@ -189,12 +193,13 @@ export default async function Home() {
                     Show friends or advisors your upcoming semester with one click.
                   </CardDescription>
                 </div>
-                <div className="mt-6 flex justify-center bg-none">
-                  <img
+                <div className="mt-6 flex justify-center bg-none relative w-full aspect-video">
+                  <Image
                     src="/features2.png"
                     alt="Course Catalog"
-                    width="100%"
-                    height="100%"
+                    fill
+                    style={{ objectFit: "contain" }}
+                    sizes="100vw"
                   />
                 </div>
               </CardHeader>
@@ -210,12 +215,13 @@ export default async function Home() {
                     Show friends or advisors your upcoming semester with one click.
                   </CardDescription>
                 </div>
-                <div className="mt-6 flex justify-center bg-none">
-                  <img
+                <div className="mt-6 flex justify-center bg-none relative w-full aspect-video">
+                  <Image
                     src="/features2.png"
                     alt="Course Catalog"
-                    width="100%"
-                    height="100%"
+                    fill
+                    style={{ objectFit: "contain" }}
+                    sizes="100vw"
                   />
                 </div>
               </CardHeader>
