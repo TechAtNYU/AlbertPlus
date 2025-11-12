@@ -21,6 +21,7 @@ import {
 import { cn } from "@/lib/utils";
 import DegreeProgreeUpload from "@/modules/report-parsing/components/degree-progress-upload";
 import type { UserCourse } from "@/modules/report-parsing/types";
+import type { StartingTerm } from "@/modules/report-parsing/utils/parse-starting-term";
 import type { Term, TermYear } from "@/utils/term";
 import {
   buildAcademicTimeline,
@@ -52,11 +53,20 @@ export default function PlanTable({ courses, student }: PlanTableProps) {
 
   const importUserCourses = useMutation(api.userCourses.importUserCourses);
 
+  const updateStudent = useMutation(api.students.updateCurrentStudent);
+
   const courseSearchId = useId();
 
-  const handleImportConfirm = async (coursesToImport: UserCourse[]) => {
+  const handleImportConfirm = async (
+    coursesToImport: UserCourse[],
+    startingTerm: StartingTerm | null,
+  ) => {
     if (coursesToImport.length === 0) {
       return;
+    }
+
+    if (startingTerm) {
+      await updateStudent({ startingDate: startingTerm });
     }
 
     const result = await importUserCourses({
