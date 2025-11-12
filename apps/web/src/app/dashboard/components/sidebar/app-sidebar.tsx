@@ -1,9 +1,9 @@
 "use client";
 
-import { ArrowUpCircleIcon } from "lucide-react";
 import type * as React from "react";
 import { NavItems } from "@/app/dashboard/components/sidebar/nav-items";
 import { NavUser } from "@/app/dashboard/components/sidebar/nav-user";
+import { AlbertPlusLogo } from "@/components/Logo";
 import { Separator } from "@/components/ui/separator";
 import {
   Sidebar,
@@ -13,6 +13,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import config from "../../../../lib/config";
 
@@ -28,6 +29,9 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
 }
 
 export function AppSidebar({ user, ...props }: AppSidebarProps) {
+  const { state } = useSidebar();
+  const isCollapsed = state === "collapsed";
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
@@ -35,12 +39,14 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
           <SidebarMenuItem>
             <SidebarMenuButton
               asChild
-              className="data-[slot=sidebar-menu-button]:p-1.5! "
+              className="data-[slot=sidebar-menu-button]:p-1.5! justify-center"
             >
-              <a href="/dashboard">
-                <ArrowUpCircleIcon className="size-5!" />
-                <span className="text-base font-semibold">Course Helper</span>
-              </a>
+              <AlbertPlusLogo
+                variant={isCollapsed ? "icon" : "full"}
+                href="/dashboard"
+                width={isCollapsed ? 40 : 80}
+                height={40}
+              />
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

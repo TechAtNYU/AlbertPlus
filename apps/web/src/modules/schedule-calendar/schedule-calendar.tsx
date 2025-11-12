@@ -4,8 +4,8 @@ import type { api } from "@albert-plus/server/convex/_generated/api";
 import type { Doc } from "@albert-plus/server/convex/_generated/dataModel";
 import type { FunctionReturnType } from "convex/server";
 import { addDays, startOfWeek } from "date-fns";
-import type { Term } from "@/components/AppConfigProvider";
 import { Skeleton } from "@/components/ui/skeleton";
+import type { Term } from "@/utils/term";
 import { WeekView } from "./components/week-view";
 
 export const EventHeight = 24;
@@ -31,7 +31,7 @@ export interface Class {
   isPreview?: boolean;
   section: string;
   year: number;
-  term: "spring" | "summer" | "fall" | "j-term";
+  term: Term;
   instructor: string[];
   location?: string;
   startTime: string;
