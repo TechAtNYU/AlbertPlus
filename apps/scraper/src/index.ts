@@ -200,10 +200,7 @@ export default {
                   .returning();
 
                 await env.SCRAPING_QUEUE.sendBatch(
-                  newJobs.map((j) => ({
-                    body: { jobId: j.id },
-                    delaySeconds: 30,
-                  })),
+                  newJobs.map((j) => ({ body: { jobId: j.id } })),
                 );
                 break;
               }
@@ -227,10 +224,7 @@ export default {
                     .returning();
 
                   await env.SCRAPING_QUEUE.sendBatch(
-                    newJobs.map((j) => ({
-                      body: { jobId: j.id },
-                      delaySeconds: 30,
-                    })),
+                    newJobs.map((j) => ({ body: { jobId: j.id } })),
                   );
 
                   console.log(
