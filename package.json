@@ -7,6 +7,7 @@
     "build": "turbo run build",
     "dev": "turbo run dev",
     "dashboard": "bun run --filter '@albert-plus/server' dashboard",
+    "seed": "bun run --filter '@albert-plus/server' seed",
     "clean": "turbo run clean && rm -rf node_modules",
     "check": "biome check",
     "check:types": "turbo run check:types",
