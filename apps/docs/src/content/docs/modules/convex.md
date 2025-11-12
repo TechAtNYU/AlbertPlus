@@ -35,3 +35,16 @@ bun run dashboard
 | `userCourseOfferings` | Links users to the specific course offerings they have added to their schedule. |
 | `students`            | Stores student-specific information, linked to a Clerk user ID.                 |
 | `schools`             | A list of the different schools within NYU.                                     |
+
+## App Configuration Keys
+
+The `appConfigs` table stores various configuration settings that control scraper behavior and term information:
+
+| Key | Type | Description |
+|-----|------|-------------|
+| `current_term` | `"spring" \| "summer" \| "fall" \| "j-term"` | The current academic term |
+| `current_year` | `string` | The current academic year (e.g., `"2025"`) |
+| `next_term` | `"spring" \| "summer" \| "fall" \| "j-term"` | The next academic term |
+| `next_year` | `string` | The next academic year |
+| `is_scrape_current` | `"true" \| "false"` | Flag to enable/disable scraping of current term course offerings |
+| `is_scrape_next` | `"true" \| "false"` | Flag to enable/disable scraping of next term course offerings |

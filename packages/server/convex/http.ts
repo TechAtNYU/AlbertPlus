@@ -157,33 +157,35 @@ export const ZUpsertPrerequisites = z.array(
   ]),
 );
 
-export const ZUpsertCourseOffering = z.object({
-  courseCode: z.string(),
-  classNumber: z.number(),
-  title: z.string(),
-  section: z.string(),
-  year: z.number(),
-  term: z.enum(["spring", "summer", "fall", "j-term"]),
-  instructor: z.array(z.string()),
-  location: z.string(),
-  days: z.array(
-    z.enum([
-      "monday",
-      "tuesday",
-      "wednesday",
-      "thursday",
-      "friday",
-      "saturday",
-      "sunday",
-    ]),
-  ),
-  startTime: z.string(),
-  endTime: z.string(),
-  status: z.enum(["open", "closed", "waitlist"]),
-  waitlistNum: z.optional(z.number()),
-  isCorequisite: z._default(z.boolean(), false),
-  corequisiteOf: z.optional(z.number()),
-});
+export const ZUpsertCourseOfferings = z.array(
+  z.object({
+    courseCode: z.string(),
+    classNumber: z.number(),
+    title: z.string(),
+    section: z.string(),
+    year: z.number(),
+    term: z.enum(["spring", "summer", "fall", "j-term"]),
+    instructor: z.array(z.string()),
+    location: z.string(),
+    days: z.array(
+      z.enum([
+        "monday",
+        "tuesday",
+        "wednesday",
+        "thursday",
+        "friday",
+        "saturday",
+        "sunday",
+      ]),
+    ),
+    startTime: z.string(),
+    endTime: z.string(),
+    status: z.enum(["open", "closed", "waitlist"]),
+    waitlistNum: z.optional(z.number()),
+    isCorequisite: z._default(z.boolean(), false),
+    corequisiteOf: z.optional(z.number()),
+  }),
+);
 
 export const ZGetAppConfig = z.object({ key: AppConfigKey });
 export const ZSetAppConfig = z.object({ key: AppConfigKey, value: z.string() });
@@ -270,7 +272,7 @@ http.route({
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
-  }, z.array(ZUpsertCourseOffering)),
+  }, ZUpsertCourseOfferings),
 });
 
 http.route({

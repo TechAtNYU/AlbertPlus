@@ -2,43 +2,25 @@
 
 import { api } from "@albert-plus/server/convex/_generated/api";
 import { useConvexAuth, usePaginatedQuery, useQuery } from "convex/react";
-import type { FunctionReturnType } from "convex/server";
 import { useEffect, useRef, useState } from "react";
-import { CourseSelector } from "@/app/dashboard/schedule/components/course-selection";
-import CourseSelectorSkeleton from "@/app/dashboard/schedule/components/course-selection/components/CourseSelectorSkeleton";
+import Selector from "@/app/dashboard/register/components/Selector";
+import { useNextTerm, useNextYear } from "@/components/AppConfigProvider";
+import { useSearchParam } from "@/hooks/use-search-param";
+import { CourseSelector } from "@/modules/course-selection";
+import CourseSelectorSkeleton from "@/modules/course-selection/components/CourseSelectorSkeleton";
 import type {
   CourseOffering,
   CourseOfferingWithCourse,
-} from "@/app/dashboard/schedule/components/course-selection/types";
-import Selector from "@/app/dashboard/schedule/components/Selector";
+} from "@/modules/course-selection/types";
 import {
-  type Term,
-  useCurrentTerm,
-  useCurrentYear,
-} from "@/components/AppConfigProvider";
-import { useSearchParam } from "@/hooks/use-search-param";
-import { formatTermTitle } from "@/utils/format-term";
-import { ScheduleCalendar } from "./components/schedule-calendar";
+  getUserClassesByTerm,
+  ScheduleCalendar,
+} from "@/modules/schedule-calendar/schedule-calendar";
 
-function getUserClassesByTerm(
-  classes:
-    | FunctionReturnType<typeof api.userCourseOfferings.getUserCourseOfferings>
-    | undefined,
-  year: number | null,
-  term: Term | null,
-) {
-  if (!year || !term || !classes) {
-    return undefined;
-  }
-  return classes.filter((cls) => {
-    return cls.courseOffering.year === year && cls.courseOffering.term === term;
-  });
-}
-
-const SchedulePage = () => {
+const RegisterPage = () => {
   const { isAuthenticated } = useConvexAuth();
-  const currentYear = useCurrentYear();
-  const currentTerm = useCurrentTerm();
+  const currentYear = useNextYear();
+  const currentTerm = useNextTerm();
 
   const [hoveredCourse, setHoveredCourse] = useState<CourseOffering | null>(
     null,
@@ -83,8 +65,6 @@ const SchedulePage = () => {
     }
   }, [results, debouncedSearchValue, status]);
 
-  const title = formatTermTitle(currentTerm, currentYear);
-
   const classes = getUserClassesByTerm(allClasses, currentYear, currentTerm);
 
   const isSearching =
@@ -102,7 +82,7 @@ const SchedulePage = () => {
   }
 
   return (
-    <div className="flex flex-col gap-4 h-[calc(100vh-theme(spacing.16)-theme(spacing.12))] w-full">
+    <div className="flex flex-col gap-4 h-[calc(100vh-(--spacing(16))-(--spacing(12)))] w-full">
       {/* Mobile toggle buttons */}
       <div className="md:hidden shrink-0 p-2">
         <Selector value={mobileView} onValueChange={setMobileView} />
@@ -122,11 +102,7 @@ const SchedulePage = () => {
           />
         ) : (
           <div className="h-full">
-            <ScheduleCalendar
-              classes={classes}
-              title={title}
-              hoveredCourse={hoveredCourse}
-            />
+            <ScheduleCalendar classes={classes} hoveredCourse={hoveredCourse} />
           </div>
         )}
       </div>
@@ -145,11 +121,7 @@ const SchedulePage = () => {
 
         <div className="flex-1 min-w-0">
           <div className="sticky top-0">
-            <ScheduleCalendar
-              classes={classes}
-              title={title}
-              hoveredCourse={hoveredCourse}
-            />
+            <ScheduleCalendar classes={classes} hoveredCourse={hoveredCourse} />
           </div>
         </div>
       </div>
@@ -157,4 +129,4 @@ const SchedulePage = () => {
   );
 };
 
-export default SchedulePage;
+export default RegisterPage;

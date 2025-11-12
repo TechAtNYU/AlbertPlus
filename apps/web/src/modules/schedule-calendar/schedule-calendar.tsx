@@ -5,7 +5,8 @@ import type { Doc } from "@albert-plus/server/convex/_generated/dataModel";
 import type { FunctionReturnType } from "convex/server";
 import { addDays, startOfWeek } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
-import { WeekView } from "./schedule-calendar/week-view";
+import type { Term } from "@/utils/term";
+import { WeekView } from "./components/week-view";
 
 export const EventHeight = 24;
 export const EventGap = 4;
@@ -30,7 +31,7 @@ export interface Class {
   isPreview?: boolean;
   section: string;
   year: number;
-  term: "spring" | "summer" | "fall" | "j-term";
+  term: Term;
   instructor: string[];
   location?: string;
   startTime: string;
@@ -70,24 +71,46 @@ export const allClassColors: EventColor[] = [
   "cyan",
 ];
 
+function getColor(id: string): EventColor {
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) {
+    const char = id.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash = hash & hash; // Convert to 32-bit integer
+  }
+  const colorIndex = Math.abs(hash) % allClassColors.length;
+  return allClassColors[colorIndex];
+}
+
+export function getUserClassesByTerm(
+  classes:
+    | FunctionReturnType<typeof api.userCourseOfferings.getUserCourseOfferings>
+    | undefined,
+  year: number | null,
+  term: Term | null,
+) {
+  if (!year || !term || !classes) {
+    return undefined;
+  }
+  return classes.filter((cls) => {
+    return cls.courseOffering.year === year && cls.courseOffering.term === term;
+  });
+}
+
 export interface ScheduleCalendarProps {
   classes:
     | FunctionReturnType<typeof api.userCourseOfferings.getUserCourseOfferings>
     | undefined;
-  title: string | undefined;
   hoveredCourse?: Doc<"courseOfferings"> | null;
 }
 
 export function ScheduleCalendar({
   classes,
-  title,
   hoveredCourse,
 }: ScheduleCalendarProps) {
-  if (!classes || !title) {
+  if (!classes) {
     return <Skeleton className="h-full w-full rounded-lg" />;
   }
-
-  let colorIndex = 0;
 
   const transformedClasses: Class[] = classes.map((c) => {
     const offering = c.courseOffering;
@@ -100,8 +123,7 @@ export function ScheduleCalendar({
       return `${dayName} ${startTime} ${endTime}`;
     });
 
-    const color = allClassColors[colorIndex % allClassColors.length];
-    colorIndex++;
+    const color = getColor(offering._id);
 
     const slots: { start: Date; end: Date }[] = [];
 
@@ -217,7 +239,7 @@ export function ScheduleCalendar({
         id: `preview-${offering._id}`,
         courseCode: offering.courseCode,
         title: `${offering.courseCode} - ${offering.title}`,
-        color: allClassColors[colorIndex % allClassColors.length],
+        color: getColor(offering._id),
         times: slots,
         description: `${offering.instructor.join(", ")} • ${offering.section.toUpperCase()} • Preview`,
         isPreview: true,

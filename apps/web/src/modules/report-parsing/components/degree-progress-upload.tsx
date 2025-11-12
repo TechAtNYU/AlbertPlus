@@ -1,7 +1,3 @@
-"use client";
-
-import { api } from "@albert-plus/server/convex/_generated/api";
-import { useMutation } from "convex/react";
 import { FileTextIcon, UploadIcon, XIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -13,21 +9,35 @@ import {
   isDegreeProgressReport,
 } from "../utils/extract-pdf-text";
 import { parseCourseHistory } from "../utils/parse-course-history";
+import {
+  extractStartingTerm,
+  type StartingTerm,
+} from "../utils/parse-starting-term";
 import { transformToUserCourses } from "../utils/transform-to-user-courses";
 import ConfirmModal from "./confirm-modal";
 
 type FileUploadButtonProps = {
   maxSizeMB?: number;
+  onConfirm: (
+    courses: UserCourse[],
+    startingTerm: StartingTerm | null,
+  ) => Promise<void> | void;
+  showFileLoaded?: boolean;
+  onFileClick?: () => void;
 };
 
 export default function DegreeProgreeUpload({
   maxSizeMB = 20,
+  onConfirm,
+  showFileLoaded = false,
+  onFileClick,
 }: FileUploadButtonProps) {
   const maxSize = maxSizeMB * 1024 * 1024;
   const [parsedCourses, setParsedCourses] = useState<UserCourse[]>([]);
+  const [startingTerm, setStartingTerm] = useState<StartingTerm | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
-  const batchImport = useMutation(api.userCourses.importUserCourses);
+  const [fileName, setFileName] = useState("");
   const [
     { files, isDragging, errors },
     {
@@ -49,6 +59,8 @@ export default function DegreeProgreeUpload({
       const file = fileData.file;
       if (!(file instanceof File)) return;
 
+      setStartingTerm(null);
+
       // Verify it's a Degree Progress Report
       try {
         const ok = await isDegreeProgressReport(file);
@@ -56,6 +68,15 @@ export default function DegreeProgreeUpload({
           toast.error("This PDF doesn't look like a Degree Progress Report.");
           removeFile(fileData.id);
           return;
+        }
+
+        try {
+          const startingTerm = await extractStartingTerm(file);
+          console.log(startingTerm);
+
+          setStartingTerm(startingTerm);
+        } catch (e) {
+          console.warn("Could not find starting term:", e);
         }
       } catch (err) {
         console.error("Error verifying PDF:", err);
@@ -80,32 +101,10 @@ export default function DegreeProgreeUpload({
     },
   });
 
-  const fileName = files[0]?.file.name || null;
-  const hasFile = files.length > 0;
-
   const handleConfirm = async () => {
     setIsImporting(true);
     try {
-      const result = await batchImport({ courses: parsedCourses });
-
-      const messages = [];
-      if (result.inserted > 0) {
-        messages.push(
-          `${result.inserted} new course${result.inserted !== 1 ? "s" : ""} imported`,
-        );
-      }
-      if (result.updated > 0) {
-        messages.push(
-          `${result.updated} course${result.updated !== 1 ? "s" : ""} updated with grades`,
-        );
-      }
-      if (result.duplicates > 0) {
-        messages.push(
-          `${result.duplicates} duplicate${result.duplicates !== 1 ? "s" : ""} skipped`,
-        );
-      }
-
-      toast.success(`Import complete: ${messages.join(", ")}`);
+      await onConfirm(parsedCourses, startingTerm);
 
       setIsModalOpen(false);
 
@@ -113,6 +112,7 @@ export default function DegreeProgreeUpload({
       // otherwise the modal will flicker with empty data
       setTimeout(() => {
         setParsedCourses([]);
+        setFileName(files[0].file.name);
         if (files[0]) {
           removeFile(files[0].id);
         }
@@ -168,7 +168,7 @@ export default function DegreeProgreeUpload({
               className="sr-only"
               aria-label="Upload PDF file"
             />
-            {hasFile ? (
+            {showFileLoaded ? (
               <div className="flex w-full flex-col items-center justify-center gap-3 p-4">
                 <div
                   className="flex size-16 shrink-0 items-center justify-center rounded-full border bg-background"
@@ -194,6 +194,7 @@ export default function DegreeProgreeUpload({
                   Degree Progress Report
                 </p>
                 <Button
+                  type="button"
                   variant="outline"
                   className="mt-4"
                   onClick={openFileDialog}
@@ -208,12 +209,12 @@ export default function DegreeProgreeUpload({
             )}
           </div>
 
-          {hasFile && (
+          {showFileLoaded && (
             <div className="absolute top-4 right-4">
               <button
                 type="button"
                 className="z-50 flex size-8 cursor-pointer items-center justify-center rounded-full bg-black/60 text-white transition-[color,box-shadow] outline-none hover:bg-black/80 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-                onClick={() => removeFile(files[0]?.id)}
+                onClick={onFileClick}
                 aria-label="Remove file"
               >
                 <XIcon className="size-4" aria-hidden="true" />
