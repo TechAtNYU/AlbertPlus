@@ -34,7 +34,7 @@ export default function ProfilePage() {
           <p>
             <strong>Programs:</strong>{" "}
             {student.programs?.length > 0
-              ? student.programs.join(", ")
+              ? student.programs.map(p => p.name).join(", ")
               : "None"}
           </p>
         </>
