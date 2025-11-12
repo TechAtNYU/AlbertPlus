@@ -88,7 +88,9 @@ export default function DegreeProgreeUpload({
       // Extract and parse course history
       try {
         const historyText = await extractCourseHistory(file);
+
         const courses = parseCourseHistory(historyText);
+
         const userCourses = transformToUserCourses(courses);
 
         // Store parsed courses and open confirmation modal
