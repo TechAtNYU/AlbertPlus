@@ -73,6 +73,17 @@ export const allClassColors: EventColor[] = [
   "cyan",
 ];
 
+function getColor(id: string): EventColor {
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) {
+    const char = id.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash = hash & hash; // Convert to 32-bit integer
+  }
+  const colorIndex = Math.abs(hash) % allClassColors.length;
+  return allClassColors[colorIndex];
+}
+
 export function getUserClassesByTerm(
   classes:
     | FunctionReturnType<typeof api.userCourseOfferings.getUserCourseOfferings>
@@ -107,8 +118,6 @@ export function ScheduleCalendar({
     return <Skeleton className="h-full w-full rounded-lg" />;
   }
 
-  let colorIndex = 0;
-
   const transformedClasses: Class[] = classes.map((c) => {
     const offering = c.courseOffering;
     const startTime = `${offering.startTime.split(":")[0]} ${offering.startTime.split(":")[1]}`;
@@ -120,8 +129,7 @@ export function ScheduleCalendar({
       return `${dayName} ${startTime} ${endTime}`;
     });
 
-    const color = allClassColors[colorIndex % allClassColors.length];
-    colorIndex++;
+    const color = getColor(offering._id);
 
     const slots: { start: Date; end: Date }[] = [];
 
@@ -239,7 +247,7 @@ export function ScheduleCalendar({
         id: `preview-${offering._id}`,
         courseCode: offering.courseCode,
         title: `${offering.courseCode} - ${offering.title}`,
-        color: allClassColors[colorIndex % allClassColors.length],
+        color: getColor(offering._id),
         times: slots,
         description: `${offering.instructor.join(", ")} • ${offering.section.toUpperCase()} • Preview`,
         isPreview: true,
