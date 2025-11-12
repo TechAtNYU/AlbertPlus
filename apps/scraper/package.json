@@ -20,15 +20,15 @@
     "@albert-plus/server": "workspace:*",
     "dotenv": "^17.2.3",
     "drizzle-orm": "^0.44.7",
-    "hono": "^4.10.4",
+    "hono": "^4.10.5",
     "nanoid": "^5.1.6",
     "zod": "^4.1.12"
   },
   "devDependencies": {
     "@libsql/client": "^0.15.15",
-    "@types/node": "^24.10.0",
+    "@types/node": "^24.10.1",
     "convex": "^1.29.0",
     "drizzle-kit": "^0.31.6",
-    "wrangler": "^4.46.0"
+    "wrangler": "^4.47.0"
   }
 }
