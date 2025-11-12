@@ -1,4 +1,4 @@
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { omit } from "convex-helpers";
 import { getOneFrom } from "convex-helpers/server/relationships";
 import { partial } from "convex-helpers/validators";
@@ -35,6 +35,23 @@ export const getUserCourses = protectedQuery({
 export const createUserCourse = protectedMutation({
   args: omit(userCourses, ["userId"]),
   handler: async (ctx, args) => {
+    const existing = await ctx.db
+      .query("userCourses")
+      .withIndex("by_user_course_term", (q) =>
+        q
+          .eq("userId", ctx.user.subject)
+          .eq("courseCode", args.courseCode)
+          .eq("year", args.year)
+          .eq("term", args.term),
+      )
+      .first();
+
+    if (existing) {
+      throw new ConvexError(
+        `${args.courseCode} already exists in ${args.term} ${args.year}`,
+      );
+    }
+
     return await ctx.db.insert("userCourses", {
       userId: ctx.user.subject,
       ...args,
