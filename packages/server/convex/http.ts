@@ -31,7 +31,7 @@ const ZSchoolName = z.enum([
 export const ZUpsertCourseWithPrerequisites = z.object({
   program: z.string(),
   code: z.string(),
-  level: z.coerce.number(),
+  level: z.enum(["undergraduate", "graduate"]),
   title: z.string(),
   credits: z.int(),
   description: z.string(),
