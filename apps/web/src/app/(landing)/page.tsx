@@ -1,5 +1,5 @@
 import { auth } from "@clerk/nextjs/server";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ChevronRight, Sparkles } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -10,6 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import HeroBadge from "@/components/ui/hero-badge";
 
 export default async function Home() {
   const { userId } = await auth();
@@ -21,13 +22,16 @@ export default async function Home() {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="max-w-6xl mx-auto px-4 py-32 sm:py-32 w-full bg-background">
+      <section className="max-w-6xl mx-auto px-4 py-28 w-full bg-background">
         <div className="text-center space-y-8">
-          {/* <Badge variant="outline" className="mx-auto">
-            Albert Plus
-          </Badge> */}
+          <HeroBadge
+            href="https://github.com/TechAtNYU/AlbertPlus"
+            text="Open source on GitHub"
+            icon={<Sparkles className="h-4 w-4" />}
+            endIcon={<ChevronRight className="h-4 w-4" />}
+          />
 
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-foreground mt-10">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-foreground mt-6">
             Plan better. Track easier. <br />
             Graduate smarter.
           </h1>
@@ -46,10 +50,6 @@ export default async function Home() {
                 Get Started
                 <ArrowRight className="w-4 h-4" />
               </Link>
-            </Button>
-
-            <Button asChild variant="outline" size="lg">
-              <Link href="https://github.com/TechAtNYU/AlbertPlus">View on GitHub</Link>
             </Button>
           </div>
         </div>
@@ -282,7 +282,7 @@ export default async function Home() {
               asChild
               size="lg"
               variant="outline"
-            // className="gap-2 text-black dark:text-white bg-[#F8F8F8] dark:bg-gray-700 hover:bg-[#DFDFDF] dark:hover:bg-gray-600"
+              // className="gap-2 text-black dark:text-white bg-[#F8F8F8] dark:bg-gray-700 hover:bg-[#DFDFDF] dark:hover:bg-gray-600"
             >
               <Link href="/sign-in">
                 Get Extension
