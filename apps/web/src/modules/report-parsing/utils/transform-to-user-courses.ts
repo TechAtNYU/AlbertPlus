@@ -77,9 +77,28 @@ export function transformToUserCourses(
     const { year, term } = normalizeTerm(course.term);
     const courseCode = `${course.subject} ${course.catalogNumber}`;
 
+    let title = course.title.trim();
+
+    if (title.endsWith(":")) {
+      title = title.slice(0, -1).trim();
+    }
+
+    if (course.meta?.CourseTopic) {
+      let topic = course.meta.CourseTopic.trim();
+      topic = topic.replace(/^\s*\d+\s*-\s*/, "").trim();
+
+      if (topic) {
+        if (title.includes(":")) {
+          title = `${title} - ${topic}`;
+        } else {
+          title = `${title}: ${topic}`;
+        }
+      }
+    }
+
     const userCourse: UserCourse = {
       courseCode,
-      title: course.title,
+      title: title,
       year,
       term,
     };
