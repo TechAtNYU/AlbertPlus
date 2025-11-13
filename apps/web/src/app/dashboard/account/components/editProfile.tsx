@@ -220,8 +220,8 @@ export function EditProfilePopup() {
     },
     onSubmit: async ({ value }) => {
       try {
-        toast.success("Onboarding completed.");
-        router.push("/dashboard");
+        toast.success("Successfully updated profile.");
+        // router.push("/dashboard");
 
         await upsertStudent({
           school: value.school as Id<"schools">,
