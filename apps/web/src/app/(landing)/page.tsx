@@ -49,7 +49,7 @@ export default async function Home() {
             </Button>
 
             <Button asChild variant="outline" size="lg">
-              <Link href="#features">Learn More</Link>
+              <Link href="https://github.com/TechAtNYU/AlbertPlus">View on GitHub</Link>
             </Button>
           </div>
         </div>
@@ -261,7 +261,7 @@ export default async function Home() {
 
       {/* CTA Section */}
       <section className="mx-auto px-16 py-20 text-center">
-        <div className="bg-[#F8F8F8] dark:bg-[#252525] rounded-lg p-12 flex flex-row items-center justify-center gap-16">
+        <div className="bg-[#F8F8F8] dark:bg-[#414141] rounded-lg p-12 flex flex-row items-center justify-center gap-16">
           <h2 className="text-3xl font-bold text-left text-gray-900 dark:text-white">
             Want to be an A+ NYU student? Try Albert+
           </h2>
@@ -271,9 +271,7 @@ export default async function Home() {
               asChild
               size="lg"
               variant="secondary"
-              className="gap-2 text-white bg-[#9043FF] hover:bg-[#6d44a7] dark:bg-[#9043FF] dark:hover:bg
-            
-            -[#af77ff]"
+              className="gap-2 text-white bg-[#9043FF] hover:bg-[#6d44a7] dark:bg-[#9043FF] dark:hover:bg-[#af77ff]"
             >
               <Link href="/sign-in">
                 Try Albert+
@@ -283,8 +281,8 @@ export default async function Home() {
             <Button
               asChild
               size="lg"
-              variant="secondary"
-              className="gap-2 text-black dark:text-white bg-[#F8F8F8] dark:bg-gray-700 hover:bg-[#DFDFDF] dark:hover:bg-gray-600"
+              variant="outline"
+            // className="gap-2 text-black dark:text-white bg-[#F8F8F8] dark:bg-gray-700 hover:bg-[#DFDFDF] dark:hover:bg-gray-600"
             >
               <Link href="/sign-in">
                 Get Extension
