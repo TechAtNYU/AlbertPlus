@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import z from "zod";
 import MultipleSelector from "@/app/onboarding/component/multiselect";
 import { SchoolCombobox } from "@/app/onboarding/component/school-combobox";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -39,6 +40,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import DegreeProgreeUpload from "@/modules/report-parsing/components/degree-progress-upload";
 import type { UserCourse } from "@/modules/report-parsing/types";
 import type { StartingTerm } from "@/modules/report-parsing/utils/parse-starting-term";
@@ -224,6 +230,8 @@ export function OnboardingForm() {
       return;
     }
 
+    form.setFieldValue("userCourses", coursesToImport);
+
     if (startingTerm) {
       form.setFieldValue("startingDate", startingTerm);
       form.setFieldValue(
@@ -232,7 +240,6 @@ export function OnboardingForm() {
       );
     }
 
-    form.setFieldValue("userCourses", coursesToImport);
     setIsFileLoaded(true);
   }
 
@@ -248,7 +255,33 @@ export function OnboardingForm() {
       <Activity mode={currentStep === 1 ? "visible" : "hidden"}>
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl">Degree Progress Report</CardTitle>
+            <CardTitle className="text-2xl flex items-center gap-2">
+              Degree Progress Report
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Badge
+                    variant="outline"
+                    className="cursor-help size-5 rounded-full p-0 text-xs hover:bg-muted"
+                  >
+                    ?
+                  </Badge>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <p>
+                    We do not store your degree progress report. Need help
+                    finding it?{" "}
+                    <a
+                      href="https://www.nyu.edu/students/student-information-and-resources/registration-records-and-graduation/registration/tracking-degree-progress.html"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline"
+                    >
+                      View NYU's guide
+                    </a>
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </CardTitle>
             <CardDescription>
               Upload your degree progress report (PDF) so we can help you track
               your academic progress and suggest courses.

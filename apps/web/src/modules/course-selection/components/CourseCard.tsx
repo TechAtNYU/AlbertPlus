@@ -60,7 +60,7 @@ export const CourseCard = ({
             </div>
             <HoverCard openDelay={10}>
               <HoverCardTrigger>
-                <InfoIcon className="size-4 shrink-0 text-blue-400" />
+                <InfoIcon className="size-4 shrink-0 text-violet-400" />
               </HoverCardTrigger>
               <HoverCardContent>{course.description}</HoverCardContent>
             </HoverCard>
