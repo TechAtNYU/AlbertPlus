@@ -1,4 +1,5 @@
-import type { Term } from "@/components/AppConfigProvider";
+import { gradeSchema } from "@/schemas/courses";
+import type { Term } from "@/utils/term";
 import type { Grade, UserCourse } from "../types";
 
 interface ParsedCourse {
@@ -57,28 +58,11 @@ function normalizeGrade(gradeStr: string): Grade | undefined {
     return undefined;
   }
 
-  const normalized = gradeStr.toLowerCase().trim() as Grade;
-  const validGrades: Grade[] = [
-    "a",
-    "a-",
-    "b+",
-    "b",
-    "b-",
-    "c+",
-    "c",
-    "c-",
-    "d+",
-    "d",
-    "p",
-    "f",
-    "w",
-  ];
+  const normalized = gradeStr.toLowerCase().trim();
 
-  if (validGrades.includes(normalized)) {
-    return normalized;
-  }
+  const grade = gradeSchema.parse(normalized);
 
-  return undefined;
+  return grade;
 }
 
 /**
@@ -93,9 +77,28 @@ export function transformToUserCourses(
     const { year, term } = normalizeTerm(course.term);
     const courseCode = `${course.subject} ${course.catalogNumber}`;
 
+    let title = course.title.trim();
+
+    if (title.endsWith(":")) {
+      title = title.slice(0, -1).trim();
+    }
+
+    if (course.meta?.CourseTopic) {
+      let topic = course.meta.CourseTopic.trim();
+      topic = topic.replace(/^\s*\d+\s*-\s*/, "").trim();
+
+      if (topic) {
+        if (title.includes(":")) {
+          title = `${title} - ${topic}`;
+        } else {
+          title = `${title}: ${topic}`;
+        }
+      }
+    }
+
     const userCourse: UserCourse = {
       courseCode,
-      title: course.title,
+      title: title,
       year,
       term,
     };

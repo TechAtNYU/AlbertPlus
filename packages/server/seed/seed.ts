@@ -73,7 +73,7 @@ async function seedDatabase() {
     console.log(`\n🔑 Using TEST_USER_ID: ${TEST_USER_ID}\n`);
 
     // Step 1: Clear all existing data
-    console.log("🗑️  Clearing existing database...\n");
+    console.log("🗑  Clearing existing database...\n");
     const clearCommand = "npx convex run seed:clearAll --no-push";
 
     const { stdout: clearStdout, stderr: clearStderr } = await execAsync(
