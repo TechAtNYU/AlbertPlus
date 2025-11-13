@@ -59,6 +59,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import { useUser } from "@clerk/nextjs";
 
 const dateSchema = z.object({
   year: z.number().int().min(2000).max(2100),
@@ -106,6 +107,13 @@ export function EditProfilePopup() {
   const { isAuthenticated } = useConvexAuth();
   const [isFileLoaded, setIsFileLoaded] = React.useState(false);
   const [currentStep, setCurrentStep] = React.useState<1 | 2>(1);
+
+    const { user } = useUser();
+
+    const student = useQuery(
+        api.students.getCurrentStudent,
+        isAuthenticated ? {} : "skip",
+    );
 
   // actions
   const upsertStudent = useMutation(api.students.upsertCurrentStudent);
@@ -232,6 +240,29 @@ export function EditProfilePopup() {
     },
   });
 
+  React.useEffect(() => {
+    if (!student) return;
+
+    // school: student.school can be an object or null
+    form.setFieldValue("school", student.school?._id ?? undefined);
+
+    // programs: student.programs might be an array of objects or array of ids
+    const programIds: Id<"programs">[] =
+        (student.programs ?? []).map((p: any) =>
+        typeof p === "string" ? (p as Id<"programs">) : (p?._id as Id<"programs">),
+        );
+
+    form.setFieldValue("programs", programIds);
+
+    // dates — assume these are already shaped correctly
+    if (student.startingDate) {
+        form.setFieldValue("startingDate", student.startingDate);
+    }
+    if (student.expectedGraduationDate) {
+        form.setFieldValue("expectedGraduationDate", student.expectedGraduationDate);
+    }
+    }, [student]);
+
   function handleConfirmImport(
     coursesToImport: UserCourse[],
     startingTerm: StartingTerm | null,
@@ -263,7 +294,7 @@ export function EditProfilePopup() {
       }}
       className="space-y-6"
     >
-      <Activity mode={currentStep === 1 ? "visible" : "hidden"}>
+      {/* <Activity mode={currentStep === 1 ? "visible" : "hidden"}>
         <Card>
           <CardHeader>
             <CardTitle className="text-2xl flex items-center gap-2">
@@ -343,9 +374,9 @@ export function EditProfilePopup() {
             </div>
           </CardFooter>
         </Card>
-      </Activity>
+      </Activity> */}
 
-      <Activity mode={currentStep === 2 ? "visible" : "hidden"}>
+      <Activity mode={currentStep === 1 ? "visible" : "hidden"}>
         <Card>
           {/* <CardHeader>
             <CardTitle className="text-2xl">Academic Information</CardTitle>
@@ -362,7 +393,7 @@ export function EditProfilePopup() {
                   return (
                     <UIField>
                       <FieldLabel htmlFor={field.name}>
-                        What school or college of NYU do you go to?
+                        What school or college of NYU do you attend?
                       </FieldLabel>
                       <FieldContent>
                         <SchoolCombobox
@@ -389,7 +420,7 @@ export function EditProfilePopup() {
                   return (
                     <UIField>
                       <FieldLabel htmlFor={field.name}>
-                        What's your major(s) and minor(s)?
+                        What are your major(s) and minor(s)?
                       </FieldLabel>
                       <FieldContent>
                         <MultipleSelector
@@ -494,20 +525,11 @@ export function EditProfilePopup() {
               </FieldGroup>
             </FieldGroup>
           </CardContent>
-          <CardFooter>
-            <div className="ml-auto space-x-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setCurrentStep(1)}
-              >
-                Back
-              </Button>
-              <Button type="submit" disabled={form.state.isSubmitting}>
-                {form.state.isSubmitting ? "Saving..." : "Save"}
-              </Button>
-            </div>
-          </CardFooter>
+          <CardFooter className="flex justify-center">
+            <Button type="submit" disabled={form.state.isSubmitting}>
+                {form.state.isSubmitting ? "Saving..." : "Save Changes"}
+            </Button>
+        </CardFooter>
         </Card>
       </Activity>
     </form>
@@ -540,12 +562,12 @@ export function EditProfilePopup() {
               <Input id="username-1" name="username" defaultValue="@peduarte" />
             </div>
           </div> */}
-          <DialogFooter>
+          {/* <DialogFooter>
             <DialogClose asChild>
               <Button variant="outline">Cancel</Button>
             </DialogClose>
             <Button type="submit">Save changes</Button>
-          </DialogFooter>
+          </DialogFooter> */}
         </DialogContent>
       </form>
     </Dialog></div>

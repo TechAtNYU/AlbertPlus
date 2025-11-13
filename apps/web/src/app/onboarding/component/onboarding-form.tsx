@@ -351,7 +351,7 @@ export function OnboardingForm() {
                   return (
                     <UIField>
                       <FieldLabel htmlFor={field.name}>
-                        What school or college of NYU do you go to?
+                        What school or college of NYU do you attend?
                       </FieldLabel>
                       <FieldContent>
                         <SchoolCombobox
