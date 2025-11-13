@@ -1,5 +1,5 @@
 import { ConvexError } from "convex/values";
-import { omit } from "convex-helpers";
+import { asyncMap, omit } from "convex-helpers";
 
 import { getOneFrom } from "convex-helpers/server/relationships";
 import { partial } from "convex-helpers/validators";
@@ -26,9 +26,16 @@ export const getCurrentStudent = protectedQuery({
       "_id",
     );
 
+    const programs = await asyncMap(student.programs, async (programId) => {
+      return await ctx.db.get(programId);
+    });
+
+    const validPrograms = programs.filter((p) => p !== null);
+
     return {
       ...student,
       school,
+      programs: validPrograms,
     };
   },
 });
