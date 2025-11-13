@@ -29,11 +29,7 @@ export default function HomeLayout({
         </div>
 
         <SignedOut>
-          <Button
-            asChild
-            variant="outline"
-            className="bg-[#9043FF] hover:bg-[#6d44a7] dark:bg-[#9043FF] dark:hover:bg-[#af77ff] text-white"
-          >
+          <Button asChild variant="default">
             <Link href="/sign-in">Sign In</Link>
           </Button>
         </SignedOut>
