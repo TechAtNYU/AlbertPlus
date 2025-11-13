@@ -38,3 +38,5 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 
 .turbo
 .vercel
+apps/web/src/app/globals.css
+apps/web/src/app/(landing)/page.tsx

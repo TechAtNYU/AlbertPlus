@@ -49,7 +49,9 @@ export default async function Home() {
             </Button>
 
             <Button asChild variant="outline" size="lg">
-              <Link href="https://github.com/TechAtNYU/AlbertPlus">View on GitHub</Link>
+              <Link href="https://github.com/TechAtNYU/AlbertPlus">
+                View on GitHub
+              </Link>
             </Button>
           </div>
         </div>
@@ -282,7 +284,6 @@ export default async function Home() {
               asChild
               size="lg"
               variant="outline"
-            // className="gap-2 text-black dark:text-white bg-[#F8F8F8] dark:bg-gray-700 hover:bg-[#DFDFDF] dark:hover:bg-gray-600"
             >
               <Link href="/sign-in">
                 Get Extension
