@@ -118,5 +118,47 @@ export const removeUserCourseOffering = protectedMutation({
     }
 
     await ctx.db.delete(args.id);
+
+    const alternatives = await ctx.db
+      .query("userCourseOfferings")
+      .withIndex("by_user", (q) => q.eq("userId", ctx.user.subject))
+      .filter((q) => q.eq(q.field("alternativeOf"), args.id))
+      .collect();
+
+    for (const alternative of alternatives) {
+      await ctx.db.delete(alternative._id);
+    }
+  },
+});
+
+export const getAlternativeCourses = protectedQuery({
+  args: { userCourseOfferingId: v.id("userCourseOfferings") },
+  handler: async (ctx, args) => {
+    const alternatives = await ctx.db
+      .query("userCourseOfferings")
+      .withIndex("by_user", (q) => q.eq("userId", ctx.user.subject))
+      .filter((q) => q.eq(q.field("alternativeOf"), args.userCourseOfferingId))
+      .collect();
+
+    return await Promise.all(
+      alternatives.map(async (alternative) => {
+        const courseOffering = await getOneFrom(
+          ctx.db,
+          "courseOfferings",
+          "by_class_number",
+          alternative.classNumber,
+          "classNumber",
+        );
+
+        if (!courseOffering) {
+          throw new Error("Course offering not found");
+        }
+
+        return {
+          ...alternative,
+          courseOffering,
+        };
+      }),
+    );
   },
 });
