@@ -1,31 +1,27 @@
-# Agent Guidelines for albert-plus
+# Development Guidelines for Albert Plus
 
 ## Build/Lint/Test Commands
 
-- `bun run dev` - Start all apps in development mode
-- `bun run build` - Build all applications
-- `bun run check` - Run Biome linting/formatting across all workspaces
-- `biome check --fix` - Auto-fix safe Biome issues (formatting, imports, safe fixes)
-- `bun run check:types` - TypeScript type checking across all workspaces
-- `bun run dashboard` - Open Convex dashboard
-- **Single app**: `bun run --filter <app-name> <command>` (e.g., `bun run --filter web dev`)
-- **Tests**: `bun run test` (runs all tests); `bun run --filter scraper test` (single app tests)
-- **Single test**: `cd apps/scraper && bun test src/modules/courses/index.test.ts` (uses bun:test)
+- **Build**: `bun run build` (builds all workspaces via turbo)
+- **Lint**: `bun run check` (runs Biome linter/formatter)
+- **Type check**: `bun run check:types` (type checks all workspaces)
+- **Test**: `bun run test` (runs all tests) or `bun test <file>` (single test)
+- **Test single file**: `cd apps/scraper && bun test src/modules/courses/index.test.ts`
+- **Test with pattern**: `bun test --test-name-pattern="<regex>"`
+- **Dev**: `bun run dev` (starts all dev servers with turbo)
 
-## Code Style
+## Code Style & Formatting
 
-- **Formatter**: Biome with 2-space indentation, double quotes, auto-organize imports
-- **Imports**: Use `@/` for app-relative paths; imports auto-sorted by Biome
-- **Types**: TypeScript strict mode; use explicit return types for exported functions
-- **Components**: React functional components with intersection types for props (e.g., `React.ComponentProps<"button"> & VariantProps<...>`)
+- **Formatter**: Biome with 2-space indentation, double quotes for strings
+- **Imports**: Organize imports automatically (use `@/*` alias for apps/web src paths)
+- **Types**: Strict TypeScript enabled - use explicit types, avoid `any`
 - **Naming**: camelCase for variables/functions, PascalCase for components/types
-- **CSS**: TailwindCSS v4 with `cn()` utility (`clsx` + `tailwind-merge`) for conditional classes
-- **Patterns**: Use `class-variance-authority` (cva) for component variants; `convex-helpers` for auth/data access
+- **Error Handling**: Use `JobError` for scraper modules, return `null` for not found in queries
 
-## Project Structure
+## Architecture Notes
 
-- **Monorepo**: Turbo + Bun package manager; workspaces in `apps/*` and `packages/*`
-- **Apps**: `web` (Next.js 15 + Clerk), `browser` (Chrome extension), `scraper` (Cloudflare Worker + Drizzle)
-- **Server**: Convex backend in `packages/server` with `protectedQuery`/`protectedMutation` for auth
-- **Dependencies**: Use `workspace:*` for internal packages; Doppler for environment variables
-- **Database**: Convex for main data; Cloudflare D1 + Drizzle for scraper operations
+- **Monorepo**: Turbo + Bun workspaces (`apps/*`, `packages/*`)
+- **Backend**: Convex (packages/server) for queries/mutations with Clerk auth
+- **Frontend**: Next.js 15 with App Router, Tailwind CSS v4, React 19
+- **Scraper**: Cloudflare Workers with Hono, Drizzle ORM for D1
+- **Testing**: Bun test runner with mocks in `__mocks__/` directories

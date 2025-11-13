@@ -9,7 +9,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import type { Term } from "@/utils/term";
+import { formatTermTitle, type Term } from "@/utils/term";
 import type { UserCourse } from "../types";
 
 type ConfirmModalProps = {
@@ -19,13 +19,6 @@ type ConfirmModalProps = {
   onConfirm: () => void;
   onCancel: () => void;
   isImporting?: boolean;
-};
-
-const termLabels: Record<Term, string> = {
-  spring: "Spring",
-  summer: "Summer",
-  fall: "Fall",
-  "j-term": "J-Term",
 };
 
 function groupCoursesByYearAndTerm(courses: UserCourse[]) {
@@ -72,18 +65,16 @@ export default function ConfirmModal({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="flex flex-col gap-0 p-0 sm:max-h-[min(640px,80vh)] sm:max-w-2xl [&>button:last-child]:top-6">
-        <DialogHeader className="shrink-0 space-y-0 text-left">
-          <DialogTitle className="px-6 pt-6 text-xl">
+        <DialogHeader className="px-6 gap-1 pb-3">
+          <DialogTitle className="pt-6 text-xl">
             Confirm Course History
           </DialogTitle>
           <DialogDescription asChild>
-            <div className="px-6 py-3">
-              <p className="text-sm text-muted-foreground">
-                We found {courses.length} course
-                {courses.length !== 1 ? "s" : ""} in your Degree Progress
-                Report. Please review and confirm.
-              </p>
-            </div>
+            <p className="text-sm text-muted-foreground">
+              We found {courses.length} course
+              {courses.length !== 1 ? "s" : ""} in your Degree Progress Report.
+              Please review and confirm.
+            </p>
           </DialogDescription>
         </DialogHeader>
 
@@ -94,7 +85,7 @@ export default function ConfirmModal({
               return (
                 <div key={key} className="space-y-2">
                   <h3 className="text-sm font-semibold text-foreground">
-                    {termLabels[term as Term]} {year}
+                    {formatTermTitle(term as Term, Number(year))}
                   </h3>
                   <div className="space-y-2">
                     {termCourses.map((course, idx) => (
