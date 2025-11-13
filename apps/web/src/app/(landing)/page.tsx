@@ -1,11 +1,15 @@
 import { auth } from "@clerk/nextjs/server";
+import { ArrowRight } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { ArrowRight, BookOpen, Zap, Users, BarChart3, Clock, Search } from "lucide-react";
+import {
+  Card,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 export default async function Home() {
   const { userId } = await auth();
@@ -24,15 +28,20 @@ export default async function Home() {
           </Badge> */}
 
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-foreground mt-10">
-            Plan better. Track easier. <br />Graduate smarter.
+            Plan better. Track easier. <br />
+            Graduate smarter.
           </h1>
 
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            A smarter student dashboard & course helper for NYU students          
-            </p>
+            A smarter student dashboard & course helper for NYU students
+          </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button asChild size="lg" className="gap-2 bg-[#9043FF] hover:bg-[#6d44a7] dark:bg-[#9043FF] dark:hover:bg-[#af77ff] dark:text-white">
+            <Button
+              asChild
+              size="lg"
+              className="gap-2 bg-[#9043FF] hover:bg-[#6d44a7] dark:bg-[#9043FF] dark:hover:bg-[#af77ff] dark:text-white"
+            >
               <Link href="/sign-in">
                 Get Started
                 <ArrowRight className="w-4 h-4" />
@@ -53,10 +62,12 @@ export default async function Home() {
           <div className="h-screen flex items-center justify-center scroll-snap-align-start border-none">
             <Card className="w-full max-w-6xl h-full flex flex-col border-none shadow-none bg-transparent dark:bg-transparent">
               <CardHeader className="flex-1 flex flex-col justify-center items-center text-center">
-
-                <CardTitle className="text-3xl dark:text-white">Plan your semesters. Stay organized. See the big picture. </CardTitle>
+                <CardTitle className="text-3xl dark:text-white">
+                  Plan your semesters. Stay organized. See the big picture.{" "}
+                </CardTitle>
                 <CardDescription className="text-lg mt-4 dark:text-gray-400">
-                  A visual Degree Progress Report that shows completed and missing requirements at a glance.
+                  A visual Degree Progress Report that shows completed and
+                  missing requirements at a glance.
                 </CardDescription>
                 <div className="mt-6 flex justify-center bg-none relative w-full aspect-video">
                   <Image
@@ -74,10 +85,12 @@ export default async function Home() {
           <div className="h-screen flex items-center justify-center scroll-snap-align-start border-none">
             <Card className="w-full max-w-6xl h-full flex flex-col border-none shadow-none bg-transparent dark:bg-transparent">
               <CardHeader className="flex-1 flex flex-col justify-center items-center text-center">
-
-                <CardTitle className="text-3xl">Track your progress. Understand your path. </CardTitle>
+                <CardTitle className="text-3xl">
+                  Track your progress. Understand your path.{" "}
+                </CardTitle>
                 <CardDescription className="text-lg mt-4">
-                  A visual Degree Progress Report that shows completed and missing requirements at a glance.
+                  A visual Degree Progress Report that shows completed and
+                  missing requirements at a glance.
                 </CardDescription>
                 <div className="mt-6 flex justify-center bg-none relative w-full aspect-video">
                   <Image
@@ -95,10 +108,12 @@ export default async function Home() {
           <div className="h-screen flex items-center justify-center scroll-snap-align-start border-none">
             <Card className="w-full max-w-6xl h-full flex flex-col border-none shadow-none bg-transparent dark:bg-transparent">
               <CardHeader className="flex-1 flex flex-col justify-center items-center text-center">
-
-                <CardTitle className="text-3xl">Find courses faster. Search smarter. </CardTitle>
+                <CardTitle className="text-3xl">
+                  Find courses faster. Search smarter.{" "}
+                </CardTitle>
                 <CardDescription className="text-lg mt-4">
-                  An improved Course Search experience — clearer results, easier navigation, and instant add options.
+                  An improved Course Search experience — clearer results, easier
+                  navigation, and instant add options.
                 </CardDescription>
                 <div className="mt-6 flex justify-center bg-none relative w-full aspect-video">
                   <Image
@@ -116,10 +131,12 @@ export default async function Home() {
           <div className="h-screen flex items-center justify-center scroll-snap-align-start border-none">
             <Card className="w-full max-w-6xl h-full flex flex-col border-none shadow-none bg-transparent dark:bg-transparent">
               <CardHeader className="flex-1 flex flex-col justify-center items-center text-center">
-
-                <CardTitle className="text-3xl">Plan directly from Albert+</CardTitle>
+                <CardTitle className="text-3xl">
+                  Plan directly from Albert+
+                </CardTitle>
                 <CardDescription className="text-lg mt-4">
-                  Use the Sidebar to add courses and build your next semester plan seamlessly.
+                  Use the Sidebar to add courses and build your next semester
+                  plan seamlessly.
                 </CardDescription>
                 <div className="mt-6 flex justify-center bg-none relative w-full aspect-video">
                   <Image
@@ -137,10 +154,12 @@ export default async function Home() {
           <div className="h-screen flex items-center justify-center scroll-snap-align-start border-none">
             <Card className="w-full max-w-6xl h-full flex flex-col border-none shadow-none bg-transparent dark:bg-transparent">
               <CardHeader className="flex-1 flex flex-col justify-center items-center text-center">
-
-                <CardTitle className="text-3xl dark:text-white">Plan your semesters. Stay organized. See the big picture. </CardTitle>
+                <CardTitle className="text-3xl dark:text-white">
+                  Plan your semesters. Stay organized. See the big picture.{" "}
+                </CardTitle>
                 <CardDescription className="text-lg mt-4 dark:text-gray-400">
-                  A visual Degree Progress Report that shows completed and missing requirements at a glance.
+                  A visual Degree Progress Report that shows completed and
+                  missing requirements at a glance.
                 </CardDescription>
                 <div className="mt-6 flex justify-center bg-none relative w-full aspect-video">
                   <Image
@@ -154,21 +173,25 @@ export default async function Home() {
               </CardHeader>
             </Card>
           </div>
-
         </div>
       </section>
 
       <section className="w-full bg-background">
-        <h2 className="text-3xl font-bold mb-4 text-center text-foreground mt-20">Explore More Features in Albert+</h2>
+        <h2 className="text-3xl font-bold mb-4 text-center text-foreground mt-20">
+          Explore More Features in Albert+
+        </h2>
         <div className="grid grid-cols-1 gap-0 scroll-snap-y scroll-snap-mandatory">
           {/* Feature Card 1 */}
           <div className="flex items-center justify-center scroll-snap-align-start border-none">
             <Card className="w-full max-w-6xl h-full flex flex-col border-none shadow-none bg-transparent dark:bg-transparent">
               <CardHeader className="flex-1 flex flex-row justify-center items-center text-left">
                 <div className="flex flex-col text-left p-10">
-                  <CardTitle className="text-3xl dark:text-white">Share your schedule </CardTitle>
+                  <CardTitle className="text-3xl dark:text-white">
+                    Share your schedule{" "}
+                  </CardTitle>
                   <CardDescription className="text-lg mt-4 dark:text-gray-400">
-                    Show friends or advisors your upcoming semester with one click.
+                    Show friends or advisors your upcoming semester with one
+                    click.
                   </CardDescription>
                 </div>
                 <div className="mt-6 flex justify-center bg-none relative w-full aspect-video">
@@ -188,9 +211,12 @@ export default async function Home() {
             <Card className="w-full max-w-6xl h-full flex flex-col border-none shadow-none bg-transparent dark:bg-transparent">
               <CardHeader className="flex-1 flex flex-row justify-center items-center text-left">
                 <div className="flex flex-col text-left p-10">
-                  <CardTitle className="text-3xl dark:text-white">Share your schedule </CardTitle>
+                  <CardTitle className="text-3xl dark:text-white">
+                    Share your schedule{" "}
+                  </CardTitle>
                   <CardDescription className="text-lg mt-4 dark:text-gray-400">
-                    Show friends or advisors your upcoming semester with one click.
+                    Show friends or advisors your upcoming semester with one
+                    click.
                   </CardDescription>
                 </div>
                 <div className="mt-6 flex justify-center bg-none relative w-full aspect-video">
@@ -210,9 +236,12 @@ export default async function Home() {
             <Card className="w-full max-w-6xl h-full flex flex-col border-none shadow-none bg-transparent dark:bg-transparent">
               <CardHeader className="flex-1 flex flex-row justify-center items-center text-left">
                 <div className="flex flex-col text-left p-10">
-                  <CardTitle className="text-3xl dark:text-white">Share your schedule </CardTitle>
+                  <CardTitle className="text-3xl dark:text-white">
+                    Share your schedule{" "}
+                  </CardTitle>
                   <CardDescription className="text-lg mt-4 dark:text-gray-400">
-                    Show friends or advisors your upcoming semester with one click.
+                    Show friends or advisors your upcoming semester with one
+                    click.
                   </CardDescription>
                 </div>
                 <div className="mt-6 flex justify-center bg-none relative w-full aspect-video">
@@ -227,7 +256,6 @@ export default async function Home() {
               </CardHeader>
             </Card>
           </div>
-
         </div>
       </section>
 
@@ -239,30 +267,43 @@ export default async function Home() {
           </h2>
 
           <div className="flex flex-row gap-4">
-            <Button asChild size="lg" variant="secondary" className="gap-2 text-white bg-[#9043FF] hover:bg-[#6d44a7] dark:bg-[#9043FF] dark:hover:bg
+            <Button
+              asChild
+              size="lg"
+              variant="secondary"
+              className="gap-2 text-white bg-[#9043FF] hover:bg-[#6d44a7] dark:bg-[#9043FF] dark:hover:bg
             
-            -[#af77ff]">
+            -[#af77ff]"
+            >
               <Link href="/sign-in">
                 Try Albert+
                 <ArrowRight className="w-4 h-4" />
               </Link>
             </Button>
-            <Button asChild size="lg" variant="secondary" className="gap-2 text-black dark:text-white bg-[#F8F8F8] dark:bg-gray-700 hover:bg-[#DFDFDF] dark:hover:bg-gray-600">
+            <Button
+              asChild
+              size="lg"
+              variant="secondary"
+              className="gap-2 text-black dark:text-white bg-[#F8F8F8] dark:bg-gray-700 hover:bg-[#DFDFDF] dark:hover:bg-gray-600"
+            >
               <Link href="/sign-in">
                 Get Extension
                 <ArrowRight className="w-4 h-4" />
               </Link>
             </Button>
           </div>
-
         </div>
       </section>
 
       {/* Footer */}
       <footer className="border-t border-border mt-20 pt-12 bg-background">
         <div className="text-center text-gray-600 dark:text-gray-400">
-          <h1 className="text-[20vw] text-[#9043FF] dark:text-[#9043FF] font-bold line-height-[0.3] mb-[-50px]">AlbertPlus</h1>
-          <p className="dark:text-gray-400">© 2025 Tech@NYU. All rights reserved.</p>
+          <h1 className="text-[20vw] text-[#9043FF] dark:text-[#9043FF] font-bold line-height-[0.3] mb-[-50px]">
+            AlbertPlus
+          </h1>
+          <p className="dark:text-gray-400">
+            © 2025 Tech@NYU. All rights reserved.
+          </p>
         </div>
       </footer>
     </div>

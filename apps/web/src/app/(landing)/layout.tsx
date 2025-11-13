@@ -1,5 +1,6 @@
 import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 
 export default function HomeLayout({
@@ -11,15 +12,19 @@ export default function HomeLayout({
     <>
       <header className="flex justify-between w-full items-center p-10 px-12 gap-4 h-16">
         <div>
-          <img
+          <Image
             src="/logo.png"
             alt="AlbertPlus"
-            className="h-8 block dark:hidden"
+            width={120}
+            height={32}
+            className="h-8 w-auto block dark:hidden"
           />
-          <img
+          <Image
             src="/logo-dark.png"
             alt="AlbertPlus"
-            className="h-8 hidden dark:block"
+            width={120}
+            height={32}
+            className="h-8 w-auto hidden dark:block"
           />
         </div>
 
