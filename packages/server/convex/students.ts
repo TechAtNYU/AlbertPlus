@@ -2,10 +2,8 @@ import { ConvexError } from "convex/values";
 import { omit } from "convex-helpers";
 
 import { getAll } from "convex-helpers/server/relationships";
-
 import { getOneFrom } from "convex-helpers/server/relationships";
 import { partial } from "convex-helpers/validators";
-
 import { protectedMutation, protectedQuery } from "./helpers/auth";
 import { students } from "./schemas/students";
 
