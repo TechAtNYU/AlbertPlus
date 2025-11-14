@@ -1,18 +1,21 @@
 import { v } from "convex/values";
-import { schoolName } from "./schools";
+
+const semester = v.object({
+  year: v.number(),
+  term: v.union(
+    v.literal("spring"),
+    v.literal("summer"),
+    v.literal("fall"),
+    v.literal("j-term"),
+  ),
+});
 
 const students = {
   userId: v.string(),
   programs: v.array(v.id("programs")),
-  school: schoolName,
-  startingDate: v.object({
-    year: v.number(),
-    term: v.union(v.literal("spring"), v.literal("fall")),
-  }),
-  expectedGraduationDate: v.object({
-    year: v.number(),
-    term: v.union(v.literal("spring"), v.literal("fall")),
-  }),
+  school: v.id("schools"),
+  startingDate: semester,
+  expectedGraduationDate: semester,
 };
 
 export { students };

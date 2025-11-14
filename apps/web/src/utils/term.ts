@@ -120,3 +120,14 @@ export function buildAcademicTimeline(
     totalYears: academicYear,
   };
 }
+
+export function getTermAfterSemesters(
+  start: TermYear,
+  semesters: number,
+): TermYear {
+  let current = start;
+  for (let i = 0; i < semesters; i++) {
+    current = getNextTerm(current);
+  }
+  return current;
+}
