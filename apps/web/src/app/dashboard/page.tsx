@@ -7,8 +7,8 @@ import {
   useQueries,
   useQuery,
 } from "convex/react";
+import type { FunctionReturnType } from "convex/server";
 import { ProgramRequirementsChart } from "@/app/dashboard/components/degree-charts";
-import { FunctionReturnType } from "convex/server";
 
 const HomePage = () => {
   const { isAuthenticated } = useConvexAuth();
@@ -43,7 +43,10 @@ const HomePage = () => {
   for (const [_, programData] of Object.entries(programs)) {
     if (programData?.requirements) {
       for (const requirement of programData.requirements) {
-        if (requirement.type === "required" || requirement.type === "alternative") {
+        if (
+          requirement.type === "required" ||
+          requirement.type === "alternative"
+        ) {
           for (const courseCode of requirement.courses) {
             allCourseCodes.add(courseCode);
           }
@@ -63,11 +66,11 @@ const HomePage = () => {
 
   const courses = useQueries(courseQueries);
 
-  const isProgramsLoading = 
+  const isProgramsLoading =
     !isAuthenticated ||
     student === undefined ||
-    Object.keys(programs).length === 0 || 
-    Object.values(programs).some(p => p === undefined)
+    Object.keys(programs).length === 0 ||
+    Object.values(programs).some((p) => p === undefined);
 
   return (
     <ProgramRequirementsChart
