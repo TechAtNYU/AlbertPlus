@@ -7,8 +7,8 @@ import {
   useQueries,
   useQuery,
 } from "convex/react";
-import { ProgramRequirementsChart } from "@/modules/degree-progress/components/degree-charts";
-import DegreeProgreeUpload from "@/modules/report-parsing/components/degree-progress-upload";
+import { ProgramRequirementsChart } from "@/app/dashboard/components/degree-charts";
+import { FunctionReturnType } from "convex/server";
 
 const HomePage = () => {
   const { isAuthenticated } = useConvexAuth();
@@ -23,6 +23,7 @@ const HomePage = () => {
   );
 
   const programQueries: RequestForQueries = {};
+
   if (isAuthenticated && student) {
     for (const programId of student.programs) {
       programQueries[programId] = {
@@ -32,7 +33,10 @@ const HomePage = () => {
     }
   }
 
-  const programs = useQueries(programQueries);
+  const programs: Record<
+    string,
+    FunctionReturnType<typeof api.programs.getProgramById>
+  > = useQueries(programQueries);
 
   // Collect all unique course codes from all programs
   const allCourseCodes = new Set<string>();
@@ -58,17 +62,11 @@ const HomePage = () => {
   const courses = useQueries(courseQueries);
 
   return (
-    <div className="container mx-auto space-y-6 p-6">
-      <h1 className="text-3xl font-bold">Dashboard</h1>
-
-      <DegreeProgreeUpload />
-
-      <ProgramRequirementsChart
-        programs={programs}
-        userCourses={userCourses}
-        courses={courses}
-      />
-    </div>
+    <ProgramRequirementsChart
+      programs={programs}
+      userCourses={userCourses}
+      courses={courses}
+    />
   );
 };
 

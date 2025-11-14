@@ -1,6 +1,6 @@
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
-import { getManyFrom, getOneFrom } from "convex-helpers/server/relationships";
+import { getManyFrom } from "convex-helpers/server/relationships";
 import { internalMutation } from "./_generated/server";
 import { protectedQuery } from "./helpers/auth";
 import { programs } from "./schemas/programs";
