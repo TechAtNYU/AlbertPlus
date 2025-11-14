@@ -38,19 +38,21 @@ const HomePage = () => {
     FunctionReturnType<typeof api.programs.getProgramById>
   > = useQueries(programQueries);
 
-  // Collect all unique course codes from all programs
+  // Collect all unique course codes from all programs of type required/alternative
   const allCourseCodes = new Set<string>();
   for (const [_, programData] of Object.entries(programs)) {
     if (programData?.requirements) {
       for (const requirement of programData.requirements) {
-        for (const courseCode of requirement.courses) {
-          allCourseCodes.add(courseCode);
+        if (requirement.type === "required" || requirement.type === "alternative") {
+          for (const courseCode of requirement.courses) {
+            allCourseCodes.add(courseCode);
+          }
         }
       }
     }
   }
 
-  // Fetch all courses
+  // Fetch all courses of type required/alternative
   const courseQueries: RequestForQueries = {};
   for (const code of allCourseCodes) {
     courseQueries[code] = {
