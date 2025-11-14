@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { getDepartmentName } from "@/lib/department-names";
 
 interface ProgramRequirementsChartProps {
   programs: Record<
@@ -255,7 +256,7 @@ export function ProgramRequirementsChart({
     if (!showCompletion) {
       // Default view: just total credits per category
       return chartData.map((item, index) => ({
-        name: item.category,
+        name: getDepartmentName(item.category),
         value: item.credits,
         fill: COLORS[index % COLORS.length],
       }));
@@ -271,11 +272,12 @@ export function ProgramRequirementsChart({
 
       chartData.forEach((item, index) => {
         const baseColor = COLORS[index % COLORS.length];
+        const departmentName = getDepartmentName(item.category);
 
         // Add completed portion (darker - original color)
         if (item.completedCredits > 0) {
           splitData.push({
-            name: `${item.category} (Completed)`,
+            name: `${departmentName} (Completed)`,
             value: item.completedCredits,
             fill: baseColor,
             isCompleted: true,
@@ -286,7 +288,7 @@ export function ProgramRequirementsChart({
         // Add remaining portion (lighter shade)
         if (item.remainingCredits > 0) {
           splitData.push({
-            name: `${item.category} (Remaining)`,
+            name: `${departmentName} (Remaining)`,
             value: item.remainingCredits,
             fill: lightenColor(baseColor),
             isCompleted: false,
