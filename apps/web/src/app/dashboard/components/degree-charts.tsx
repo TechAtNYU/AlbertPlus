@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { Spinner } from "@/components/ui/spinner";
 
 interface ProgramRequirementsChartProps {
   programs: Record<
@@ -33,6 +34,7 @@ interface ProgramRequirementsChartProps {
     string,
     FunctionReturnType<typeof api.courses.getCourseByCode> | undefined
   >;
+  isLoading: boolean;
 }
 
 const COLORS = [
@@ -146,6 +148,7 @@ export function ProgramRequirementsChart({
   programs,
   userCourses,
   courses,
+  isLoading,
 }: ProgramRequirementsChartProps) {
   const [showCompletion, setShowCompletion] = useState(false);
   const [hasAnimated, setHasAnimated] = useState(false);
@@ -308,7 +311,7 @@ export function ProgramRequirementsChart({
     }
   }, [pieChartData, hasAnimated]);
 
-  if (program === undefined) {
+  if (isLoading) {
     return (
       <Card>
         <CardHeader>

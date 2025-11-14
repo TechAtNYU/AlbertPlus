@@ -63,11 +63,18 @@ const HomePage = () => {
 
   const courses = useQueries(courseQueries);
 
+  const isProgramsLoading = 
+    !isAuthenticated ||
+    student === undefined ||
+    Object.keys(programs).length === 0 || 
+    Object.values(programs).some(p => p === undefined)
+
   return (
     <ProgramRequirementsChart
       programs={programs}
       userCourses={userCourses}
       courses={courses}
+      isLoading={isProgramsLoading}
     />
   );
 };
