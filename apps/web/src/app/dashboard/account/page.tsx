@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {EditProfilePopup} from "./components/editProfile";
 import { Shield, Key, Trash2, Mail, MapPin } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -19,9 +19,10 @@ import { useForm } from "@tanstack/react-form";
 import { Doc, Id } from "@albert-plus/server/convex/_generated/dataModel";
 import { FunctionArgs } from "convex/server";
 import { toast } from "sonner";
-import React from "react";
+import React, { Activity } from "react";
 import { useRouter } from "next/router";
 import { getTermAfterSemesters, Term } from "@/utils/term";
+import DegreeProgreeUpload from "@/modules/report-parsing/components/degree-progress-upload";
 import z from "zod";
 import {
   Select,
@@ -49,6 +50,13 @@ import {
 } from "@/components/ui/field";
 import { SchoolCombobox } from "@/app/onboarding/component/school-combobox";
 import MultipleSelector from "@/app/onboarding/component/multiselect";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { UserCourse } from "@/modules/report-parsing/types";
+import { StartingTerm } from "@/modules/report-parsing/utils/parse-starting-term";
 
 const onboardingFormSchema = z
   .object({
@@ -173,6 +181,27 @@ export default function ProfilePage() {
       }
       return years;
     }, [currentYear]);
+
+    function handleConfirmImport(
+      coursesToImport: UserCourse[],
+      startingTerm: StartingTerm | null,
+    ) {
+      if (coursesToImport.length === 0) {
+        return;
+      }
+  
+      form.setFieldValue("userCourses", coursesToImport);
+  
+      if (startingTerm) {
+        form.setFieldValue("startingDate", startingTerm);
+        form.setFieldValue(
+          "expectedGraduationDate",
+          getTermAfterSemesters(startingTerm, 14),
+        );
+      }
+  
+      setIsFileLoaded(true);
+    }
   
     
   const form = useForm({
@@ -572,7 +601,75 @@ export default function ProfilePage() {
         </Card>
       </TabsContent>)};
 
-      <TabsContent value="degreeProgressReport" className="space-y-6"></TabsContent>
+      <TabsContent value="degreeProgressReport" className="space-y-6">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            form.handleSubmit();
+          }}
+          className="space-y-6"
+      >
+        <Activity mode={currentStep === 1 ? "visible" : "hidden"}>
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-2xl flex items-center gap-2">
+                Degree Progress Report
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Badge
+                      variant="outline"
+                      className="cursor-help size-5 rounded-full p-0 text-xs hover:bg-muted"
+                    >
+                      ?
+                    </Badge>
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-xs">
+                    <p>
+                      We do not store your degree progress report. Need help
+                      finding it?{" "}
+                      <a
+                        href="https://www.nyu.edu/students/student-information-and-resources/registration-records-and-graduation/registration/tracking-degree-progress.html"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline"
+                      >
+                        View NYU's guide
+                      </a>
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </CardTitle>
+              <CardDescription>
+                Upload your degree progress report (PDF) so we can help you
+                track your academic progress and suggest courses.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <DegreeProgreeUpload
+                onConfirm={handleConfirmImport}
+                showFileLoaded={isFileLoaded}
+                onFileClick={() => {
+                  form.setFieldValue("userCourses", undefined);
+                  form.setFieldValue("startingDate", defaultStartingDate);
+                  form.setFieldValue(
+                    "expectedGraduationDate",
+                    defaultExpectedGraduation,
+                  );
+                  setIsFileLoaded(false);
+                }}
+              />
+            </CardContent>
+            <CardFooter className="flex justify-center">
+              <Button type="submit" disabled={form.state.isSubmitting}>
+                {form.state.isSubmitting ? "Saving..." : "Save Changes"}
+              </Button>
+            </CardFooter>
+          </Card>
+        </Activity>
+      </form>
+
+      </TabsContent>
 
     </Tabs>
     
