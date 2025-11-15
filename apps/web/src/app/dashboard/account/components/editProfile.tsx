@@ -58,7 +58,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
 import { useUser } from "@clerk/nextjs";
 
 const dateSchema = z.object({
@@ -108,12 +108,12 @@ export function EditProfilePopup() {
   const [isFileLoaded, setIsFileLoaded] = React.useState(false);
   const [currentStep, setCurrentStep] = React.useState<1 | 2>(1);
 
-    const { user } = useUser();
+  const { user } = useUser();
 
-    const student = useQuery(
-        api.students.getCurrentStudent,
-        isAuthenticated ? {} : "skip",
-    );
+  const student = useQuery(
+    api.students.getCurrentStudent,
+    isAuthenticated ? {} : "skip",
+  );
 
   // actions
   const upsertStudent = useMutation(api.students.upsertCurrentStudent);
@@ -247,21 +247,26 @@ export function EditProfilePopup() {
     form.setFieldValue("school", student.school?._id ?? undefined);
 
     // programs: student.programs might be an array of objects or array of ids
-    const programIds: Id<"programs">[] =
-        (student.programs ?? []).map((p: any) =>
-        typeof p === "string" ? (p as Id<"programs">) : (p?._id as Id<"programs">),
-        );
+    const programIds: Id<"programs">[] = (student.programs ?? []).map(
+      (p: any) =>
+        typeof p === "string"
+          ? (p as Id<"programs">)
+          : (p?._id as Id<"programs">),
+    );
 
     form.setFieldValue("programs", programIds);
 
     // dates — assume these are already shaped correctly
     if (student.startingDate) {
-        form.setFieldValue("startingDate", student.startingDate);
+      form.setFieldValue("startingDate", student.startingDate);
     }
     if (student.expectedGraduationDate) {
-        form.setFieldValue("expectedGraduationDate", student.expectedGraduationDate);
+      form.setFieldValue(
+        "expectedGraduationDate",
+        student.expectedGraduationDate,
+      );
     }
-    }, [student]);
+  }, [student]);
 
   function handleConfirmImport(
     coursesToImport: UserCourse[],
@@ -286,87 +291,86 @@ export function EditProfilePopup() {
 
   function DegreeProgressUpload() {
     return (
-        <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        form.handleSubmit();
-      }}
-      className="space-y-6"
-    >
-      <Activity mode={currentStep === 1 ? "visible" : "hidden"}>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl flex items-center gap-2">
-              Degree Progress Report
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Badge
-                    variant="outline"
-                    className="cursor-help size-5 rounded-full p-0 text-xs hover:bg-muted"
-                  >
-                    ?
-                  </Badge>
-                </TooltipTrigger>
-                <TooltipContent className="max-w-xs">
-                  <p>
-                    We do not store your degree progress report. Need help
-                    finding it?{" "}
-                    <a
-                      href="https://www.nyu.edu/students/student-information-and-resources/registration-records-and-graduation/registration/tracking-degree-progress.html"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="underline"
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          form.handleSubmit();
+        }}
+        className="space-y-6"
+      >
+        <Activity mode={currentStep === 1 ? "visible" : "hidden"}>
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-2xl flex items-center gap-2">
+                Degree Progress Report
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Badge
+                      variant="outline"
+                      className="cursor-help size-5 rounded-full p-0 text-xs hover:bg-muted"
                     >
-                      View NYU's guide
-                    </a>
-                  </p>
-                </TooltipContent>
-              </Tooltip>
-            </CardTitle>
-            <CardDescription>
-              Upload your degree progress report (PDF) so we can help you track
-              your academic progress and suggest courses.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <DegreeProgreeUpload
-              onConfirm={handleConfirmImport}
-              showFileLoaded={isFileLoaded}
-              onFileClick={() => {
-                form.setFieldValue("userCourses", undefined);
-                form.setFieldValue("startingDate", defaultStartingDate);
-                form.setFieldValue(
-                  "expectedGraduationDate",
-                  defaultExpectedGraduation,
-                );
-                setIsFileLoaded(false);
-              }}
-            />
-          </CardContent>
-          <CardFooter className="flex justify-center">
-            <Button type="submit" disabled={form.state.isSubmitting}>
+                      ?
+                    </Badge>
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-xs">
+                    <p>
+                      We do not store your degree progress report. Need help
+                      finding it?{" "}
+                      <a
+                        href="https://www.nyu.edu/students/student-information-and-resources/registration-records-and-graduation/registration/tracking-degree-progress.html"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline"
+                      >
+                        View NYU's guide
+                      </a>
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </CardTitle>
+              <CardDescription>
+                Upload your degree progress report (PDF) so we can help you
+                track your academic progress and suggest courses.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <DegreeProgreeUpload
+                onConfirm={handleConfirmImport}
+                showFileLoaded={isFileLoaded}
+                onFileClick={() => {
+                  form.setFieldValue("userCourses", undefined);
+                  form.setFieldValue("startingDate", defaultStartingDate);
+                  form.setFieldValue(
+                    "expectedGraduationDate",
+                    defaultExpectedGraduation,
+                  );
+                  setIsFileLoaded(false);
+                }}
+              />
+            </CardContent>
+            <CardFooter className="flex justify-center">
+              <Button type="submit" disabled={form.state.isSubmitting}>
                 {form.state.isSubmitting ? "Saving..." : "Save Changes"}
-            </Button>
-        </CardFooter>
-        </Card>
-      </Activity>
-
-    </form>
-    )
+              </Button>
+            </CardFooter>
+          </Card>
+        </Activity>
+      </form>
+    );
   }
 
   function Form() {
     return (
-        <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        form.handleSubmit();
-      }}
-      className="space-y-6"
-    >
-      {/* <Activity mode={currentStep === 1 ? "visible" : "hidden"}>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          form.handleSubmit();
+        }}
+        className="space-y-6"
+      >
+        {/* <Activity mode={currentStep === 1 ? "visible" : "hidden"}>
         <Card>
           <CardHeader>
             <CardTitle className="text-2xl flex items-center gap-2">
@@ -448,250 +452,186 @@ export function EditProfilePopup() {
         </Card>
       </Activity> */}
 
-      <Activity mode={currentStep === 1 ? "visible" : "hidden"}>
-        <Card>
-          {/* <CardHeader>
+        <Activity mode={currentStep === 1 ? "visible" : "hidden"}>
+          <Card>
+            {/* <CardHeader>
             <CardTitle className="text-2xl">Academic Information</CardTitle>
             <CardDescription>
               Tell us about your academic background so we can personalize your
               experience.
             </CardDescription>
           </CardHeader> */}
-          <CardContent>
-            <FieldGroup>
-              {/* school */}
-              <form.Field name="school">
-                {(field) => {
-                  return (
-                    <UIField>
-                      <FieldLabel htmlFor={field.name}>
-                        What school or college of NYU do you attend?
-                      </FieldLabel>
-                      <FieldContent>
-                        <SchoolCombobox
-                          id={field.name}
-                          schools={schools}
-                          value={field.state.value}
-                          onValueChange={(value) => field.handleChange(value)}
-                        />
-                      </FieldContent>
-                      <FieldError errors={field.state.meta.errors} />
-                    </UIField>
-                  );
-                }}
-              </form.Field>
-
-              {/* programs (multi-select) */}
-              <form.Field name="programs">
-                {(field) => {
-                  const selected = (field.state.value ?? []).map((p) => ({
-                    value: p,
-                    label: programOptions.find((val) => val.value === p)
-                      ?.label as string,
-                  }));
-                  return (
-                    <UIField>
-                      <FieldLabel htmlFor={field.name}>
-                        What are your major(s) and minor(s)?
-                      </FieldLabel>
-                      <FieldContent>
-                        <MultipleSelector
-                          value={selected}
-                          onChange={(opts) =>
-                            field.handleChange(
-                              opts.map((o) => o.value as Id<"programs">),
-                            )
-                          }
-                          defaultOptions={programOptions}
-                          options={programOptions}
-                          delay={300}
-                          onSearch={handleSearchPrograms}
-                          triggerSearchOnFocus
-                          placeholder="Select your programs"
-                          commandProps={{ label: "Select programs" }}
-                          onListReachEnd={handleLoadMorePrograms}
-                          emptyIndicator={
-                            <p className="text-center text-sm">
-                              No programs found
-                            </p>
-                          }
-                        />
-                      </FieldContent>
-                      <FieldError errors={field.state.meta.errors} />
-                    </UIField>
-                  );
-                }}
-              </form.Field>
-
-              {/* Program timeline - start and end dates in one row */}
+            <CardContent>
               <FieldGroup>
-                <FieldLabel>When does your program start and end?</FieldLabel>
-                <div className="rounded-lg border border-border/40 bg-muted/5 p-4">
-                {/* Starting Date section */}
-                    <div className="flex-1 space-y-3">
+                {/* school */}
+                <form.Field name="school">
+                  {(field) => {
+                    return (
+                      <UIField>
+                        <FieldLabel htmlFor={field.name}>
+                          What school or college of NYU do you attend?
+                        </FieldLabel>
+                        <FieldContent>
+                          <SchoolCombobox
+                            id={field.name}
+                            schools={schools}
+                            value={field.state.value}
+                            onValueChange={(value) => field.handleChange(value)}
+                          />
+                        </FieldContent>
+                        <FieldError errors={field.state.meta.errors} />
+                      </UIField>
+                    );
+                  }}
+                </form.Field>
+
+                {/* programs (multi-select) */}
+                <form.Field name="programs">
+                  {(field) => {
+                    const selected = (field.state.value ?? []).map((p) => ({
+                      value: p,
+                      label: programOptions.find((val) => val.value === p)
+                        ?.label as string,
+                    }));
+                    return (
+                      <UIField>
+                        <FieldLabel htmlFor={field.name}>
+                          What are your major(s) and minor(s)?
+                        </FieldLabel>
+                        <FieldContent>
+                          <MultipleSelector
+                            value={selected}
+                            onChange={(opts) =>
+                              field.handleChange(
+                                opts.map((o) => o.value as Id<"programs">),
+                              )
+                            }
+                            defaultOptions={programOptions}
+                            options={programOptions}
+                            delay={300}
+                            onSearch={handleSearchPrograms}
+                            triggerSearchOnFocus
+                            placeholder="Select your programs"
+                            commandProps={{ label: "Select programs" }}
+                            onListReachEnd={handleLoadMorePrograms}
+                            emptyIndicator={
+                              <p className="text-center text-sm">
+                                No programs found
+                              </p>
+                            }
+                          />
+                        </FieldContent>
+                        <FieldError errors={field.state.meta.errors} />
+                      </UIField>
+                    );
+                  }}
+                </form.Field>
+
+                {/* Program timeline - start and end dates in one row */}
+                <FieldGroup>
+                  <FieldLabel>When does your program end?</FieldLabel>
+                  <div className="rounded-lg border border-border/40 bg-muted/5 p-4">
+                    <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-8">
+                      {/* Expected graduation date section */}
+                      <div className="flex-1 space-y-3">
                         <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                        Start date
+                          Expected graduation
                         </div>
                         <div className="flex gap-2">
-                        {/* startingDate.term */}
-                        <form.Field name="startingDate.term">
+                          {/* expectedGraduationDate.term */}
+                          <form.Field name="expectedGraduationDate.term">
                             {(field) => (
-                            <Select
+                              <Select
                                 value={field.state.value ?? ""}
                                 onValueChange={(val) =>
-                                field.handleChange(val as Term)
+                                  field.handleChange(val as Term)
                                 }
-                            >
+                              >
                                 <SelectTrigger
-                                aria-invalid={!field.state.meta.isValid}
+                                  aria-invalid={!field.state.meta.isValid}
                                 >
-                                <SelectValue placeholder="Term" />
+                                  <SelectValue placeholder="Term" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                <SelectItem value="spring">Spring</SelectItem>
-                                <SelectItem value="summer">Summer</SelectItem>
-                                <SelectItem value="fall">Fall</SelectItem>
-                                <SelectItem value="j-term">Winter</SelectItem>
+                                  <SelectItem value="spring">Spring</SelectItem>
+                                  <SelectItem value="summer">Summer</SelectItem>
+                                  <SelectItem value="fall">Fall</SelectItem>
+                                  <SelectItem value="j-term">Winter</SelectItem>
                                 </SelectContent>
-                            </Select>
+                              </Select>
                             )}
-                        </form.Field>
-                        {/* startingDate.year */}
-                        <form.Field name="startingDate.year">
+                          </form.Field>
+                          {/* expectedGraduationDate.year */}
+                          <form.Field name="expectedGraduationDate.year">
                             {(field) => (
-                            <Select
+                              <Select
                                 value={field.state.value?.toString() ?? ""}
                                 onValueChange={(val) =>
-                                field.handleChange(Number.parseInt(val, 10))
+                                  field.handleChange(Number.parseInt(val, 10))
                                 }
-                            >
+                              >
                                 <SelectTrigger
-                                aria-invalid={!field.state.meta.isValid}
+                                  aria-invalid={!field.state.meta.isValid}
                                 >
-                                <SelectValue placeholder="Year" />
+                                  <SelectValue placeholder="Year" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                {yearOptions.map((year) => (
+                                  {yearOptions.map((year) => (
                                     <SelectItem
-                                    key={year}
-                                    value={year.toString()}
+                                      key={year}
+                                      value={year.toString()}
                                     >
-                                    {year}
+                                      {year}
                                     </SelectItem>
-                                ))}
+                                  ))}
                                 </SelectContent>
-                            </Select>
+                              </Select>
                             )}
-                        </form.Field>
+                          </form.Field>
                         </div>
-                    </div>
-                  <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-8">
-                    
-
-                    {/* Expected graduation date section */}
-                    <div className="flex-1 space-y-3">
-                      <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mt-4 ">
-                        Expected graduation
-                      </div>
-                      <div className="flex gap-2">
-                        
-                        {/* expectedGraduationDate.term */}
-                        <form.Field name="expectedGraduationDate.term">
-                          {(field) => (
-                            <Select
-                              value={field.state.value ?? ""}
-                              onValueChange={(val) =>
-                                field.handleChange(val as Term)
-                              }
-                            >
-                              <SelectTrigger
-                                aria-invalid={!field.state.meta.isValid}
-                              >
-                                <SelectValue placeholder="Term" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="spring">Spring</SelectItem>
-                                <SelectItem value="summer">Summer</SelectItem>
-                                <SelectItem value="fall">Fall</SelectItem>
-                                <SelectItem value="j-term">Winter</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          )}
-                        </form.Field>
-                        {/* expectedGraduationDate.year */}
-                        <form.Field name="expectedGraduationDate.year">
-                          {(field) => (
-                            <Select
-                              value={field.state.value?.toString() ?? ""}
-                              onValueChange={(val) =>
-                                field.handleChange(Number.parseInt(val, 10))
-                              }
-                            >
-                              <SelectTrigger
-                                aria-invalid={!field.state.meta.isValid}
-                              >
-                                <SelectValue placeholder="Year" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {yearOptions.map((year) => (
-                                  <SelectItem
-                                    key={year}
-                                    value={year.toString()}
-                                  >
-                                    {year}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          )}
-                        </form.Field>
                       </div>
                     </div>
                   </div>
-                  <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-8">
 
-                    
-                  </div>
-                </div>
-                
-
-                {/* Aggregate object-level errors (from Zod refine, etc.) */}
-                <form.Field name="expectedGraduationDate">
-                  {(field) => <FieldError errors={field.state.meta.errors} />}
-                </form.Field>
+                  {/* Aggregate object-level errors (from Zod refine, etc.) */}
+                  <form.Field name="expectedGraduationDate">
+                    {(field) => <FieldError errors={field.state.meta.errors} />}
+                  </form.Field>
+                </FieldGroup>
               </FieldGroup>
-
-              
-            </FieldGroup>
-          </CardContent>
-          <CardFooter className="flex justify-center">
-            <Button type="submit" disabled={form.state.isSubmitting}>
+            </CardContent>
+            <CardFooter>
+              <Button
+                type="submit"
+                disabled={form.state.isSubmitting}
+                className="ml-auto"
+              >
                 {form.state.isSubmitting ? "Saving..." : "Save Changes"}
-            </Button>
-        </CardFooter>
-        </Card>
-      </Activity>
-    </form>
-    )
+              </Button>
+            </CardFooter>
+          </Card>
+        </Activity>
+      </form>
+    );
   }
 
   return (
     <div>
       <Dialog>
-      <form>
-        <DialogTrigger asChild>
-          <Button variant="outline">Edit Profile</Button>
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Edit profile</DialogTitle>
-            <DialogDescription>
-              Make changes to your profile here. Click save when you&apos;re
-              done.
-            </DialogDescription>
-          </DialogHeader>
-          <Form/>
-          {/* <div className="grid gap-4">
+        <form>
+          <DialogTrigger asChild>
+            <Button variant="outline">Edit Profile</Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Edit profile</DialogTitle>
+              <DialogDescription>
+                Make changes to your profile here. Click save when you&apos;re
+                done.
+              </DialogDescription>
+            </DialogHeader>
+            <Form />
+            {/* <div className="grid gap-4">
             <div className="grid gap-3">
               <Label htmlFor="name-1">Name</Label>
               <Input id="name-1" name="name" defaultValue="Pedro Duarte" />
@@ -701,31 +641,31 @@ export function EditProfilePopup() {
               <Input id="username-1" name="username" defaultValue="@peduarte" />
             </div>
           </div> */}
-          {/* <DialogFooter>
+            {/* <DialogFooter>
             <DialogClose asChild>
               <Button variant="outline">Cancel</Button>
             </DialogClose>
             <Button type="submit">Save changes</Button>
           </DialogFooter> */}
-        </DialogContent>
-      </form>
-        </Dialog>
+          </DialogContent>
+        </form>
+      </Dialog>
 
-        <Dialog>
-      <form>
-        <DialogTrigger asChild>
-          <Button variant="outline">Reupload Degree Progress Report</Button>
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Reupload Degree Progress Report</DialogTitle>
-            {/* <DialogDescription>
+      <Dialog>
+        <form>
+          <DialogTrigger asChild>
+            <Button variant="outline">Reupload Degree Progress Report</Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Reupload Degree Progress Report</DialogTitle>
+              {/* <DialogDescription>
               Reupload your degree progress report here. Click save when you&apos;re
               done.
             </DialogDescription> */}
-          </DialogHeader>
-          <DegreeProgressUpload/>
-          {/* <div className="grid gap-4">
+            </DialogHeader>
+            <DegreeProgressUpload />
+            {/* <div className="grid gap-4">
             <div className="grid gap-3">
               <Label htmlFor="name-1">Name</Label>
               <Input id="name-1" name="name" defaultValue="Pedro Duarte" />
@@ -735,16 +675,15 @@ export function EditProfilePopup() {
               <Input id="username-1" name="username" defaultValue="@peduarte" />
             </div>
           </div> */}
-          {/* <DialogFooter>
+            {/* <DialogFooter>
             <DialogClose asChild>
               <Button variant="outline">Cancel</Button>
             </DialogClose>
             <Button type="submit">Save changes</Button>
           </DialogFooter> */}
-        </DialogContent>
-      </form>
-        </Dialog>
+          </DialogContent>
+        </form>
+      </Dialog>
     </div>
-    
   );
 }
