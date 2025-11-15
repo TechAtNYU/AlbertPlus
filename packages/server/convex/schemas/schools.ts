@@ -20,6 +20,7 @@ export const schoolName = v.union(
   v.literal("Steinhardt School of Culture, Education, and Human Development"),
   v.literal("Tandon School of Engineering"),
   v.literal("Tisch School of the Arts"),
+  v.literal("Non-School Based Programs - UG"),
 );
 
 export const schools = {

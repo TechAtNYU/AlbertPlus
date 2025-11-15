@@ -210,19 +210,31 @@ export default {
               }
               case "discover-courses": {
                 const courseUrls = await discoverCourses(job.url);
-                const newJobs = await db
-                  .insert(jobs)
-                  .values(
-                    courseUrls.map((url) => ({
-                      url,
-                      jobType: "course" as const,
-                    })),
-                  )
-                  .returning();
+                // NOTE: Cloudflare Queues has a limit of 100 messages per sendBatch()
+                console.log(`Discovered ${courseUrls.length} course URLs`);
 
-                await env.SCRAPING_QUEUE.sendBatch(
-                  newJobs.map((j) => ({ body: { jobId: j.id } })),
-                );
+                const BATCH_SIZE = 10;
+                for (let i = 0; i < courseUrls.length; i += BATCH_SIZE) {
+                  const batch = courseUrls.slice(i, i + BATCH_SIZE);
+
+                  const newJobs = await db
+                    .insert(jobs)
+                    .values(
+                      batch.map((url) => ({
+                        url,
+                        jobType: "course" as const,
+                      })),
+                    )
+                    .returning();
+
+                  await env.SCRAPING_QUEUE.sendBatch(
+                    newJobs.map((j) => ({ body: { jobId: j.id } })),
+                  );
+
+                  console.log(
+                    `Queued batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(courseUrls.length / BATCH_SIZE)} (${newJobs.length} jobs)`,
+                  );
+                }
                 break;
               }
               case "program": {
@@ -242,18 +254,25 @@ export default {
                 break;
               }
               case "course": {
-                const res = await scrapeCourse(job.url, db, env);
+                // A single URL may contain multiple courses
+                const courses = await scrapeCourse(job.url, db, env);
 
-                const courseId = await convex.upsertCourseWithPrerequisites({
-                  ...res.course,
-                  prerequisites: res.prerequisites,
-                });
+                console.log(
+                  `Scraped ${courses.length} courses from ${job.url}`,
+                );
 
-                if (!courseId) {
-                  throw new JobError(
-                    "Failed to upsert course: no ID returned",
-                    "validation",
-                  );
+                for (const courseData of courses) {
+                  const courseId = await convex.upsertCourseWithPrerequisites({
+                    ...courseData.course,
+                    prerequisites: courseData.prerequisites,
+                  });
+
+                  if (!courseId) {
+                    throw new JobError(
+                      `Failed to upsert course ${courseData.course.code}: no ID returned`,
+                      "validation",
+                    );
+                  }
                 }
                 break;
               }

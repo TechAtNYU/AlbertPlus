@@ -25,12 +25,13 @@ const ZSchoolName = z.enum([
   "Steinhardt School of Culture, Education, and Human Development",
   "Tandon School of Engineering",
   "Tisch School of the Arts",
+  "Non-School Based Programs - UG",
 ] as const);
 
 export const ZUpsertCourseWithPrerequisites = z.object({
   program: z.string(),
   code: z.string(),
-  level: z.coerce.number(),
+  level: z.enum(["undergraduate", "graduate"]),
   title: z.string(),
   credits: z.int(),
   description: z.string(),

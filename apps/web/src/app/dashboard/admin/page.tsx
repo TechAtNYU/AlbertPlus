@@ -33,7 +33,7 @@ export default function AdminPage() {
   );
   const setConfig = useMutation(api.appConfigs.setAppConfig);
   const removeConfig = useMutation(api.appConfigs.removeAppConfig);
-  const triggerMajorsScraping = useAction(api.scraper.triggerMajorsScraping);
+  const triggerProgramsScraping = useAction(api.scraper.triggerMajorsScraping);
   const triggerCoursesScraping = useAction(api.scraper.triggerCoursesScraping);
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -46,7 +46,7 @@ export default function AdminPage() {
     Doc<"appConfigs"> | undefined
   >(undefined);
 
-  const [isTriggeringMajors, setIsTriggeringMajors] = useState(false);
+  const [isTriggeringPrograms, setIsTriggeringPrograms] = useState(false);
   const [isTriggeringCourses, setIsTriggeringCourses] = useState(false);
 
   if (isAuthenticated && !isAdmin) {
@@ -142,19 +142,19 @@ export default function AdminPage() {
     }
   };
 
-  const handleTriggerMajors = async () => {
-    setIsTriggeringMajors(true);
+  const handleTriggerPrograms = async () => {
+    setIsTriggeringPrograms(true);
     try {
-      const result = await triggerMajorsScraping({});
-      toast.success("Majors scraping triggered successfully", {
+      const result = await triggerProgramsScraping({});
+      toast.success("Programs scraping triggered successfully", {
         description: `Job ID: ${result.jobId}`,
       });
     } catch (error) {
-      toast.error("Failed to trigger majors scraping", {
+      toast.error("Failed to trigger programs scraping", {
         description: error instanceof Error ? error.message : "Unknown error",
       });
     } finally {
-      setIsTriggeringMajors(false);
+      setIsTriggeringPrograms(false);
     }
   };
 
@@ -180,17 +180,17 @@ export default function AdminPage() {
         <h2 className="text-lg font-semibold mb-3">Scraper Controls</h2>
         <div className="flex gap-3">
           <Button
-            onClick={handleTriggerMajors}
-            disabled={isTriggeringMajors}
+            onClick={handleTriggerPrograms}
+            disabled={isTriggeringPrograms}
             size="sm"
             variant="outline"
           >
-            {isTriggeringMajors ? (
+            {isTriggeringPrograms ? (
               <Spinner className="size-4" />
             ) : (
               <GraduationCap className="size-4" />
             )}
-            Trigger Majors Scraping
+            Trigger Programs Scraping
           </Button>
           <Button
             onClick={handleTriggerCourses}
