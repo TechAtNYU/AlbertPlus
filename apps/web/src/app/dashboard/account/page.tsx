@@ -282,7 +282,7 @@ export default function ProfilePage() {
 
   return (
     <div>
-      <Tabs defaultValue="personal" className="space-y-6">
+      <Tabs defaultValue="personal">
       
       <Card>
       <CardContent>
@@ -599,21 +599,19 @@ export default function ProfilePage() {
             
           </CardContent></form>
         </Card>
-      </TabsContent>)};
+      </TabsContent>)}
 
-      <TabsContent value="degreeProgressReport" className="space-y-6">
+      <TabsContent value="degreeProgressReport">
         <form
           onSubmit={(e) => {
             e.preventDefault();
             e.stopPropagation();
             form.handleSubmit();
           }}
-          className="space-y-6"
       >
-        <Activity mode={currentStep === 1 ? "visible" : "hidden"}>
           <Card>
             <CardHeader>
-              <CardTitle className="text-2xl flex items-center gap-2">
+              <CardTitle className="text-2xl flex items-center">
                 Degree Progress Report
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -641,7 +639,7 @@ export default function ProfilePage() {
                 </Tooltip>
               </CardTitle>
               <CardDescription>
-                Upload your degree progress report (PDF) so we can help you
+                Upload a PDF of you degree progress report so we can help you
                 track your academic progress and suggest courses.
               </CardDescription>
             </CardHeader>
@@ -666,7 +664,6 @@ export default function ProfilePage() {
               </Button>
             </CardFooter>
           </Card>
-        </Activity>
       </form>
 
       </TabsContent>
