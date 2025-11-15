@@ -254,12 +254,7 @@ export default function ProfilePage() {
   return (
     <div>
       <Tabs defaultValue="personal" className="space-y-6">
-      {/* <TabsList className="grid w-full grid-cols-4">
-        <TabsTrigger value="personal">Personal</TabsTrigger>
-        <TabsTrigger value="account">Account</TabsTrigger>
-        <TabsTrigger value="security">Security</TabsTrigger>
-        <TabsTrigger value="notifications">Notifications</TabsTrigger>
-      </TabsList> */}
+      
       <Card>
       <CardContent>
         <div className="flex flex-col items-start gap-6 md:flex-row md:items-center">
@@ -312,7 +307,12 @@ export default function ProfilePage() {
         </div>
       </CardContent>
     </Card>
-      
+      <TabsList className="grid w-full grid-cols-2">
+        <TabsTrigger value="personal">Academic Profile</TabsTrigger>
+        <TabsTrigger value="degreeProgressReport">Degree Progress Report</TabsTrigger>
+        {/* <TabsTrigger value="security">Security</TabsTrigger>
+        <TabsTrigger value="notifications">Notifications</TabsTrigger> */}
+      </TabsList>
       {student && (
       
       <TabsContent value="personal" className="space-y-6">
@@ -571,6 +571,8 @@ export default function ProfilePage() {
           </CardContent></form>
         </Card>
       </TabsContent>)};
+
+      <TabsContent value="degreeProgressReport" className="space-y-6"></TabsContent>
 
     </Tabs>
     
