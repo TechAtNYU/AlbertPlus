@@ -88,7 +88,9 @@ export default function ProfilePage() {
 
   // const router = useRouter();
     const { isAuthenticated } = useConvexAuth();
+    const [editingProfile, setEditingProfile] = React.useState(false);
     const [isFileLoaded, setIsFileLoaded] = React.useState(false);
+    
     const [currentStep, setCurrentStep] = React.useState<1 | 2>(1);
   
      const student = useQuery(
@@ -203,7 +205,8 @@ export default function ProfilePage() {
         },
       },
       onSubmit: async ({ value }) => {
-        try {
+        if (editingProfile) {
+          try {
           toast.success("Successfully updated profile.");
           // router.push("/dashboard");
   
@@ -213,6 +216,8 @@ export default function ProfilePage() {
             startingDate: value.startingDate,
             expectedGraduationDate: value.expectedGraduationDate,
           });
+
+          setEditingProfile(false);
   
           if (value.userCourses) {
             await importUserCourses({ courses: value.userCourses });
@@ -220,6 +225,7 @@ export default function ProfilePage() {
         } catch (error) {
           console.error("Error completing onboarding:", error);
           toast.error("Could not complete onboarding. Please try again.");
+        }
         }
       },
     });
@@ -327,9 +333,12 @@ export default function ProfilePage() {
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="firstName">School</Label>
+                {editingProfile && (
                 <form.Field name="school">
                     {(field) => {
                       return (
+
+                        
                         <UIField>
                           <FieldContent>
                             <SchoolCombobox
@@ -343,66 +352,69 @@ export default function ProfilePage() {
                         </UIField>
                       );
                     }}
-                  </form.Field>
-                {/* <p className="text-gray-700 text-sm">{student.school
-                ? `${student.school.name} (${
-                    student.school.level
-                      ? student.school.level.charAt(0).toUpperCase() + student.school.level.slice(1).toLowerCase()
-                      : ""
-                  })`
-                : "N/A"}</p> */}
+                  </form.Field>)}
+                  {!editingProfile && (
+                    <p className="text-gray-700 text-sm">{student.school
+                    ? `${student.school.name} (${
+                        student.school.level
+                          ? student.school.level.charAt(0).toUpperCase() + student.school.level.slice(1).toLowerCase()
+                          : ""
+                      })`
+                    : "N/A"}</p>)}
                 {/* <Input id="firstName" defaultValue="John" /> */}
               </div>
               <div className="space-y-2">
                 <Label>Programs</Label>
-                {/* <p className="text-gray-700 text-sm">{student.programs?.length > 0
+                {!editingProfile && (<p className="text-gray-700 text-sm">{student.programs?.length > 0
                 ? student.programs.map((p) => p.name).join(", ")
-                : "None"}</p> */}
-                <form.Field name="programs">
-                  {(field) => {
-                    const selected = (field.state.value ?? []).map((p) => ({
-                      value: p,
-                      label: programOptions.find((val) => val.value === p)
-                        ?.label as string,
-                    }));
-                    return (
-                      <UIField>
-                        {/* <FieldLabel htmlFor={field.name}>
-                          What are your major(s) and minor(s)?
-                        </FieldLabel> */}
-                        <FieldContent>
-                          <MultipleSelector
-                            value={selected}
-                            onChange={(opts) =>
-                              field.handleChange(
-                                opts.map((o) => o.value as Id<"programs">),
-                              )
-                            }
-                            defaultOptions={programOptions}
-                            options={programOptions}
-                            delay={300}
-                            onSearch={handleSearchPrograms}
-                            triggerSearchOnFocus
-                            placeholder="Select your programs"
-                            commandProps={{ label: "Select programs" }}
-                            onListReachEnd={handleLoadMorePrograms}
-                            emptyIndicator={
-                              <p className="text-center text-sm">
-                                No programs found
-                              </p>
-                            }
-                          />
-                        </FieldContent>
-                        <FieldError errors={field.state.meta.errors} />
-                      </UIField>
-                    );
-                  }}
-                </form.Field>
+                : "None"}</p>)}
+                {editingProfile && (
+                  <form.Field name="programs">
+                    {(field) => {
+                      const selected = (field.state.value ?? []).map((p) => ({
+                        value: p,
+                        label: programOptions.find((val) => val.value === p)
+                          ?.label as string,
+                      }));
+                      return (
+                        <UIField>
+                          {/* <FieldLabel htmlFor={field.name}>
+                            What are your major(s) and minor(s)?
+                          </FieldLabel> */}
+                          <FieldContent>
+                            <MultipleSelector
+                              value={selected}
+                              onChange={(opts) =>
+                                field.handleChange(
+                                  opts.map((o) => o.value as Id<"programs">),
+                                )
+                              }
+                              defaultOptions={programOptions}
+                              options={programOptions}
+                              delay={300}
+                              onSearch={handleSearchPrograms}
+                              triggerSearchOnFocus
+                              placeholder="Select your programs"
+                              commandProps={{ label: "Select programs" }}
+                              onListReachEnd={handleLoadMorePrograms}
+                              emptyIndicator={
+                                <p className="text-center text-sm">
+                                  No programs found
+                                </p>
+                              }
+                            />
+                          </FieldContent>
+                          <FieldError errors={field.state.meta.errors} />
+                        </UIField>
+                      );
+                    }}
+                  </form.Field>)}
 
                 {/* <Input id="lastName" defaultValue="Doe" /> */}
               </div>
               <div className="space-y-2">
                 <Label>Enrollment Start Date</Label>
+                {editingProfile && (
                 <div className="flex gap-2">
                 {/* startingDate.term */}
                 <form.Field name="startingDate.term">
@@ -454,16 +466,16 @@ export default function ProfilePage() {
                     </Select>
                     )}
                 </form.Field>
-                </div>
-              
-                {/* <p className="text-gray-700 text-sm">{student.startingDate
-                ? `${student.startingDate.term.charAt(0).toUpperCase()}${student.startingDate.term.slice(1)} ${student.startingDate.year}`
-                : "N/A"}</p> */}
+                </div>)}
+                {!editingProfile && (
+                  <p className="text-gray-700 text-sm">{student.startingDate
+                  ? `${student.startingDate.term.charAt(0).toUpperCase()}${student.startingDate.term.slice(1)} ${student.startingDate.year}`
+                  : "N/A"}</p>)}
                 {/* <Input id="email" type="email" defaultValue="john.doe@example.com" /> */}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="phone">Expected Graduation Date</Label>
-                <div className="flex gap-2">
+                {editingProfile && (<div className="flex gap-2">
                                         
                   {/* expectedGraduationDate.term */}
                   <form.Field name="expectedGraduationDate.term">
@@ -515,21 +527,47 @@ export default function ProfilePage() {
                       </Select>
                     )}
                   </form.Field>
-                </div>
-                {/* <p className="text-gray-700 text-sm">{student.expectedGraduationDate
+                </div>)}
+                {!editingProfile && (<p className="text-gray-700 text-sm">{student.expectedGraduationDate
                 ? `${student.expectedGraduationDate.term.charAt(0).toUpperCase()}${student.expectedGraduationDate.term.slice(1)} ${student.expectedGraduationDate.year}`
-                : "N/A"}</p> */}
+                : "N/A"}</p>)}
                 {/* <Input id="phone" defaultValue="+1 (555) 123-4567" /> */}
               </div>
-              <Button
-                type="submit"
-                disabled={form.state.isSubmitting}
-                className="w-auto max-w-fit"
-              >
-                {form.state.isSubmitting ? "Saving..." : "Save Changes"}
-              </Button>
+
+              {!editingProfile ? (
+                <Button
+                  type="button"
+                  className="w-auto max-w-fit"
+                  onClick={() => setEditingProfile(true)}
+                >
+                  Edit Profile
+                </Button>
+              ) : (
+                <div className="flex gap-3">
+                  <Button
+                    type="submit"
+                    disabled={form.state.isSubmitting}
+                    className="w-auto max-w-fit"
+                  >
+                    {form.state.isSubmitting ? "Saving..." : "Save Changes"}
+                  </Button>
+
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-auto max-w-fit"
+                    onClick={() => setEditingProfile(false)}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              )}
+
+              
+
               {/* <EditProfilePopup/> */}
             </div>
+            
           </CardContent></form>
         </Card>
       </TabsContent>)};
