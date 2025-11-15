@@ -49,6 +49,17 @@ import DegreeProgreeUpload from "@/modules/report-parsing/components/degree-prog
 import type { UserCourse } from "@/modules/report-parsing/types";
 import type { StartingTerm } from "@/modules/report-parsing/utils/parse-starting-term";
 import { getTermAfterSemesters, type Term } from "@/utils/term";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { useUser } from "@clerk/nextjs";
 
 const dateSchema = z.object({
   year: z.number().int().min(2000).max(2100),
@@ -91,11 +102,18 @@ const onboardingFormSchema = z
     },
   );
 
-export function OnboardingForm() {
+export function EditProfilePopup() {
   const router = useRouter();
   const { isAuthenticated } = useConvexAuth();
   const [isFileLoaded, setIsFileLoaded] = React.useState(false);
   const [currentStep, setCurrentStep] = React.useState<1 | 2>(1);
+
+  const { user } = useUser();
+
+  const student = useQuery(
+    api.students.getCurrentStudent,
+    isAuthenticated ? {} : "skip",
+  );
 
   // actions
   const upsertStudent = useMutation(api.students.upsertCurrentStudent);
@@ -202,8 +220,8 @@ export function OnboardingForm() {
     },
     onSubmit: async ({ value }) => {
       try {
-        toast.success("Onboarding completed.");
-        router.push("/dashboard");
+        toast.success("Successfully updated profile.");
+        // router.push("/dashboard");
 
         await upsertStudent({
           school: value.school as Id<"schools">,
@@ -221,6 +239,34 @@ export function OnboardingForm() {
       }
     },
   });
+
+  React.useEffect(() => {
+    if (!student) return;
+
+    // school: student.school can be an object or null
+    form.setFieldValue("school", student.school?._id ?? undefined);
+
+    // programs: student.programs might be an array of objects or array of ids
+    const programIds: Id<"programs">[] = (student.programs ?? []).map(
+      (p: any) =>
+        typeof p === "string"
+          ? (p as Id<"programs">)
+          : (p?._id as Id<"programs">),
+    );
+
+    form.setFieldValue("programs", programIds);
+
+    // dates — assume these are already shaped correctly
+    if (student.startingDate) {
+      form.setFieldValue("startingDate", student.startingDate);
+    }
+    if (student.expectedGraduationDate) {
+      form.setFieldValue(
+        "expectedGraduationDate",
+        student.expectedGraduationDate,
+      );
+    }
+  }, [student]);
 
   function handleConfirmImport(
     coursesToImport: UserCourse[],
@@ -243,16 +289,88 @@ export function OnboardingForm() {
     setIsFileLoaded(true);
   }
 
-  return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        form.handleSubmit();
-      }}
-      className="space-y-6"
-    >
-      <Activity mode={currentStep === 1 ? "visible" : "hidden"}>
+  function DegreeProgressUpload() {
+    return (
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          form.handleSubmit();
+        }}
+        className="space-y-6"
+      >
+        <Activity mode={currentStep === 1 ? "visible" : "hidden"}>
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-2xl flex items-center gap-2">
+                Degree Progress Report
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Badge
+                      variant="outline"
+                      className="cursor-help size-5 rounded-full p-0 text-xs hover:bg-muted"
+                    >
+                      ?
+                    </Badge>
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-xs">
+                    <p>
+                      We do not store your degree progress report. Need help
+                      finding it?{" "}
+                      <a
+                        href="https://www.nyu.edu/students/student-information-and-resources/registration-records-and-graduation/registration/tracking-degree-progress.html"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline"
+                      >
+                        View NYU's guide
+                      </a>
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </CardTitle>
+              <CardDescription>
+                Upload your degree progress report (PDF) so we can help you
+                track your academic progress and suggest courses.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <DegreeProgreeUpload
+                onConfirm={handleConfirmImport}
+                showFileLoaded={isFileLoaded}
+                onFileClick={() => {
+                  form.setFieldValue("userCourses", undefined);
+                  form.setFieldValue("startingDate", defaultStartingDate);
+                  form.setFieldValue(
+                    "expectedGraduationDate",
+                    defaultExpectedGraduation,
+                  );
+                  setIsFileLoaded(false);
+                }}
+              />
+            </CardContent>
+            <CardFooter className="flex justify-center">
+              <Button type="submit" disabled={form.state.isSubmitting}>
+                {form.state.isSubmitting ? "Saving..." : "Save Changes"}
+              </Button>
+            </CardFooter>
+          </Card>
+        </Activity>
+      </form>
+    );
+  }
+
+  function Form() {
+    return (
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          form.handleSubmit();
+        }}
+        className="space-y-6"
+      >
+        {/* <Activity mode={currentStep === 1 ? "visible" : "hidden"}>
         <Card>
           <CardHeader>
             <CardTitle className="text-2xl flex items-center gap-2">
@@ -332,153 +450,155 @@ export function OnboardingForm() {
             </div>
           </CardFooter>
         </Card>
-      </Activity>
+      </Activity> */}
 
-      <Activity mode={currentStep === 2 ? "visible" : "hidden"}>
-        <Card>
-          <CardHeader>
+        <Activity mode={currentStep === 1 ? "visible" : "hidden"}>
+          <Card>
+            {/* <CardHeader>
             <CardTitle className="text-2xl">Academic Information</CardTitle>
             <CardDescription>
               Tell us about your academic background so we can personalize your
               experience.
             </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <FieldGroup>
-              {/* school */}
-              <form.Field name="school">
-                {(field) => {
-                  return (
-                    <UIField>
-                      <FieldLabel htmlFor={field.name}>
-                        What school or college of NYU do you attend?
-                      </FieldLabel>
-                      <FieldContent>
-                        <SchoolCombobox
-                          id={field.name}
-                          schools={schools}
-                          value={field.state.value}
-                          onValueChange={(value) => field.handleChange(value)}
-                        />
-                      </FieldContent>
-                      <FieldError errors={field.state.meta.errors} />
-                    </UIField>
-                  );
-                }}
-              </form.Field>
+          </CardHeader> */}
+            <CardContent>
+              <FieldGroup>
+                {/* school */}
+                <form.Field name="school">
+                  {(field) => {
+                    return (
+                      <UIField>
+                        <FieldLabel htmlFor={field.name}>
+                          What school or college of NYU do you attend?
+                        </FieldLabel>
+                        <FieldContent>
+                          <SchoolCombobox
+                            id={field.name}
+                            schools={schools}
+                            value={field.state.value}
+                            onValueChange={(value) => field.handleChange(value)}
+                          />
+                        </FieldContent>
+                        <FieldError errors={field.state.meta.errors} />
+                      </UIField>
+                    );
+                  }}
+                </form.Field>
 
-              {/* programs (multi-select) */}
-              <form.Field name="programs">
-                {(field) => {
-                  const selected = (field.state.value ?? []).map((p) => ({
-                    value: p,
-                    label: programOptions.find((val) => val.value === p)
-                      ?.label as string,
-                  }));
-                  return (
-                    <UIField>
-                      <FieldLabel htmlFor={field.name}>
-                        What's your major(s) and minor(s)?
-                      </FieldLabel>
-                      <FieldContent>
-                        <MultipleSelector
-                          value={selected}
-                          onChange={(opts) =>
-                            field.handleChange(
-                              opts.map((o) => o.value as Id<"programs">),
-                            )
-                          }
-                          defaultOptions={programOptions}
-                          options={programOptions}
-                          delay={300}
-                          onSearch={handleSearchPrograms}
-                          triggerSearchOnFocus
-                          placeholder="Select your programs"
-                          commandProps={{ label: "Select programs" }}
-                          onListReachEnd={handleLoadMorePrograms}
-                          emptyIndicator={
-                            <p className="text-center text-sm">
-                              No programs found
-                            </p>
-                          }
-                        />
-                      </FieldContent>
-                      <FieldError errors={field.state.meta.errors} />
-                    </UIField>
-                  );
-                }}
-              </form.Field>
+                {/* programs (multi-select) */}
+                <form.Field name="programs">
+                  {(field) => {
+                    const selected = (field.state.value ?? []).map((p) => ({
+                      value: p,
+                      label: programOptions.find((val) => val.value === p)
+                        ?.label as string,
+                    }));
+                    return (
+                      <UIField>
+                        <FieldLabel htmlFor={field.name}>
+                          What are your major(s) and minor(s)?
+                        </FieldLabel>
+                        <FieldContent>
+                          <MultipleSelector
+                            value={selected}
+                            onChange={(opts) =>
+                              field.handleChange(
+                                opts.map((o) => o.value as Id<"programs">),
+                              )
+                            }
+                            defaultOptions={programOptions}
+                            options={programOptions}
+                            delay={300}
+                            onSearch={handleSearchPrograms}
+                            triggerSearchOnFocus
+                            placeholder="Select your programs"
+                            commandProps={{ label: "Select programs" }}
+                            onListReachEnd={handleLoadMorePrograms}
+                            emptyIndicator={
+                              <p className="text-center text-sm">
+                                No programs found
+                              </p>
+                            }
+                          />
+                        </FieldContent>
+                        <FieldError errors={field.state.meta.errors} />
+                      </UIField>
+                    );
+                  }}
+                </form.Field>
 
-              {/* Program timeline - start and end dates in one row */}
+                {/* Program timeline - start and end dates in one row */}
               <FieldGroup>
                 <FieldLabel>When does your program start and end?</FieldLabel>
                 <div className="rounded-lg border border-border/40 bg-muted/5 p-4">
-                  <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-8">
-                    {/* Starting date section */}
+                {/* Starting Date section */}
                     <div className="flex-1 space-y-3">
-                      <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                         Start date
-                      </div>
-                      <div className="flex gap-2">
+                        </div>
+                        <div className="flex gap-2">
                         {/* startingDate.term */}
                         <form.Field name="startingDate.term">
-                          {(field) => (
+                            {(field) => (
                             <Select
-                              value={field.state.value ?? ""}
-                              onValueChange={(val) =>
+                                value={field.state.value ?? ""}
+                                onValueChange={(val) =>
                                 field.handleChange(val as Term)
-                              }
+                                }
                             >
-                              <SelectTrigger
+                                <SelectTrigger
                                 aria-invalid={!field.state.meta.isValid}
-                              >
+                                >
                                 <SelectValue placeholder="Term" />
-                              </SelectTrigger>
-                              <SelectContent>
+                                </SelectTrigger>
+                                <SelectContent>
                                 <SelectItem value="spring">Spring</SelectItem>
                                 <SelectItem value="summer">Summer</SelectItem>
                                 <SelectItem value="fall">Fall</SelectItem>
                                 <SelectItem value="j-term">Winter</SelectItem>
-                              </SelectContent>
+                                </SelectContent>
                             </Select>
-                          )}
+                            )}
                         </form.Field>
                         {/* startingDate.year */}
                         <form.Field name="startingDate.year">
-                          {(field) => (
+                            {(field) => (
                             <Select
-                              value={field.state.value?.toString() ?? ""}
-                              onValueChange={(val) =>
+                                value={field.state.value?.toString() ?? ""}
+                                onValueChange={(val) =>
                                 field.handleChange(Number.parseInt(val, 10))
-                              }
+                                }
                             >
-                              <SelectTrigger
+                                <SelectTrigger
                                 aria-invalid={!field.state.meta.isValid}
-                              >
+                                >
                                 <SelectValue placeholder="Year" />
-                              </SelectTrigger>
-                              <SelectContent>
+                                </SelectTrigger>
+                                <SelectContent>
                                 {yearOptions.map((year) => (
-                                  <SelectItem
+                                    <SelectItem
                                     key={year}
                                     value={year.toString()}
-                                  >
+                                    >
                                     {year}
-                                  </SelectItem>
+                                    </SelectItem>
                                 ))}
-                              </SelectContent>
+                                </SelectContent>
                             </Select>
-                          )}
+                            )}
                         </form.Field>
-                      </div>
+                        </div>
                     </div>
+                  <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-8">
+                    
 
                     {/* Expected graduation date section */}
                     <div className="flex-1 space-y-3">
-                      <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mt-4 ">
                         Expected graduation
                       </div>
                       <div className="flex gap-2">
+                        
                         {/* expectedGraduationDate.term */}
                         <form.Field name="expectedGraduationDate.term">
                           {(field) => (
@@ -532,31 +652,74 @@ export function OnboardingForm() {
                       </div>
                     </div>
                   </div>
+                  <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-8">
+
+                    
+                  </div>
                 </div>
+                
 
                 {/* Aggregate object-level errors (from Zod refine, etc.) */}
                 <form.Field name="expectedGraduationDate">
                   {(field) => <FieldError errors={field.state.meta.errors} />}
                 </form.Field>
               </FieldGroup>
-            </FieldGroup>
-          </CardContent>
-          <CardFooter>
-            <div className="ml-auto space-x-2">
+
+              </FieldGroup>
+            </CardContent>
+            <CardFooter>
               <Button
-                type="button"
-                variant="outline"
-                onClick={() => setCurrentStep(1)}
+                type="submit"
+                disabled={form.state.isSubmitting}
+                className="ml-auto"
               >
-                Back
+                {form.state.isSubmitting ? "Saving..." : "Save Changes"}
               </Button>
-              <Button type="submit" disabled={form.state.isSubmitting}>
-                {form.state.isSubmitting ? "Saving..." : "Save"}
-              </Button>
-            </div>
-          </CardFooter>
-        </Card>
-      </Activity>
+            </CardFooter>
+          </Card>
+        </Activity>
+      </form>
+    );
+  }
+
+  return (
+    <div className="flex gap-x-2">
+
+        
+    <Dialog>
+    <form>
+        <DialogTrigger asChild>
+        <Button variant="default">Edit Profile</Button>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+            <DialogTitle>Edit profile</DialogTitle>
+            <DialogDescription>
+            Make changes to your profile here. Click save when you&apos;re
+            done.
+            </DialogDescription>
+        </DialogHeader>
+        <Form/>
+        
+        </DialogContent>
     </form>
+    </Dialog>
+
+    <Dialog>
+        <form>
+            <DialogTrigger asChild>
+            <Button variant="outline">Reupload Degree Progress Report</Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+                <DialogTitle>Reupload Degree Progress Report</DialogTitle>
+            </DialogHeader>
+            <DegreeProgressUpload/>
+            </DialogContent>
+        </form>
+    </Dialog>
+
+        
+    </div>
   );
 }
