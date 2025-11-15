@@ -618,37 +618,39 @@ export function EditProfilePopup() {
   return (
     <div className="flex gap-x-2">
 
-        <Dialog>
-            <form>
-                <DialogTrigger asChild>
-                <Button variant="outline">Reupload Degree Progress Report</Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                    <DialogTitle>Reupload Degree Progress Report</DialogTitle>
-                </DialogHeader>
-                <DegreeProgressUpload/>
-                </DialogContent>
-            </form>
-        </Dialog>
-      <Dialog>
-      <form>
+        
+    <Dialog>
+    <form>
         <DialogTrigger asChild>
-          <Button variant="default">Edit Profile</Button>
+        <Button variant="default">Edit Profile</Button>
         </DialogTrigger>
         <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
+        <DialogHeader>
             <DialogTitle>Edit profile</DialogTitle>
             <DialogDescription>
-              Make changes to your profile here. Click save when you&apos;re
-              done.
+            Make changes to your profile here. Click save when you&apos;re
+            done.
             </DialogDescription>
-          </DialogHeader>
-          <Form/>
-          
+        </DialogHeader>
+        <Form/>
+        
         </DialogContent>
-      </form>
-        </Dialog>
+    </form>
+    </Dialog>
+
+    <Dialog>
+        <form>
+            <DialogTrigger asChild>
+            <Button variant="outline">Reupload Degree Progress Report</Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+                <DialogTitle>Reupload Degree Progress Report</DialogTitle>
+            </DialogHeader>
+            <DegreeProgressUpload/>
+            </DialogContent>
+        </form>
+    </Dialog>
 
         
     </div>
