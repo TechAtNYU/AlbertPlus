@@ -528,76 +528,143 @@ export function EditProfilePopup() {
                 </form.Field>
 
                 {/* Program timeline - start and end dates in one row */}
-                <FieldGroup>
-                  <FieldLabel>When does your program end?</FieldLabel>
-                  <div className="rounded-lg border border-border/40 bg-muted/5 p-4">
-                    <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-8">
-                      {/* Expected graduation date section */}
-                      <div className="flex-1 space-y-3">
+              <FieldGroup>
+                <FieldLabel>When does your program start and end?</FieldLabel>
+                <div className="rounded-lg border border-border/40 bg-muted/5 p-4">
+                {/* Starting Date section */}
+                    <div className="flex-1 space-y-3">
                         <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                          Expected graduation
+                        Start date
                         </div>
                         <div className="flex gap-2">
-                          {/* expectedGraduationDate.term */}
-                          <form.Field name="expectedGraduationDate.term">
+                        {/* startingDate.term */}
+                        <form.Field name="startingDate.term">
                             {(field) => (
-                              <Select
+                            <Select
                                 value={field.state.value ?? ""}
                                 onValueChange={(val) =>
-                                  field.handleChange(val as Term)
+                                field.handleChange(val as Term)
                                 }
-                              >
+                            >
                                 <SelectTrigger
-                                  aria-invalid={!field.state.meta.isValid}
+                                aria-invalid={!field.state.meta.isValid}
                                 >
-                                  <SelectValue placeholder="Term" />
+                                <SelectValue placeholder="Term" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  <SelectItem value="spring">Spring</SelectItem>
-                                  <SelectItem value="summer">Summer</SelectItem>
-                                  <SelectItem value="fall">Fall</SelectItem>
-                                  <SelectItem value="j-term">Winter</SelectItem>
+                                <SelectItem value="spring">Spring</SelectItem>
+                                <SelectItem value="summer">Summer</SelectItem>
+                                <SelectItem value="fall">Fall</SelectItem>
+                                <SelectItem value="j-term">Winter</SelectItem>
                                 </SelectContent>
-                              </Select>
+                            </Select>
                             )}
-                          </form.Field>
-                          {/* expectedGraduationDate.year */}
-                          <form.Field name="expectedGraduationDate.year">
+                        </form.Field>
+                        {/* startingDate.year */}
+                        <form.Field name="startingDate.year">
                             {(field) => (
-                              <Select
+                            <Select
                                 value={field.state.value?.toString() ?? ""}
                                 onValueChange={(val) =>
-                                  field.handleChange(Number.parseInt(val, 10))
+                                field.handleChange(Number.parseInt(val, 10))
                                 }
-                              >
+                            >
                                 <SelectTrigger
-                                  aria-invalid={!field.state.meta.isValid}
+                                aria-invalid={!field.state.meta.isValid}
                                 >
-                                  <SelectValue placeholder="Year" />
+                                <SelectValue placeholder="Year" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  {yearOptions.map((year) => (
+                                {yearOptions.map((year) => (
                                     <SelectItem
-                                      key={year}
-                                      value={year.toString()}
+                                    key={year}
+                                    value={year.toString()}
                                     >
-                                      {year}
+                                    {year}
                                     </SelectItem>
-                                  ))}
+                                ))}
                                 </SelectContent>
-                              </Select>
+                            </Select>
                             )}
-                          </form.Field>
+                        </form.Field>
                         </div>
+                    </div>
+                  <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-8">
+                    
+
+                    {/* Expected graduation date section */}
+                    <div className="flex-1 space-y-3">
+                      <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mt-4 ">
+                        Expected graduation
+                      </div>
+                      <div className="flex gap-2">
+                        
+                        {/* expectedGraduationDate.term */}
+                        <form.Field name="expectedGraduationDate.term">
+                          {(field) => (
+                            <Select
+                              value={field.state.value ?? ""}
+                              onValueChange={(val) =>
+                                field.handleChange(val as Term)
+                              }
+                            >
+                              <SelectTrigger
+                                aria-invalid={!field.state.meta.isValid}
+                              >
+                                <SelectValue placeholder="Term" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="spring">Spring</SelectItem>
+                                <SelectItem value="summer">Summer</SelectItem>
+                                <SelectItem value="fall">Fall</SelectItem>
+                                <SelectItem value="j-term">Winter</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          )}
+                        </form.Field>
+                        {/* expectedGraduationDate.year */}
+                        <form.Field name="expectedGraduationDate.year">
+                          {(field) => (
+                            <Select
+                              value={field.state.value?.toString() ?? ""}
+                              onValueChange={(val) =>
+                                field.handleChange(Number.parseInt(val, 10))
+                              }
+                            >
+                              <SelectTrigger
+                                aria-invalid={!field.state.meta.isValid}
+                              >
+                                <SelectValue placeholder="Year" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {yearOptions.map((year) => (
+                                  <SelectItem
+                                    key={year}
+                                    value={year.toString()}
+                                  >
+                                    {year}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          )}
+                        </form.Field>
                       </div>
                     </div>
                   </div>
+                  <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-8">
 
-                  {/* Aggregate object-level errors (from Zod refine, etc.) */}
-                  <form.Field name="expectedGraduationDate">
-                    {(field) => <FieldError errors={field.state.meta.errors} />}
-                  </form.Field>
-                </FieldGroup>
+                    
+                  </div>
+                </div>
+                
+
+                {/* Aggregate object-level errors (from Zod refine, etc.) */}
+                <form.Field name="expectedGraduationDate">
+                  {(field) => <FieldError errors={field.state.meta.errors} />}
+                </form.Field>
+              </FieldGroup>
+
               </FieldGroup>
             </CardContent>
             <CardFooter>
