@@ -49,6 +49,20 @@ export default function ProfilePage() {
                 ? student.programs.map((p) => p.name).join(", ")
                 : "None"}
             </p>
+
+            <p>
+              <strong>Start Date:</strong>{" "}
+              {student.startingDate
+                ? `${student.startingDate.term.charAt(0).toUpperCase()}${student.startingDate.term.slice(1)} ${student.startingDate.year}`
+                : "N/A"}
+            </p>
+
+            <p>
+              <strong>Expected Graduation:</strong>{" "}
+              {student.expectedGraduationDate
+                ? `${student.expectedGraduationDate.term.charAt(0).toUpperCase()}${student.expectedGraduationDate.term.slice(1)} ${student.expectedGraduationDate.year}`
+                : "N/A"}
+            </p>
         </>
       )}
       <EditProfilePopup/>
