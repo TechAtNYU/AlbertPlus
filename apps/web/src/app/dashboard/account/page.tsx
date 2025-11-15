@@ -41,22 +41,39 @@ export default function ProfilePage() {
       <CardContent>
         <div className="flex flex-col items-start gap-6 md:flex-row md:items-center">
           <div className="relative">
-            <Avatar className="h-24 w-24">
-              <AvatarImage src="https://bundui-images.netlify.app/avatars/08.png" alt="Profile" />
-              <AvatarFallback className="text-2xl">JD</AvatarFallback>
-            </Avatar>
+                    
+            <Avatar className="inline-block h-20 w-20 rounded-full overflow-hidden">
+            {user?.imageUrl ? (
+              <AvatarImage
+                src={user.imageUrl}
+                alt={user.fullName || "User avatar"}
+                className="block h-full w-full object-cover"
+              />
+            ) : (
+              <AvatarFallback className="flex h-full w-full items-center justify-center bg-gray-200 text-base font-medium">
+                {`${user?.firstName?.[0] || "U"}${user?.lastName?.[0] || "U"}`}
+              </AvatarFallback>
+            )}
+          </Avatar>
+
             
           </div>
           <div className="flex-1 space-y-2">
             <div className="flex flex-col gap-2 md:flex-row md:items-center">
-              <h1 className="text-2xl font-bold">John Doe</h1>
+              <h1 className="text-2xl font-bold">{user?.fullName || "Unknown User"}</h1>
               
             </div>
-            <p className="text-muted-foreground">Senior Product Designer</p>
+            {student && (
+                <p className="text-muted-foreground">
+                  {student.school?.level
+                    ? student.school.level.charAt(0).toUpperCase() + student.school.level.slice(1).toLowerCase() + " Student"
+                    : "Student"}
+                </p>
+              )}
             <div className="text-muted-foreground flex flex-wrap gap-4 text-sm">
               <div className="flex items-center gap-1">
                 <Mail className="size-4" />
-                john.doe@example.com
+                {user?.primaryEmailAddress?.emailAddress || ""}
               </div>
               <div className="flex items-center gap-1">
                 <MapPin className="size-4" />
@@ -121,53 +138,6 @@ export default function ProfilePage() {
 
     </Tabs>
     
-
-    <div className="space-y-2">
-      <h1 className="text-xl font-semibold">Profile</h1>
-
-      <p>
-        <strong>Name:</strong> {user?.fullName || "Unknown User"}
-      </p>
-      <p>
-        <strong>Email:</strong> {user?.primaryEmailAddress?.emailAddress || ""}
-      </p>
-
-      {student && (
-        <>
-          <p>
-            <strong>School:</strong>{" "}
-              {student.school
-                ? `${student.school.name} (${
-                    student.school.level
-                      ? student.school.level.charAt(0).toUpperCase() + student.school.level.slice(1).toLowerCase()
-                      : ""
-                  })`
-                : "N/A"}
-            </p>
-            <p>
-              <strong>Programs:</strong>{" "}
-              {student.programs?.length > 0
-                ? student.programs.map((p) => p.name).join(", ")
-                : "None"}
-            </p>
-
-            <p>
-              <strong>Start Date:</strong>{" "}
-              {student.startingDate
-                ? `${student.startingDate.term.charAt(0).toUpperCase()}${student.startingDate.term.slice(1)} ${student.startingDate.year}`
-                : "N/A"}
-            </p>
-
-            <p>
-              <strong>Expected Graduation:</strong>{" "}
-              {student.expectedGraduationDate
-                ? `${student.expectedGraduationDate.term.charAt(0).toUpperCase()}${student.expectedGraduationDate.term.slice(1)} ${student.expectedGraduationDate.year}`
-                : "N/A"}
-            </p>
-        </>
-      )}
-      
-    </div>
     </div>
   );
 }
