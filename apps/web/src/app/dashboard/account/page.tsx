@@ -1,5 +1,26 @@
 "use client";
 
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import DegreeProgreeUpload from "@/modules/report-parsing/components/degree-progress-upload";
+import { getTermAfterSemesters, type Term } from "@/utils/term";
 import { api } from "@albert-plus/server/convex/_generated/api";
 import type { Doc, Id } from "@albert-plus/server/convex/_generated/dataModel";
 import { useUser } from "@clerk/nextjs";
@@ -12,37 +33,24 @@ import {
   useQuery,
 } from "convex/react";
 import type { FunctionArgs } from "convex/server";
-import { Key, Mail, MapPin, Shield, Trash2 } from "lucide-react";
-import { useRouter } from "next/router";
-import React, { Activity } from "react";
+import { Mail, MapPin } from "lucide-react";
+import React from "react";
 import { toast } from "sonner";
 import z from "zod";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import MultipleSelector from "@/app/onboarding/component/multiselect";
+import { SchoolCombobox } from "@/app/onboarding/component/school-combobox";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+  FieldContent,
+  FieldError,
+  Field as UIField,
+} from "@/components/ui/field";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
-import { Switch } from "@/components/ui/switch";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
-import DegreeProgreeUpload from "@/modules/report-parsing/components/degree-progress-upload";
-import { getTermAfterSemesters, type Term } from "@/utils/term";
-import { EditProfilePopup } from "./components/editProfile";
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import type { UserCourse } from "@/modules/report-parsing/types";
+import type { StartingTerm } from "@/modules/report-parsing/utils/parse-starting-term";
 
 const dateSchema = z.object({
   year: z.number().int().min(2000).max(2100),
@@ -53,23 +61,6 @@ const dateSchema = z.object({
     z.literal("summer"),
   ]),
 });
-
-import MultipleSelector from "@/app/onboarding/component/multiselect";
-import { SchoolCombobox } from "@/app/onboarding/component/school-combobox";
-import {
-  FieldContent,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-  Field as UIField,
-} from "@/components/ui/field";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import type { UserCourse } from "@/modules/report-parsing/types";
-import type { StartingTerm } from "@/modules/report-parsing/utils/parse-starting-term";
 
 const onboardingFormSchema = z
   .object({
@@ -103,14 +94,10 @@ const onboardingFormSchema = z
   );
 
 export default function ProfilePage() {
-  const upsert = useMutation(api.students.upsertCurrentStudent);
-
   // const router = useRouter();
   const { isAuthenticated } = useConvexAuth();
   const [editingProfile, setEditingProfile] = React.useState(false);
   const [isFileLoaded, setIsFileLoaded] = React.useState(false);
-
-  const [currentStep, setCurrentStep] = React.useState<1 | 2>(1);
 
   const student = useQuery(
     api.students.getCurrentStudent,
