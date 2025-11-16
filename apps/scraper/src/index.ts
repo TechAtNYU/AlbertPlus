@@ -227,20 +227,13 @@ export default {
                       batch.map((url) => ({
                         url,
                         jobType: "course" as const,
-                      }))
+                      })),
                     )
                     .returning();
 
-                  await env.SCRAPING_QUEUE.sendBatch(
-                    newJobs.map((j) => ({ body: { jobId: j.id } }))
-                  );
-
-                  console.log(
-                    `Queued batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(
-                      courseUrls.length / BATCH_SIZE
-                    )} (${newJobs.length} jobs)`
-                  );
-                }
+                await env.SCRAPING_QUEUE.sendBatch(
+                  newJobs.map((j) => ({ body: { jobId: j.id } }))
+                );
                 break;
               }
               case "program": {
@@ -270,18 +263,11 @@ export default {
                   `Scraped ${courses.length} courses from ${job.url}`
                 );
 
-                for (const courseData of courses) {
-                  const courseId = await convex.upsertCourseWithPrerequisites({
-                    ...courseData.course,
-                    prerequisites: courseData.prerequisites,
-                  });
-
-                  if (!courseId) {
-                    throw new JobError(
-                      `Failed to upsert course ${courseData.course.code}: no ID returned`,
-                      "validation"
-                    );
-                  }
+                if (!courseId) {
+                  throw new JobError(
+                    "Failed to upsert course: no ID returned",
+                    "validation"
+                  );
                 }
                 break;
               }
