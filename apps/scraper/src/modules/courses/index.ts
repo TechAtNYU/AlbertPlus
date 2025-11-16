@@ -15,6 +15,8 @@ export type CoursePrerequisite =
   | Omit<Extract<PrerequisiteItem, { type: "alternative" }>, "courseId">
   | Omit<Extract<PrerequisiteItem, { type: "options" }>, "courseId">;
 
+type CourseLevel = "undergraduate" | "graduate";
+
 export type SchoolName = Infer<typeof schoolName>;
 
 const SCHOOL_CODE_TO_NAME: Record<string, SchoolName> = {
@@ -90,6 +92,49 @@ export function getSchoolFromProgram(program: string): SchoolName {
   const school = SCHOOL_CODE_TO_NAME[code];
   return school ?? "College of Arts and Science";
 }
+
+const GRADUATE_PROGRAM_CODES = new Set([
+  "GA",
+  "GG",
+  "GH",
+  "GI",
+  "GP",
+  "GN",
+  "GU",
+  "GC",
+  "GS",
+  "GE",
+  "GB",
+  "GY",
+  "GX",
+  "GT",
+  "MD",
+  "LW",
+  "NL",
+  "NP",
+]);
+
+function getCourseLevel(program: string, courseNumber: string): CourseLevel {
+  const programCode = program.split("-").pop()?.toUpperCase() ?? "";
+
+  if (GRADUATE_PROGRAM_CODES.has(programCode)) {
+    return "graduate";
+  }
+
+  if (programCode.startsWith("U")) {
+    return "undergraduate";
+  }
+
+  const normalized = courseNumber.replace(/\D/g, "").padStart(4, "0");
+  const firstDigit = Number.parseInt(normalized[0], 10);
+
+  if (!Number.isNaN(firstDigit) && firstDigit >= 5) {
+    return "graduate";
+  }
+
+  return "undergraduate";
+}
+
 export async function discoverCourses(url: string): Promise<string[]> {
   const courses: string[] = [];
 
@@ -151,8 +196,8 @@ export async function scrapeCourse(
         if (currentCode && currentTitle) {
           const codeMatch = currentCode.match(/([A-Z]+(?:-[A-Z]+)?)\s+(\d+)/);
           if (codeMatch) {
-            const [, program, levelStr] = codeMatch;
-            const level = Number.parseInt(levelStr, 10);
+            const [, program, courseNumber] = codeMatch;
+            const level = getCourseLevel(program, courseNumber);
 
             courses.push({
               course: {
@@ -210,7 +255,7 @@ export async function scrapeCourse(
 
   class PrereqHandler {
     text(text: { text: string }) {
-      currentPrereqs += text.text.trim() + " ";
+      currentPrereqs += `${text.text.trim()} `;
     }
   }
 

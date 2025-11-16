@@ -13,6 +13,9 @@ import { discoverCourses, scrapeCourse } from "./modules/courses";
 import { discoverPrograms, scrapeProgram } from "./modules/programs";
 
 const app = new Hono<{ Bindings: CloudflareBindings }>();
+const COURSE_SCRAPE_DELAY_MS = 250;
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const validateApiKey = async (
   c: Context<{ Bindings: CloudflareBindings }>,
@@ -255,6 +258,9 @@ export default {
               }
               case "course": {
                 // A single URL may contain multiple courses
+                if (COURSE_SCRAPE_DELAY_MS > 0) {
+                  await sleep(COURSE_SCRAPE_DELAY_MS);
+                }
                 const courses = await scrapeCourse(job.url, db, env);
 
                 console.log(
