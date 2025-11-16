@@ -379,7 +379,7 @@ export default function ProfilePage() {
                         </form.Field>
                       )}
                       {!editingProfile && (
-                        <p className="text-gray-700 text-sm">
+                        <p className="text-sm text-muted-foreground">
                           {student.school
                             ? `${student.school.name} (${
                                 student.school.level
@@ -397,7 +397,7 @@ export default function ProfilePage() {
                     <div className="space-y-2">
                       <Label>Programs</Label>
                       {!editingProfile && (
-                        <p className="text-gray-700 text-sm">
+                        <p className="text-sm text-muted-foreground">
                           {student.programs?.length > 0
                             ? student.programs.map((p) => p.name).join(", ")
                             : "None"}
@@ -510,7 +510,7 @@ export default function ProfilePage() {
                         </div>
                       )}
                       {!editingProfile && (
-                        <p className="text-gray-700 text-sm">
+                        <p className="text-sm text-muted-foreground">
                           {student.startingDate
                             ? `${student.startingDate.term.charAt(0).toUpperCase()}${student.startingDate.term.slice(1)} ${student.startingDate.year}`
                             : "N/A"}
@@ -575,7 +575,7 @@ export default function ProfilePage() {
                         </div>
                       )}
                       {!editingProfile && (
-                        <p className="text-gray-700 text-sm">
+                        <p className="text-sm text-muted-foreground">
                           {student.expectedGraduationDate
                             ? `${student.expectedGraduationDate.term.charAt(0).toUpperCase()}${student.expectedGraduationDate.term.slice(1)} ${student.expectedGraduationDate.year}`
                             : "N/A"}
