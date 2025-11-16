@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { ChevronDown, ChevronRight, InfoIcon } from "lucide-react";
+import { Check, ChevronDown, ChevronRight, InfoIcon } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -18,6 +18,7 @@ import { CourseSectionItem } from "./CourseSectionItem";
 interface CourseCardProps {
   course: CourseWithOfferings;
   isExpanded: boolean;
+  selectedClassNumbers?: number[];
   onToggleExpand: (courseCode: string) => void;
   onSectionSelect?: (offering: CourseOffering) => void;
   onSectionHover?: (offering: CourseOffering | null) => void;
@@ -26,15 +27,17 @@ interface CourseCardProps {
 export const CourseCard = ({
   course,
   isExpanded,
+  selectedClassNumbers,
   onToggleExpand,
   onSectionSelect,
   onSectionHover,
 }: CourseCardProps) => {
+  const hasSelectedSection = course.offerings.some(offering => selectedClassNumbers?.includes(offering.classNumber));
   return (
     <div className="w-full">
       <Card
         className={clsx(
-          !isExpanded && "hover:bg-neutral-100 dark:hover:bg-neutral-800",
+          !isExpanded && "hover:bg-neutral-100 dark:hover:bg-neutral-800"
         )}
         onClick={() => onToggleExpand(course.code)}
       >
@@ -73,6 +76,9 @@ export const CourseCard = ({
                   {course.offerings.length !== 1 ? "s" : ""}
                 </span>
               </>
+            )}
+            {hasSelectedSection && (
+              <Check className="size-4 shrink-0 self-center text-green-600 mx-1.5" />
             )}
           </CardDescription>
         </CardHeader>
