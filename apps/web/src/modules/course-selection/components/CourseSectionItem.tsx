@@ -48,7 +48,7 @@ export const CourseSectionItem = ({
           {offering.days.map((day) => day.slice(0, 3).toUpperCase()).join(", ")}{" "}
           {offering.startTime} - {offering.endTime}
         </div>
-        <div>{offering.location}</div>
+        <div>{offering.location ?? "TBD"}</div>
         <div className="capitalize">
           {offering.term} {offering.year}
         </div>

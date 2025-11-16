@@ -12,7 +12,9 @@
     "startTime": "11:00",
     "endTime": "12:15",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "CSCI-UA 481",
@@ -27,7 +29,9 @@
     "startTime": "14:00",
     "endTime": "15:15",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "CSCI-UA 480",
@@ -42,7 +46,9 @@
     "startTime": "15:30",
     "endTime": "16:45",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "CSCI-UA 479",
@@ -58,7 +64,9 @@
     "endTime": "12:15",
     "status": "waitlist",
     "waitlistNum": 3,
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "CSCI-UA 101",
@@ -73,7 +81,9 @@
     "startTime": "11:00",
     "endTime": "12:15",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "CSCI-UA 101",
@@ -89,7 +99,9 @@
     "endTime": "15:15",
     "status": "waitlist",
     "waitlistNum": 5,
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "CSCI-UA 102",
@@ -104,7 +116,9 @@
     "startTime": "14:00",
     "endTime": "15:15",
     "status": "closed",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "CSCI-UA 102",
@@ -119,7 +133,9 @@
     "startTime": "11:00",
     "endTime": "12:15",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "CSCI-UA 201",
@@ -134,7 +150,9 @@
     "startTime": "15:30",
     "endTime": "16:45",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "CSCI-UA 202",
@@ -149,7 +167,9 @@
     "startTime": "15:30",
     "endTime": "16:45",
     "status": "closed",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "CSCI-UA 310",
@@ -164,7 +184,9 @@
     "startTime": "12:30",
     "endTime": "13:45",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "CSCI-UA 467",
@@ -179,7 +201,9 @@
     "startTime": "14:00",
     "endTime": "15:15",
     "status": "closed",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "CSCI-UA 473",
@@ -194,7 +218,9 @@
     "startTime": "15:30",
     "endTime": "16:45",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "CSCI-UA 380",
@@ -209,7 +235,9 @@
     "startTime": "11:00",
     "endTime": "12:15",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "MATH-UA 120",
@@ -224,7 +252,9 @@
     "startTime": "10:00",
     "endTime": "10:50",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "MATH-UA 121",
@@ -239,7 +269,9 @@
     "startTime": "09:30",
     "endTime": "10:45",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "MATH-UA 122",
@@ -255,7 +287,9 @@
     "endTime": "10:45",
     "status": "waitlist",
     "waitlistNum": 3,
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "MATH-UA 140",
@@ -270,7 +304,9 @@
     "startTime": "12:30",
     "endTime": "13:45",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "MATH-UA 233",
@@ -285,7 +321,9 @@
     "startTime": "14:00",
     "endTime": "15:15",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "CORE-UA 214",
@@ -300,7 +338,9 @@
     "startTime": "11:00",
     "endTime": "12:15",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "WRIT-UA 9",
@@ -315,7 +355,9 @@
     "startTime": "11:00",
     "endTime": "12:15",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "PHIL-UA 20",
@@ -330,7 +372,9 @@
     "startTime": "16:55",
     "endTime": "18:10",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "ECON-UA 1",
@@ -345,7 +389,9 @@
     "startTime": "11:00",
     "endTime": "12:15",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "ECON-UA 2",
@@ -360,7 +406,9 @@
     "startTime": "14:00",
     "endTime": "15:15",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "PSYCH-UA 1",
@@ -375,7 +423,9 @@
     "startTime": "15:30",
     "endTime": "16:45",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "HIST-UA 101",
@@ -390,7 +440,9 @@
     "startTime": "12:30",
     "endTime": "13:45",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "DSGA-UA 201",
@@ -406,7 +458,9 @@
     "endTime": "16:45",
     "status": "waitlist",
     "waitlistNum": 8,
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "CSCI-UA 101",
@@ -421,7 +475,9 @@
     "startTime": "11:00",
     "endTime": "12:15",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "CSCI-UA 101",
@@ -436,7 +492,9 @@
     "startTime": "14:00",
     "endTime": "15:15",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "CSCI-UA 102",
@@ -451,7 +509,9 @@
     "startTime": "14:00",
     "endTime": "15:15",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "CSCI-UA 201",
@@ -466,7 +526,9 @@
     "startTime": "15:30",
     "endTime": "16:45",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "CSCI-UA 202",
@@ -481,7 +543,9 @@
     "startTime": "15:30",
     "endTime": "16:45",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "CSCI-UA 310",
@@ -496,7 +560,9 @@
     "startTime": "12:30",
     "endTime": "13:45",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "CSCI-UA 380",
@@ -511,7 +577,9 @@
     "startTime": "11:00",
     "endTime": "12:15",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "CSCI-UA 467",
@@ -526,7 +594,9 @@
     "startTime": "14:00",
     "endTime": "15:15",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "CSCI-UA 470",
@@ -541,7 +611,9 @@
     "startTime": "11:00",
     "endTime": "12:15",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "CSCI-UA 473",
@@ -556,7 +628,9 @@
     "startTime": "15:30",
     "endTime": "16:45",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "CSCI-UA 479",
@@ -571,7 +645,9 @@
     "startTime": "11:00",
     "endTime": "12:15",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "CSCI-UA 481",
@@ -586,7 +662,9 @@
     "startTime": "12:30",
     "endTime": "13:45",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "MATH-UA 120",
@@ -601,7 +679,9 @@
     "startTime": "10:00",
     "endTime": "10:50",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "MATH-UA 121",
@@ -616,7 +696,9 @@
     "startTime": "09:30",
     "endTime": "10:45",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "MATH-UA 140",
@@ -631,7 +713,9 @@
     "startTime": "12:30",
     "endTime": "13:45",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "MATH-UA 233",
@@ -646,7 +730,9 @@
     "startTime": "14:00",
     "endTime": "15:15",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "ECON-UA 1",
@@ -661,7 +747,9 @@
     "startTime": "11:00",
     "endTime": "12:15",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "ECON-UA 2",
@@ -676,6 +764,8 @@
     "startTime": "14:00",
     "endTime": "15:15",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   }
 ]

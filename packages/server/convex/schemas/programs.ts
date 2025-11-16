@@ -12,18 +12,21 @@ const requirements = v.union(
   v.object({
     programId: v.id("programs"),
     isMajor: v.boolean(),
+    description: v.optional(v.string()),
     type: v.literal("required"),
     courses: v.array(v.string()), // course code
   }),
   v.object({
     programId: v.id("programs"),
     isMajor: v.boolean(),
+    description: v.optional(v.string()),
     type: v.literal("alternative"),
     courses: v.array(v.string()), // course code
   }),
   v.object({
     programId: v.id("programs"),
     isMajor: v.boolean(),
+    description: v.optional(v.string()),
     type: v.literal("options"),
     courses: v.array(v.string()), // course code
     courseLevels: v.array(

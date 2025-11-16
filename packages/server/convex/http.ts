@@ -111,22 +111,25 @@ export const ZUpsertProgramWithRequirements = z.object({
     z.discriminatedUnion("type", [
       z.object({
         isMajor: z.boolean(),
+        description: z.optional(z.string()),
         type: z.literal("required"),
         courses: z.array(z.string()),
       }),
       z.object({
         isMajor: z.boolean(),
+        description: z.optional(z.string()),
         type: z.literal("alternative"),
         courses: z.array(z.string()),
       }),
       z.object({
         isMajor: z.boolean(),
+        description: z.optional(z.string()),
         type: z.literal("options"),
         courses: z.array(z.string()),
         courseLevels: z.array(
           z.object({
-            program: z.string(),
-            level: z.coerce.number(),
+            program: z.string(), // CSCI-UA
+            level: z.coerce.number(), // 4
           }),
         ),
         creditsRequired: z.number(),
@@ -143,6 +146,7 @@ export const ZUpsertRequirements = z.array(
         z.transform((val) => val as Id<"programs">),
       ),
       isMajor: z.boolean(),
+      description: z.optional(z.string()),
       type: z.literal("required"),
       courses: z.array(z.string()),
     }),
@@ -152,6 +156,7 @@ export const ZUpsertRequirements = z.array(
         z.transform((val) => val as Id<"programs">),
       ),
       isMajor: z.boolean(),
+      description: z.optional(z.string()),
       type: z.literal("alternative"),
       courses: z.array(z.string()),
     }),
@@ -161,6 +166,7 @@ export const ZUpsertRequirements = z.array(
         z.transform((val) => val as Id<"programs">),
       ),
       isMajor: z.boolean(),
+      description: z.optional(z.string()),
       type: z.literal("options"),
       courses: z.array(z.string()),
       courseLevels: z.array(
@@ -206,14 +212,17 @@ export const ZUpsertPrerequisites = z.array(
 
 export const ZUpsertCourseOfferings = z.array(
   z.object({
-    courseCode: z.string(),
-    classNumber: z.number(),
-    title: z.string(),
+    courseCode: z.string(), // CSCI-UA 102
+    classNumber: z.number(), // 10349
+    title: z.optional(z.string()),
     section: z.string(),
-    year: z.number(),
+    description: z.optional(z.string()),
+    year: z.number(), // 2025
     term: z.enum(["spring", "summer", "fall", "j-term"]),
+    level: z.enum(["undergraduate", "graduate"]),
+    school: ZSchoolName,
     instructor: z.array(z.string()),
-    location: z.string(),
+    location: z.optional(z.string()),
     days: z.array(
       z.enum([
         "monday",
@@ -225,8 +234,8 @@ export const ZUpsertCourseOfferings = z.array(
         "sunday",
       ]),
     ),
-    startTime: z.string(),
-    endTime: z.string(),
+    startTime: z.string(), // 13:00
+    endTime: z.string(), // 14:15
     status: z.enum(["open", "closed", "waitlist"]),
     waitlistNum: z.optional(z.number()),
     isCorequisite: z._default(z.boolean(), false),
