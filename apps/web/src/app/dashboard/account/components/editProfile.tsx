@@ -2,6 +2,7 @@
 
 import { api } from "@albert-plus/server/convex/_generated/api";
 import type { Doc, Id } from "@albert-plus/server/convex/_generated/dataModel";
+import { useUser } from "@clerk/nextjs";
 import { useForm } from "@tanstack/react-form";
 import {
   useConvexAuth,
@@ -27,6 +28,16 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
   FieldContent,
   FieldError,
   FieldGroup,
@@ -49,17 +60,6 @@ import DegreeProgreeUpload from "@/modules/report-parsing/components/degree-prog
 import type { UserCourse } from "@/modules/report-parsing/types";
 import type { StartingTerm } from "@/modules/report-parsing/utils/parse-starting-term";
 import { getTermAfterSemesters, type Term } from "@/utils/term";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { useUser } from "@clerk/nextjs";
 
 const dateSchema = z.object({
   year: z.number().int().min(2000).max(2100),
@@ -370,7 +370,6 @@ export function EditProfilePopup() {
         }}
         className="space-y-6"
       >
-        
         <Activity mode={currentStep === 1 ? "visible" : "hidden"}>
           <Card>
             {/* <CardHeader>
@@ -447,80 +446,17 @@ export function EditProfilePopup() {
                 </form.Field>
 
                 {/* Program timeline - start and end dates in one row */}
-              <FieldGroup>
-                <FieldLabel>When does your program start and end?</FieldLabel>
-                <div className="rounded-lg border border-border/40 bg-muted/5 p-4">
-                {/* Starting Date section */}
+                <FieldGroup>
+                  <FieldLabel>When does your program start and end?</FieldLabel>
+                  <div className="rounded-lg border border-border/40 bg-muted/5 p-4">
+                    {/* Starting Date section */}
                     <div className="flex-1 space-y-3">
-                        <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                         Start date
-                        </div>
-                        <div className="flex gap-2">
+                      </div>
+                      <div className="flex gap-2">
                         {/* startingDate.term */}
                         <form.Field name="startingDate.term">
-                            {(field) => (
-                            <Select
-                                value={field.state.value ?? ""}
-                                onValueChange={(val) =>
-                                field.handleChange(val as Term)
-                                }
-                            >
-                                <SelectTrigger
-                                aria-invalid={!field.state.meta.isValid}
-                                >
-                                <SelectValue placeholder="Term" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                <SelectItem value="spring">Spring</SelectItem>
-                                <SelectItem value="summer">Summer</SelectItem>
-                                <SelectItem value="fall">Fall</SelectItem>
-                                <SelectItem value="j-term">Winter</SelectItem>
-                                </SelectContent>
-                            </Select>
-                            )}
-                        </form.Field>
-                        {/* startingDate.year */}
-                        <form.Field name="startingDate.year">
-                            {(field) => (
-                            <Select
-                                value={field.state.value?.toString() ?? ""}
-                                onValueChange={(val) =>
-                                field.handleChange(Number.parseInt(val, 10))
-                                }
-                            >
-                                <SelectTrigger
-                                aria-invalid={!field.state.meta.isValid}
-                                >
-                                <SelectValue placeholder="Year" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                {yearOptions.map((year) => (
-                                    <SelectItem
-                                    key={year}
-                                    value={year.toString()}
-                                    >
-                                    {year}
-                                    </SelectItem>
-                                ))}
-                                </SelectContent>
-                            </Select>
-                            )}
-                        </form.Field>
-                        </div>
-                    </div>
-                  <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-8">
-                    
-
-                    {/* Expected graduation date section */}
-                    <div className="flex-1 space-y-3">
-                      <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mt-4 ">
-                        Expected graduation
-                      </div>
-                      
-                      <div className="flex gap-2">
-                        
-                        {/* expectedGraduationDate.term */}
-                        <form.Field name="expectedGraduationDate.term">
                           {(field) => (
                             <Select
                               value={field.state.value ?? ""}
@@ -542,8 +478,8 @@ export function EditProfilePopup() {
                             </Select>
                           )}
                         </form.Field>
-                        {/* expectedGraduationDate.year */}
-                        <form.Field name="expectedGraduationDate.year">
+                        {/* startingDate.year */}
+                        <form.Field name="startingDate.year">
                           {(field) => (
                             <Select
                               value={field.state.value?.toString() ?? ""}
@@ -571,20 +507,75 @@ export function EditProfilePopup() {
                         </form.Field>
                       </div>
                     </div>
+                    <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-8">
+                      {/* Expected graduation date section */}
+                      <div className="flex-1 space-y-3">
+                        <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mt-4 ">
+                          Expected graduation
+                        </div>
+
+                        <div className="flex gap-2">
+                          {/* expectedGraduationDate.term */}
+                          <form.Field name="expectedGraduationDate.term">
+                            {(field) => (
+                              <Select
+                                value={field.state.value ?? ""}
+                                onValueChange={(val) =>
+                                  field.handleChange(val as Term)
+                                }
+                              >
+                                <SelectTrigger
+                                  aria-invalid={!field.state.meta.isValid}
+                                >
+                                  <SelectValue placeholder="Term" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="spring">Spring</SelectItem>
+                                  <SelectItem value="summer">Summer</SelectItem>
+                                  <SelectItem value="fall">Fall</SelectItem>
+                                  <SelectItem value="j-term">Winter</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            )}
+                          </form.Field>
+                          {/* expectedGraduationDate.year */}
+                          <form.Field name="expectedGraduationDate.year">
+                            {(field) => (
+                              <Select
+                                value={field.state.value?.toString() ?? ""}
+                                onValueChange={(val) =>
+                                  field.handleChange(Number.parseInt(val, 10))
+                                }
+                              >
+                                <SelectTrigger
+                                  aria-invalid={!field.state.meta.isValid}
+                                >
+                                  <SelectValue placeholder="Year" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {yearOptions.map((year) => (
+                                    <SelectItem
+                                      key={year}
+                                      value={year.toString()}
+                                    >
+                                      {year}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            )}
+                          </form.Field>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-8"></div>
                   </div>
-                  <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-8">
 
-                    
-                  </div>
-                </div>
-                
-
-                {/* Aggregate object-level errors (from Zod refine, etc.) */}
-                <form.Field name="expectedGraduationDate">
-                  {(field) => <FieldError errors={field.state.meta.errors} />}
-                </form.Field>
-              </FieldGroup>
-
+                  {/* Aggregate object-level errors (from Zod refine, etc.) */}
+                  <form.Field name="expectedGraduationDate">
+                    {(field) => <FieldError errors={field.state.meta.errors} />}
+                  </form.Field>
+                </FieldGroup>
               </FieldGroup>
             </CardContent>
             <CardFooter>
@@ -604,42 +595,37 @@ export function EditProfilePopup() {
 
   return (
     <div className="flex gap-x-2">
-
-        
-    <Dialog>
-    <form>
-        <DialogTrigger asChild>
-        <Button variant="default">Edit Profile</Button>
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-            <DialogTitle>Edit profile</DialogTitle>
-            <DialogDescription>
-            Make changes to your profile here. Click save when you&apos;re
-            done.
-            </DialogDescription>
-        </DialogHeader>
-        <Form/>
-        
-        </DialogContent>
-    </form>
-    </Dialog>
-
-    <Dialog>
+      <Dialog>
         <form>
-            <DialogTrigger asChild>
-            <Button variant="outline">Reupload Degree Progress Report</Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
+          <DialogTrigger asChild>
+            <Button variant="default">Edit Profile</Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
-                <DialogTitle>Reupload Degree Progress Report</DialogTitle>
+              <DialogTitle>Edit profile</DialogTitle>
+              <DialogDescription>
+                Make changes to your profile here. Click save when you&apos;re
+                done.
+              </DialogDescription>
             </DialogHeader>
-            <DegreeProgressUpload/>
-            </DialogContent>
+            <Form />
+          </DialogContent>
         </form>
-    </Dialog>
+      </Dialog>
 
-        
+      <Dialog>
+        <form>
+          <DialogTrigger asChild>
+            <Button variant="outline">Reupload Degree Progress Report</Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Reupload Degree Progress Report</DialogTitle>
+            </DialogHeader>
+            <DegreeProgressUpload />
+          </DialogContent>
+        </form>
+      </Dialog>
     </div>
   );
 }

@@ -1,29 +1,34 @@
 "use client";
 
 import { api } from "@albert-plus/server/convex/_generated/api";
+import type { Doc, Id } from "@albert-plus/server/convex/_generated/dataModel";
 import { useUser } from "@clerk/nextjs";
-import { useConvexAuth, useMutation, usePaginatedQuery, useQuery } from "convex/react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {EditProfilePopup} from "./components/editProfile";
-import { Shield, Key, Trash2, Mail, MapPin } from "lucide-react";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { Switch } from "@/components/ui/switch";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 import { useForm } from "@tanstack/react-form";
-import { Doc, Id } from "@albert-plus/server/convex/_generated/dataModel";
-import { FunctionArgs } from "convex/server";
-import { toast } from "sonner";
-import React, { Activity } from "react";
+import {
+  useConvexAuth,
+  useMutation,
+  usePaginatedQuery,
+  useQuery,
+} from "convex/react";
+import type { FunctionArgs } from "convex/server";
+import { Key, Mail, MapPin, Shield, Trash2 } from "lucide-react";
 import { useRouter } from "next/router";
-import { getTermAfterSemesters, Term } from "@/utils/term";
-import DegreeProgreeUpload from "@/modules/report-parsing/components/degree-progress-upload";
+import React, { Activity } from "react";
+import { toast } from "sonner";
 import z from "zod";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -31,6 +36,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import DegreeProgreeUpload from "@/modules/report-parsing/components/degree-progress-upload";
+import { getTermAfterSemesters, type Term } from "@/utils/term";
+import { EditProfilePopup } from "./components/editProfile";
 
 const dateSchema = z.object({
   year: z.number().int().min(2000).max(2100),
@@ -41,6 +53,9 @@ const dateSchema = z.object({
     z.literal("summer"),
   ]),
 });
+
+import MultipleSelector from "@/app/onboarding/component/multiselect";
+import { SchoolCombobox } from "@/app/onboarding/component/school-combobox";
 import {
   FieldContent,
   FieldError,
@@ -48,15 +63,13 @@ import {
   FieldLabel,
   Field as UIField,
 } from "@/components/ui/field";
-import { SchoolCombobox } from "@/app/onboarding/component/school-combobox";
-import MultipleSelector from "@/app/onboarding/component/multiselect";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { UserCourse } from "@/modules/report-parsing/types";
-import { StartingTerm } from "@/modules/report-parsing/utils/parse-starting-term";
+import type { UserCourse } from "@/modules/report-parsing/types";
+import type { StartingTerm } from "@/modules/report-parsing/utils/parse-starting-term";
 
 const onboardingFormSchema = z
   .object({
@@ -89,156 +102,153 @@ const onboardingFormSchema = z
     },
   );
 
-
 export default function ProfilePage() {
- 
   const upsert = useMutation(api.students.upsertCurrentStudent);
 
   // const router = useRouter();
-    const { isAuthenticated } = useConvexAuth();
-    const [editingProfile, setEditingProfile] = React.useState(false);
-    const [isFileLoaded, setIsFileLoaded] = React.useState(false);
-    
-    const [currentStep, setCurrentStep] = React.useState<1 | 2>(1);
-  
-     const student = useQuery(
+  const { isAuthenticated } = useConvexAuth();
+  const [editingProfile, setEditingProfile] = React.useState(false);
+  const [isFileLoaded, setIsFileLoaded] = React.useState(false);
+
+  const [currentStep, setCurrentStep] = React.useState<1 | 2>(1);
+
+  const student = useQuery(
     api.students.getCurrentStudent,
     isAuthenticated ? {} : "skip",
   );
 
-    const { user } = useUser();
-  
-    // actions
-    const upsertStudent = useMutation(api.students.upsertCurrentStudent);
-    const importUserCourses = useMutation(api.userCourses.importUserCourses);
-  
-    // schools
-    const schools = useQuery(
-      api.schools.getSchools,
-      isAuthenticated ? {} : ("skip" as const),
-    );
-  
-    // Programs
-    const [programsQuery, setProgramsQuery] = React.useState<string | undefined>(
-      undefined,
-    );
-    const {
-      results: programs,
-      status: programsStatus,
-      loadMore: programsLoadMore,
-    } = usePaginatedQuery(
-      api.programs.getPrograms,
-      isAuthenticated ? { query: programsQuery } : ("skip" as const),
-      { initialNumItems: 20 },
-    );
-  
-    const programOptions = React.useMemo(
-      () =>
-        (programs ?? []).map((program) => ({
-          value: program._id,
-          label: program.name,
-        })),
-      [programs],
-    );
-  
-    const handleSearchPrograms = React.useCallback(
-      async (value: string) => {
-        const trimmed = value.trim();
-        setProgramsQuery(trimmed.length === 0 ? undefined : trimmed);
-        return programOptions;
-      },
-      [programOptions],
-    );
-  
-    const handleLoadMorePrograms = React.useCallback(() => {
-      if (programsStatus === "CanLoadMore") {
-        void programsLoadMore(10);
-      }
-    }, [programsStatus, programsLoadMore]);
-  
-    const currentYear = React.useMemo(() => new Date().getFullYear(), []);
-    const defaultTerm = React.useMemo<Term>(() => {
-      const month = new Date().getMonth();
-      return month >= 6 ? "fall" : "spring";
-    }, []);
-    const defaultStartingDate = {
-      year: currentYear,
-      term: defaultTerm,
-    };
-    const defaultExpectedGraduation = getTermAfterSemesters(
-      {
-        term: defaultTerm,
-        year: currentYear,
-      },
-      14,
-    );
-  
-    // Generate year options: currentYear ± 4 years
-    const yearOptions = React.useMemo(() => {
-      const years: number[] = [];
-      for (let i = currentYear - 5; i <= currentYear + 5; i++) {
-        years.push(i);
-      }
-      return years;
-    }, [currentYear]);
+  const { user } = useUser();
 
-    function handleConfirmImport(
-      coursesToImport: UserCourse[],
-      startingTerm: StartingTerm | null,
-    ) {
-      if (coursesToImport.length === 0) {
-        return;
-      }
-  
-      form.setFieldValue("userCourses", coursesToImport);
-  
-      if (startingTerm) {
-        form.setFieldValue("startingDate", startingTerm);
-        form.setFieldValue(
-          "expectedGraduationDate",
-          getTermAfterSemesters(startingTerm, 14),
-        );
-      }
-  
-      setIsFileLoaded(true);
+  // actions
+  const upsertStudent = useMutation(api.students.upsertCurrentStudent);
+  const importUserCourses = useMutation(api.userCourses.importUserCourses);
+
+  // schools
+  const schools = useQuery(
+    api.schools.getSchools,
+    isAuthenticated ? {} : ("skip" as const),
+  );
+
+  // Programs
+  const [programsQuery, setProgramsQuery] = React.useState<string | undefined>(
+    undefined,
+  );
+  const {
+    results: programs,
+    status: programsStatus,
+    loadMore: programsLoadMore,
+  } = usePaginatedQuery(
+    api.programs.getPrograms,
+    isAuthenticated ? { query: programsQuery } : ("skip" as const),
+    { initialNumItems: 20 },
+  );
+
+  const programOptions = React.useMemo(
+    () =>
+      (programs ?? []).map((program) => ({
+        value: program._id,
+        label: program.name,
+      })),
+    [programs],
+  );
+
+  const handleSearchPrograms = React.useCallback(
+    async (value: string) => {
+      const trimmed = value.trim();
+      setProgramsQuery(trimmed.length === 0 ? undefined : trimmed);
+      return programOptions;
+    },
+    [programOptions],
+  );
+
+  const handleLoadMorePrograms = React.useCallback(() => {
+    if (programsStatus === "CanLoadMore") {
+      void programsLoadMore(10);
     }
-  
-    
+  }, [programsStatus, programsLoadMore]);
+
+  const currentYear = React.useMemo(() => new Date().getFullYear(), []);
+  const defaultTerm = React.useMemo<Term>(() => {
+    const month = new Date().getMonth();
+    return month >= 6 ? "fall" : "spring";
+  }, []);
+  const defaultStartingDate = {
+    year: currentYear,
+    term: defaultTerm,
+  };
+  const defaultExpectedGraduation = getTermAfterSemesters(
+    {
+      term: defaultTerm,
+      year: currentYear,
+    },
+    14,
+  );
+
+  // Generate year options: currentYear ± 4 years
+  const yearOptions = React.useMemo(() => {
+    const years: number[] = [];
+    for (let i = currentYear - 5; i <= currentYear + 5; i++) {
+      years.push(i);
+    }
+    return years;
+  }, [currentYear]);
+
+  function handleConfirmImport(
+    coursesToImport: UserCourse[],
+    startingTerm: StartingTerm | null,
+  ) {
+    if (coursesToImport.length === 0) {
+      return;
+    }
+
+    form.setFieldValue("userCourses", coursesToImport);
+
+    if (startingTerm) {
+      form.setFieldValue("startingDate", startingTerm);
+      form.setFieldValue(
+        "expectedGraduationDate",
+        getTermAfterSemesters(startingTerm, 14),
+      );
+    }
+
+    setIsFileLoaded(true);
+  }
+
   const form = useForm({
-      defaultValues: {
-        // student data
-        school: undefined as Id<"schools"> | undefined,
-        programs: [] as Id<"programs">[],
-        startingDate: defaultStartingDate as Doc<"students">["startingDate"],
-        expectedGraduationDate:
-          defaultExpectedGraduation as Doc<"students">["expectedGraduationDate"],
-        // user courses
-        userCourses: undefined as
-          | FunctionArgs<typeof api.userCourses.importUserCourses>["courses"]
-          | undefined,
-      },
-      validators: {
-        onSubmit: ({ value }) => {
-          const result = onboardingFormSchema.safeParse(value);
-          if (!result.success) {
-            const fieldErrors: Record<string, { message: string }[]> = {};
-            for (const issue of result.error.issues) {
-              const path = issue.path.join(".");
-              fieldErrors[path] = [{ message: issue.message }];
-            }
-            return {
-              fields: fieldErrors,
-            };
+    defaultValues: {
+      // student data
+      school: undefined as Id<"schools"> | undefined,
+      programs: [] as Id<"programs">[],
+      startingDate: defaultStartingDate as Doc<"students">["startingDate"],
+      expectedGraduationDate:
+        defaultExpectedGraduation as Doc<"students">["expectedGraduationDate"],
+      // user courses
+      userCourses: undefined as
+        | FunctionArgs<typeof api.userCourses.importUserCourses>["courses"]
+        | undefined,
+    },
+    validators: {
+      onSubmit: ({ value }) => {
+        const result = onboardingFormSchema.safeParse(value);
+        if (!result.success) {
+          const fieldErrors: Record<string, { message: string }[]> = {};
+          for (const issue of result.error.issues) {
+            const path = issue.path.join(".");
+            fieldErrors[path] = [{ message: issue.message }];
           }
-          return undefined;
-        },
+          return {
+            fields: fieldErrors,
+          };
+        }
+        return undefined;
       },
-      onSubmit: async ({ value }) => {
-        if (editingProfile) {
-          try {
+    },
+    onSubmit: async ({ value }) => {
+      if (editingProfile) {
+        try {
           toast.success("Successfully updated profile.");
           // router.push("/dashboard");
-  
+
           await upsertStudent({
             school: value.school as Id<"schools">,
             programs: value.programs,
@@ -247,7 +257,7 @@ export default function ProfilePage() {
           });
 
           setEditingProfile(false);
-  
+
           if (value.userCourses) {
             await importUserCourses({ courses: value.userCourses });
           }
@@ -255,421 +265,443 @@ export default function ProfilePage() {
           console.error("Error completing onboarding:", error);
           toast.error("Could not complete onboarding. Please try again.");
         }
-        }
-      },
-    });
+      }
+    },
+  });
 
   React.useEffect(() => {
-      if (!student) return;
-  
-      // school: student.school can be an object or null
-      form.setFieldValue("school", student.school?._id ?? undefined);
-  
-      // programs: student.programs might be an array of objects or array of ids
-      const programIds: Id<"programs">[] = (student.programs ?? []).map(
-        (p: any) =>
-          typeof p === "string"
-            ? (p as Id<"programs">)
-            : (p?._id as Id<"programs">),
-      );
-  
-      form.setFieldValue("programs", programIds);
-  
-     
-    }, [student]);
-  
-  
+    if (!student) return;
+
+    // school: student.school can be an object or null
+    form.setFieldValue("school", student.school?._id ?? undefined);
+
+    // programs: student.programs might be an array of objects or array of ids
+    const programIds: Id<"programs">[] = (student.programs ?? []).map(
+      (p: any) =>
+        typeof p === "string"
+          ? (p as Id<"programs">)
+          : (p?._id as Id<"programs">),
+    );
+
+    form.setFieldValue("programs", programIds);
+  }, [student]);
 
   return (
     <div>
       <Tabs defaultValue="personal">
-      
-      <Card>
-      <CardContent>
-        <div className="flex flex-col items-start gap-6 md:flex-row md:items-center">
-          <div className="relative">
-                    
-            <Avatar className="inline-block h-20 w-20 rounded-full overflow-hidden">
-            {user?.imageUrl ? (
-              <AvatarImage
-                src={user.imageUrl}
-                alt={user.fullName || "User avatar"}
-                className="block h-full w-full object-cover"
-              />
-            ) : (
-              <AvatarFallback className="flex h-full w-full items-center justify-center bg-gray-200 text-base font-medium">
-                {`${user?.firstName?.[0] || "U"}${user?.lastName?.[0] || "U"}`}
-              </AvatarFallback>
-            )}
-          </Avatar>
-
-            
-          </div>
-          <div className="flex-1 space-y-2">
-            <div className="flex flex-col gap-2 md:flex-row md:items-center">
-              <h1 className="text-2xl font-bold">{user?.fullName || "Unknown User"}</h1>
-              
-            </div>
-            {student && (
-                <p className="text-muted-foreground">
-                  {student.school?.level
-                    ? student.school.level.charAt(0).toUpperCase() + student.school.level.slice(1).toLowerCase() + " Student"
-                    : "Student"}
-                </p>
-              )}
-            <div className="text-muted-foreground flex flex-wrap gap-4 text-sm">
-              <div className="flex items-center gap-1">
-                <Mail className="size-4" />
-                {user?.primaryEmailAddress?.emailAddress || ""}
+        <Card>
+          <CardContent>
+            <div className="flex flex-col items-start gap-6 md:flex-row md:items-center">
+              <div className="relative">
+                <Avatar className="inline-block h-20 w-20 rounded-full overflow-hidden">
+                  {user?.imageUrl ? (
+                    <AvatarImage
+                      src={user.imageUrl}
+                      alt={user.fullName || "User avatar"}
+                      className="block h-full w-full object-cover"
+                    />
+                  ) : (
+                    <AvatarFallback className="flex h-full w-full items-center justify-center bg-gray-200 text-base font-medium">
+                      {`${user?.firstName?.[0] || "U"}${user?.lastName?.[0] || "U"}`}
+                    </AvatarFallback>
+                  )}
+                </Avatar>
               </div>
-              <div className="flex items-center gap-1">
-                <MapPin className="size-4" />
-                New York University
-              </div>
-              {/* <div className="flex items-center gap-1">
+              <div className="flex-1 space-y-2">
+                <div className="flex flex-col gap-2 md:flex-row md:items-center">
+                  <h1 className="text-2xl font-bold">
+                    {user?.fullName || "Unknown User"}
+                  </h1>
+                </div>
+                {student && (
+                  <p className="text-muted-foreground">
+                    {student.school?.level
+                      ? student.school.level.charAt(0).toUpperCase() +
+                        student.school.level.slice(1).toLowerCase() +
+                        " Student"
+                      : "Student"}
+                  </p>
+                )}
+                <div className="text-muted-foreground flex flex-wrap gap-4 text-sm">
+                  <div className="flex items-center gap-1">
+                    <Mail className="size-4" />
+                    {user?.primaryEmailAddress?.emailAddress || ""}
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <MapPin className="size-4" />
+                    New York University
+                  </div>
+                  {/* <div className="flex items-center gap-1">
                 <Calendar className="size-4" />
                 Joined March 2023
               </div> */}
+                </div>
+              </div>
+              {/* <Button variant="default">Edit Profile</Button> */}
             </div>
-          </div>
-          {/* <Button variant="default">Edit Profile</Button> */}
-        </div>
-      </CardContent>
-    </Card>
-      <TabsList className="grid w-full grid-cols-2">
-        <TabsTrigger value="personal">Academic Profile</TabsTrigger>
-        <TabsTrigger value="degreeProgressReport">Degree Progress Report</TabsTrigger>
-        {/* <TabsTrigger value="security">Security</TabsTrigger>
+          </CardContent>
+        </Card>
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="personal">Academic Profile</TabsTrigger>
+          <TabsTrigger value="degreeProgressReport">
+            Degree Progress Report
+          </TabsTrigger>
+          {/* <TabsTrigger value="security">Security</TabsTrigger>
         <TabsTrigger value="notifications">Notifications</TabsTrigger> */}
-      </TabsList>
-      {student && (
-      
-      <TabsContent value="personal" className="space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Academic Information</CardTitle>
-            <CardDescription>View and update your academic information here.</CardDescription>
-          </CardHeader>
+        </TabsList>
+        {student && (
+          <TabsContent value="personal" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Academic Information</CardTitle>
+                <CardDescription>
+                  View and update your academic information here.
+                </CardDescription>
+              </CardHeader>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  form.handleSubmit();
+                }}
+                className="space-y-6"
+              >
+                <CardContent className="space-y-6">
+                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="firstName">School</Label>
+                      {editingProfile && (
+                        <form.Field name="school">
+                          {(field) => {
+                            return (
+                              <UIField>
+                                <FieldContent>
+                                  <SchoolCombobox
+                                    id={field.name}
+                                    schools={schools}
+                                    value={field.state.value}
+                                    onValueChange={(value) =>
+                                      field.handleChange(value)
+                                    }
+                                  />
+                                </FieldContent>
+                                <FieldError errors={field.state.meta.errors} />
+                              </UIField>
+                            );
+                          }}
+                        </form.Field>
+                      )}
+                      {!editingProfile && (
+                        <p className="text-gray-700 text-sm">
+                          {student.school
+                            ? `${student.school.name} (${
+                                student.school.level
+                                  ? student.school.level
+                                      .charAt(0)
+                                      .toUpperCase() +
+                                    student.school.level.slice(1).toLowerCase()
+                                  : ""
+                              })`
+                            : "N/A"}
+                        </p>
+                      )}
+                      {/* <Input id="firstName" defaultValue="John" /> */}
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Programs</Label>
+                      {!editingProfile && (
+                        <p className="text-gray-700 text-sm">
+                          {student.programs?.length > 0
+                            ? student.programs.map((p) => p.name).join(", ")
+                            : "None"}
+                        </p>
+                      )}
+                      {editingProfile && (
+                        <form.Field name="programs">
+                          {(field) => {
+                            const selected = (field.state.value ?? []).map(
+                              (p) => ({
+                                value: p,
+                                label: programOptions.find(
+                                  (val) => val.value === p,
+                                )?.label as string,
+                              }),
+                            );
+                            return (
+                              <UIField>
+                                {/* <FieldLabel htmlFor={field.name}>
+                            What are your major(s) and minor(s)?
+                          </FieldLabel> */}
+                                <FieldContent>
+                                  <MultipleSelector
+                                    value={selected}
+                                    onChange={(opts) =>
+                                      field.handleChange(
+                                        opts.map(
+                                          (o) => o.value as Id<"programs">,
+                                        ),
+                                      )
+                                    }
+                                    defaultOptions={programOptions}
+                                    options={programOptions}
+                                    delay={300}
+                                    onSearch={handleSearchPrograms}
+                                    triggerSearchOnFocus
+                                    placeholder="Select your programs"
+                                    commandProps={{ label: "Select programs" }}
+                                    onListReachEnd={handleLoadMorePrograms}
+                                    emptyIndicator={
+                                      <p className="text-center text-sm">
+                                        No programs found
+                                      </p>
+                                    }
+                                  />
+                                </FieldContent>
+                                <FieldError errors={field.state.meta.errors} />
+                              </UIField>
+                            );
+                          }}
+                        </form.Field>
+                      )}
+
+                      {/* <Input id="lastName" defaultValue="Doe" /> */}
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Enrollment Start Date</Label>
+                      {editingProfile && (
+                        <div className="flex gap-2">
+                          {/* startingDate.term */}
+                          <form.Field name="startingDate.term">
+                            {(field) => (
+                              <Select
+                                value={field.state.value ?? ""}
+                                onValueChange={(val) =>
+                                  field.handleChange(val as Term)
+                                }
+                              >
+                                <SelectTrigger
+                                  aria-invalid={!field.state.meta.isValid}
+                                >
+                                  <SelectValue placeholder="Term" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="spring">Spring</SelectItem>
+                                  <SelectItem value="summer">Summer</SelectItem>
+                                  <SelectItem value="fall">Fall</SelectItem>
+                                  <SelectItem value="j-term">Winter</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            )}
+                          </form.Field>
+                          {/* startingDate.year */}
+                          <form.Field name="startingDate.year">
+                            {(field) => (
+                              <Select
+                                value={field.state.value?.toString() ?? ""}
+                                onValueChange={(val) =>
+                                  field.handleChange(Number.parseInt(val, 10))
+                                }
+                              >
+                                <SelectTrigger
+                                  aria-invalid={!field.state.meta.isValid}
+                                >
+                                  <SelectValue placeholder="Year" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {yearOptions.map((year) => (
+                                    <SelectItem
+                                      key={year}
+                                      value={year.toString()}
+                                    >
+                                      {year}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            )}
+                          </form.Field>
+                        </div>
+                      )}
+                      {!editingProfile && (
+                        <p className="text-gray-700 text-sm">
+                          {student.startingDate
+                            ? `${student.startingDate.term.charAt(0).toUpperCase()}${student.startingDate.term.slice(1)} ${student.startingDate.year}`
+                            : "N/A"}
+                        </p>
+                      )}
+                      {/* <Input id="email" type="email" defaultValue="john.doe@example.com" /> */}
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="phone">Expected Graduation Date</Label>
+                      {editingProfile && (
+                        <div className="flex gap-2">
+                          {/* expectedGraduationDate.term */}
+                          <form.Field name="expectedGraduationDate.term">
+                            {(field) => (
+                              <Select
+                                value={field.state.value ?? ""}
+                                onValueChange={(val) =>
+                                  field.handleChange(val as Term)
+                                }
+                              >
+                                <SelectTrigger
+                                  aria-invalid={!field.state.meta.isValid}
+                                >
+                                  <SelectValue placeholder="Term" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="spring">Spring</SelectItem>
+                                  <SelectItem value="summer">Summer</SelectItem>
+                                  <SelectItem value="fall">Fall</SelectItem>
+                                  <SelectItem value="j-term">Winter</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            )}
+                          </form.Field>
+                          {/* expectedGraduationDate.year */}
+                          <form.Field name="expectedGraduationDate.year">
+                            {(field) => (
+                              <Select
+                                value={field.state.value?.toString() ?? ""}
+                                onValueChange={(val) =>
+                                  field.handleChange(Number.parseInt(val, 10))
+                                }
+                              >
+                                <SelectTrigger
+                                  aria-invalid={!field.state.meta.isValid}
+                                >
+                                  <SelectValue placeholder="Year" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {yearOptions.map((year) => (
+                                    <SelectItem
+                                      key={year}
+                                      value={year.toString()}
+                                    >
+                                      {year}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            )}
+                          </form.Field>
+                        </div>
+                      )}
+                      {!editingProfile && (
+                        <p className="text-gray-700 text-sm">
+                          {student.expectedGraduationDate
+                            ? `${student.expectedGraduationDate.term.charAt(0).toUpperCase()}${student.expectedGraduationDate.term.slice(1)} ${student.expectedGraduationDate.year}`
+                            : "N/A"}
+                        </p>
+                      )}
+                      {/* <Input id="phone" defaultValue="+1 (555) 123-4567" /> */}
+                    </div>
+
+                    {!editingProfile ? (
+                      <Button
+                        type="button"
+                        className="w-auto max-w-fit"
+                        onClick={() => setEditingProfile(true)}
+                      >
+                        Edit Profile
+                      </Button>
+                    ) : (
+                      <div className="flex gap-3">
+                        <Button
+                          type="submit"
+                          disabled={form.state.isSubmitting}
+                          className="w-auto max-w-fit"
+                        >
+                          {form.state.isSubmitting
+                            ? "Saving..."
+                            : "Save Changes"}
+                        </Button>
+
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="w-auto max-w-fit"
+                          onClick={() => setEditingProfile(false)}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    )}
+
+                    {/* <EditProfilePopup/> */}
+                  </div>
+                </CardContent>
+              </form>
+            </Card>
+          </TabsContent>
+        )}
+
+        <TabsContent value="degreeProgressReport">
           <form
             onSubmit={(e) => {
               e.preventDefault();
               e.stopPropagation();
               form.handleSubmit();
             }}
-            className="space-y-6"
           >
-          <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="firstName">School</Label>
-                {editingProfile && (
-                <form.Field name="school">
-                    {(field) => {
-                      return (
-
-                        
-                        <UIField>
-                          <FieldContent>
-                            <SchoolCombobox
-                              id={field.name}
-                              schools={schools}
-                              value={field.state.value}
-                              onValueChange={(value) => field.handleChange(value)}
-                            />
-                          </FieldContent>
-                          <FieldError errors={field.state.meta.errors} />
-                        </UIField>
-                      );
-                    }}
-                  </form.Field>)}
-                  {!editingProfile && (
-                    <p className="text-gray-700 text-sm">{student.school
-                    ? `${student.school.name} (${
-                        student.school.level
-                          ? student.school.level.charAt(0).toUpperCase() + student.school.level.slice(1).toLowerCase()
-                          : ""
-                      })`
-                    : "N/A"}</p>)}
-                {/* <Input id="firstName" defaultValue="John" /> */}
-              </div>
-              <div className="space-y-2">
-                <Label>Programs</Label>
-                {!editingProfile && (<p className="text-gray-700 text-sm">{student.programs?.length > 0
-                ? student.programs.map((p) => p.name).join(", ")
-                : "None"}</p>)}
-                {editingProfile && (
-                  <form.Field name="programs">
-                    {(field) => {
-                      const selected = (field.state.value ?? []).map((p) => ({
-                        value: p,
-                        label: programOptions.find((val) => val.value === p)
-                          ?.label as string,
-                      }));
-                      return (
-                        <UIField>
-                          {/* <FieldLabel htmlFor={field.name}>
-                            What are your major(s) and minor(s)?
-                          </FieldLabel> */}
-                          <FieldContent>
-                            <MultipleSelector
-                              value={selected}
-                              onChange={(opts) =>
-                                field.handleChange(
-                                  opts.map((o) => o.value as Id<"programs">),
-                                )
-                              }
-                              defaultOptions={programOptions}
-                              options={programOptions}
-                              delay={300}
-                              onSearch={handleSearchPrograms}
-                              triggerSearchOnFocus
-                              placeholder="Select your programs"
-                              commandProps={{ label: "Select programs" }}
-                              onListReachEnd={handleLoadMorePrograms}
-                              emptyIndicator={
-                                <p className="text-center text-sm">
-                                  No programs found
-                                </p>
-                              }
-                            />
-                          </FieldContent>
-                          <FieldError errors={field.state.meta.errors} />
-                        </UIField>
-                      );
-                    }}
-                  </form.Field>)}
-
-                {/* <Input id="lastName" defaultValue="Doe" /> */}
-              </div>
-              <div className="space-y-2">
-                <Label>Enrollment Start Date</Label>
-                {editingProfile && (
-                <div className="flex gap-2">
-                {/* startingDate.term */}
-                <form.Field name="startingDate.term">
-                    {(field) => (
-                    <Select
-                        value={field.state.value ?? ""}
-                        onValueChange={(val) =>
-                        field.handleChange(val as Term)
-                        }
-                    >
-                        <SelectTrigger
-                        aria-invalid={!field.state.meta.isValid}
-                        >
-                        <SelectValue placeholder="Term" />
-                        </SelectTrigger>
-                        <SelectContent>
-                        <SelectItem value="spring">Spring</SelectItem>
-                        <SelectItem value="summer">Summer</SelectItem>
-                        <SelectItem value="fall">Fall</SelectItem>
-                        <SelectItem value="j-term">Winter</SelectItem>
-                        </SelectContent>
-                    </Select>
-                    )}
-                </form.Field>
-                {/* startingDate.year */}
-                <form.Field name="startingDate.year">
-                    {(field) => (
-                    <Select
-                        value={field.state.value?.toString() ?? ""}
-                        onValueChange={(val) =>
-                        field.handleChange(Number.parseInt(val, 10))
-                        }
-                    >
-                        <SelectTrigger
-                        aria-invalid={!field.state.meta.isValid}
-                        >
-                        <SelectValue placeholder="Year" />
-                        </SelectTrigger>
-                        <SelectContent>
-                        {yearOptions.map((year) => (
-                            <SelectItem
-                            key={year}
-                            value={year.toString()}
-                            >
-                            {year}
-                            </SelectItem>
-                        ))}
-                        </SelectContent>
-                    </Select>
-                    )}
-                </form.Field>
-                </div>)}
-                {!editingProfile && (
-                  <p className="text-gray-700 text-sm">{student.startingDate
-                  ? `${student.startingDate.term.charAt(0).toUpperCase()}${student.startingDate.term.slice(1)} ${student.startingDate.year}`
-                  : "N/A"}</p>)}
-                {/* <Input id="email" type="email" defaultValue="john.doe@example.com" /> */}
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="phone">Expected Graduation Date</Label>
-                {editingProfile && (<div className="flex gap-2">
-                                        
-                  {/* expectedGraduationDate.term */}
-                  <form.Field name="expectedGraduationDate.term">
-                    {(field) => (
-                      <Select
-                        value={field.state.value ?? ""}
-                        onValueChange={(val) =>
-                          field.handleChange(val as Term)
-                        }
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-2xl flex items-center">
+                  Degree Progress Report
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Badge
+                        variant="outline"
+                        className="cursor-help size-5 rounded-full p-0 text-xs hover:bg-muted"
                       >
-                        <SelectTrigger
-                          aria-invalid={!field.state.meta.isValid}
+                        ?
+                      </Badge>
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs">
+                      <p>
+                        We do not store your degree progress report. Need help
+                        finding it?{" "}
+                        <a
+                          href="https://www.nyu.edu/students/student-information-and-resources/registration-records-and-graduation/registration/tracking-degree-progress.html"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="underline"
                         >
-                          <SelectValue placeholder="Term" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="spring">Spring</SelectItem>
-                          <SelectItem value="summer">Summer</SelectItem>
-                          <SelectItem value="fall">Fall</SelectItem>
-                          <SelectItem value="j-term">Winter</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    )}
-                  </form.Field>
-                  {/* expectedGraduationDate.year */}
-                  <form.Field name="expectedGraduationDate.year">
-                    {(field) => (
-                      <Select
-                        value={field.state.value?.toString() ?? ""}
-                        onValueChange={(val) =>
-                          field.handleChange(Number.parseInt(val, 10))
-                        }
-                      >
-                        <SelectTrigger
-                          aria-invalid={!field.state.meta.isValid}
-                        >
-                          <SelectValue placeholder="Year" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {yearOptions.map((year) => (
-                            <SelectItem
-                              key={year}
-                              value={year.toString()}
-                            >
-                              {year}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    )}
-                  </form.Field>
-                </div>)}
-                {!editingProfile && (<p className="text-gray-700 text-sm">{student.expectedGraduationDate
-                ? `${student.expectedGraduationDate.term.charAt(0).toUpperCase()}${student.expectedGraduationDate.term.slice(1)} ${student.expectedGraduationDate.year}`
-                : "N/A"}</p>)}
-                {/* <Input id="phone" defaultValue="+1 (555) 123-4567" /> */}
-              </div>
-
-              {!editingProfile ? (
-                <Button
-                  type="button"
-                  className="w-auto max-w-fit"
-                  onClick={() => setEditingProfile(true)}
-                >
-                  Edit Profile
+                          View NYU's guide
+                        </a>
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </CardTitle>
+                <CardDescription>
+                  Upload a PDF of you degree progress report so we can help you
+                  track your academic progress and suggest courses.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <DegreeProgreeUpload
+                  onConfirm={handleConfirmImport}
+                  showFileLoaded={isFileLoaded}
+                  onFileClick={() => {
+                    form.setFieldValue("userCourses", undefined);
+                    form.setFieldValue("startingDate", defaultStartingDate);
+                    form.setFieldValue(
+                      "expectedGraduationDate",
+                      defaultExpectedGraduation,
+                    );
+                    setIsFileLoaded(false);
+                  }}
+                />
+              </CardContent>
+              <CardFooter className="flex justify-center">
+                <Button type="submit" disabled={form.state.isSubmitting}>
+                  {form.state.isSubmitting ? "Saving..." : "Save Changes"}
                 </Button>
-              ) : (
-                <div className="flex gap-3">
-                  <Button
-                    type="submit"
-                    disabled={form.state.isSubmitting}
-                    className="w-auto max-w-fit"
-                  >
-                    {form.state.isSubmitting ? "Saving..." : "Save Changes"}
-                  </Button>
-
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="w-auto max-w-fit"
-                    onClick={() => setEditingProfile(false)}
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              )}
-
-              
-
-              {/* <EditProfilePopup/> */}
-            </div>
-            
-          </CardContent></form>
-        </Card>
-      </TabsContent>)}
-
-      <TabsContent value="degreeProgressReport">
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            form.handleSubmit();
-          }}
-      >
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-2xl flex items-center">
-                Degree Progress Report
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Badge
-                      variant="outline"
-                      className="cursor-help size-5 rounded-full p-0 text-xs hover:bg-muted"
-                    >
-                      ?
-                    </Badge>
-                  </TooltipTrigger>
-                  <TooltipContent className="max-w-xs">
-                    <p>
-                      We do not store your degree progress report. Need help
-                      finding it?{" "}
-                      <a
-                        href="https://www.nyu.edu/students/student-information-and-resources/registration-records-and-graduation/registration/tracking-degree-progress.html"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="underline"
-                      >
-                        View NYU's guide
-                      </a>
-                    </p>
-                  </TooltipContent>
-                </Tooltip>
-              </CardTitle>
-              <CardDescription>
-                Upload a PDF of you degree progress report so we can help you
-                track your academic progress and suggest courses.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <DegreeProgreeUpload
-                onConfirm={handleConfirmImport}
-                showFileLoaded={isFileLoaded}
-                onFileClick={() => {
-                  form.setFieldValue("userCourses", undefined);
-                  form.setFieldValue("startingDate", defaultStartingDate);
-                  form.setFieldValue(
-                    "expectedGraduationDate",
-                    defaultExpectedGraduation,
-                  );
-                  setIsFileLoaded(false);
-                }}
-              />
-            </CardContent>
-            <CardFooter className="flex justify-center">
-              <Button type="submit" disabled={form.state.isSubmitting}>
-                {form.state.isSubmitting ? "Saving..." : "Save Changes"}
-              </Button>
-            </CardFooter>
-          </Card>
-      </form>
-
-      </TabsContent>
-
-    </Tabs>
-    
+              </CardFooter>
+            </Card>
+          </form>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

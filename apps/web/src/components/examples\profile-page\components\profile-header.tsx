@@ -1,8 +1,8 @@
+import { Calendar, Camera, Mail, MapPin } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Camera, Calendar, Mail, MapPin } from "lucide-react";
 
 export default function ProfileHeader() {
   return (
@@ -11,13 +11,17 @@ export default function ProfileHeader() {
         <div className="flex flex-col items-start gap-6 md:flex-row md:items-center">
           <div className="relative">
             <Avatar className="h-24 w-24">
-              <AvatarImage src="https://bundui-images.netlify.app/avatars/08.png" alt="Profile" />
+              <AvatarImage
+                src="https://bundui-images.netlify.app/avatars/08.png"
+                alt="Profile"
+              />
               <AvatarFallback className="text-2xl">JD</AvatarFallback>
             </Avatar>
             <Button
               size="icon"
               variant="outline"
-              className="absolute -right-2 -bottom-2 h-8 w-8 rounded-full">
+              className="absolute -right-2 -bottom-2 h-8 w-8 rounded-full"
+            >
               <Camera />
             </Button>
           </div>
