@@ -25,7 +25,7 @@ export const CourseSectionItem = ({
         "w-full text-left p-3 rounded-lg border transition-colors",
         offering.status === "closed"
           ? "cursor-not-allowed hover:bg-neutral-50/0"
-          : "cursor-pointer hover:bg-neutral-50 dark:hover:bg-neutral-800"
+          : "cursor-pointer hover:bg-neutral-50 dark:hover:bg-neutral-800",
       )}
     >
       <div className="flex items-center justify-between mb-2">
@@ -46,7 +46,7 @@ export const CourseSectionItem = ({
               "text-xs px-2 py-1 rounded-full font-medium capitalize",
               offering.status === "open" && "bg-green-100 text-green-800",
               offering.status === "closed" && "bg-red-100 text-red-800",
-              offering.status === "waitlist" && "bg-yellow-100 text-yellow-800"
+              offering.status === "waitlist" && "bg-yellow-100 text-yellow-800",
             )}
           >
             {offering.status === "waitlist"

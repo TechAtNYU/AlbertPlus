@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { Check, ChevronDown, ChevronRight, InfoIcon } from "lucide-react";
+import { ChevronDown, ChevronRight, InfoIcon } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -32,14 +32,11 @@ export const CourseCard = ({
   onSectionSelect,
   onSectionHover,
 }: CourseCardProps) => {
-  const hasSelectedSection = course.offerings.some((offering) => 
-    selectedClassNumbers?.includes(offering.classNumber),
-  );
   return (
     <div className="w-full">
       <Card
         className={clsx(
-          !isExpanded && "hover:bg-neutral-100 dark:hover:bg-neutral-800"
+          !isExpanded && "hover:bg-neutral-100 dark:hover:bg-neutral-800",
         )}
         onClick={() => onToggleExpand(course.code)}
       >
@@ -78,9 +75,6 @@ export const CourseCard = ({
                   {course.offerings.length !== 1 ? "s" : ""}
                 </span>
               </>
-            )}
-            {hasSelectedSection && (
-              <Check className="size-4 shrink-0 self-center text-green-600 mx-1.5" />
             )}
           </CardDescription>
         </CardHeader>
