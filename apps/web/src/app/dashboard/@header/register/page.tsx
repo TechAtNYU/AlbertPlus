@@ -2,7 +2,7 @@
 
 import { useNextTerm, useNextYear } from "@/components/AppConfigProvider";
 import { Skeleton } from "@/components/ui/skeleton";
-import { formatTermTitle } from "@/utils/format-term";
+import { formatTermTitle } from "@/utils/term";
 import { AppHeader } from "../../components/app-header";
 
 export default function ScheduleHeader() {

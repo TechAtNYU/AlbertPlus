@@ -11,6 +11,42 @@ import { internalMutation } from "./_generated/server";
 import { schoolName } from "./schemas/schools";
 
 /**
+ * Clear all data from all tables
+ * WARNING: This will delete all data in the database
+ */
+export const clearAll = internalMutation({
+  handler: async (ctx) => {
+    console.log("🗑  Clearing all database tables...");
+
+    // Delete in reverse dependency order to maintain referential integrity
+    const tables = [
+      "userCourseOfferings",
+      "userCourses",
+      "students",
+      "courseOfferings",
+      "requirements",
+      "prerequisites",
+      "courses",
+      "programs",
+      "schools",
+      "appConfigs",
+    ] as const;
+
+    for (const tableName of tables) {
+      console.log(`  Clearing ${tableName}...`);
+      const documents = await ctx.db.query(tableName).collect();
+      for (const doc of documents) {
+        await ctx.db.delete(doc._id);
+      }
+      console.log(`  ✓ Cleared ${documents.length} records from ${tableName}`);
+    }
+
+    console.log("✅ All tables cleared successfully!");
+    return { success: true, message: "All tables cleared" };
+  },
+});
+
+/**
  * Seed all data from JSON files
  * This is the main seeding function that handles all tables with proper relationships
  */
@@ -37,11 +73,37 @@ export const seedAll = internalMutation({
         programUrl: v.string(),
       }),
     ),
+    students: v.array(
+      v.object({
+        userId: v.string(),
+        programs: v.array(v.string()),
+        school: schoolName,
+        schoolLevel: v.union(v.literal("undergraduate"), v.literal("graduate")),
+        startingDate: v.object({
+          year: v.number(),
+          term: v.union(
+            v.literal("spring"),
+            v.literal("summer"),
+            v.literal("fall"),
+            v.literal("j-term"),
+          ),
+        }),
+        expectedGraduationDate: v.object({
+          year: v.number(),
+          term: v.union(
+            v.literal("spring"),
+            v.literal("summer"),
+            v.literal("fall"),
+            v.literal("j-term"),
+          ),
+        }),
+      }),
+    ),
     courses: v.array(
       v.object({
         code: v.string(),
         program: v.string(),
-        level: v.number(),
+        level: v.union(v.literal("undergraduate"), v.literal("graduate")),
         title: v.string(),
         credits: v.number(),
         school: schoolName,
@@ -53,8 +115,9 @@ export const seedAll = internalMutation({
       v.object({
         courseCode: v.string(),
         classNumber: v.number(),
-        title: v.string(),
+        title: v.optional(v.string()),
         section: v.string(),
+        description: v.optional(v.string()),
         year: v.number(),
         term: v.union(
           v.literal("spring"),
@@ -62,6 +125,8 @@ export const seedAll = internalMutation({
           v.literal("fall"),
           v.literal("j-term"),
         ),
+        level: v.union(v.literal("undergraduate"), v.literal("graduate")),
+        school: schoolName,
         instructor: v.array(v.string()),
         location: v.optional(v.string()),
         days: v.array(
@@ -112,18 +177,21 @@ export const seedAll = internalMutation({
         v.object({
           programName: v.string(),
           isMajor: v.boolean(),
+          description: v.optional(v.string()),
           type: v.literal("required"),
           courses: v.array(v.string()),
         }),
         v.object({
           programName: v.string(),
           isMajor: v.boolean(),
+          description: v.optional(v.string()),
           type: v.literal("alternative"),
           courses: v.array(v.string()),
         }),
         v.object({
           programName: v.string(),
           isMajor: v.boolean(),
+          description: v.optional(v.string()),
           type: v.literal("options"),
           courses: v.array(v.string()),
           courseLevels: v.array(
@@ -135,21 +203,6 @@ export const seedAll = internalMutation({
           creditsRequired: v.number(),
         }),
       ),
-    ),
-    students: v.array(
-      v.object({
-        userId: v.string(),
-        programNames: v.array(v.string()),
-        school: schoolName,
-        startingDate: v.object({
-          year: v.number(),
-          term: v.union(v.literal("spring"), v.literal("fall")),
-        }),
-        expectedGraduationDate: v.object({
-          year: v.number(),
-          term: v.union(v.literal("spring"), v.literal("fall")),
-        }),
-      }),
     ),
     userCourses: v.array(
       v.object({
@@ -307,6 +360,7 @@ export const seedAll = internalMutation({
         await ctx.db.insert("requirements", {
           programId,
           isMajor: req.isMajor,
+          description: req.description,
           type: req.type,
           courses: req.courses,
           courseLevels: req.courseLevels,
@@ -316,6 +370,7 @@ export const seedAll = internalMutation({
         await ctx.db.insert("requirements", {
           programId,
           isMajor: req.isMajor,
+          description: req.description,
           type: req.type,
           courses: req.courses,
         });
@@ -343,15 +398,31 @@ export const seedAll = internalMutation({
     }
 
     // 7. Seed students
-    console.log("👥 Seeding students...");
+    console.log("👨 Seeding students...");
     for (const student of args.students) {
-      const programIds = student.programNames
-        .map((name) => programMap.get(name))
-        .filter((id) => id !== undefined);
-
-      if (programIds.length === 0) {
-        console.warn(`No valid programs found for student ${student.userId}`);
+      // Get school ID by both name and level
+      const school = await ctx.db
+        .query("schools")
+        .withIndex("by_name_level", (q) =>
+          q.eq("name", student.school).eq("level", student.schoolLevel),
+        )
+        .unique();
+      if (!school) {
+        console.warn(
+          `School not found: ${student.school} (${student.schoolLevel})`,
+        );
         continue;
+      }
+
+      // Convert program names to IDs
+      const programIds: Id<"programs">[] = [];
+      for (const programName of student.programs) {
+        const programId = programMap.get(programName);
+        if (programId) {
+          programIds.push(programId);
+        } else {
+          console.warn(`Program not found: ${programName}`);
+        }
       }
 
       const existing = await ctx.db
@@ -362,7 +433,7 @@ export const seedAll = internalMutation({
       const studentData = {
         userId: student.userId,
         programs: programIds,
-        school: student.school,
+        school: school._id,
         startingDate: student.startingDate,
         expectedGraduationDate: student.expectedGraduationDate,
       };

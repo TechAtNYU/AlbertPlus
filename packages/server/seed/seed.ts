@@ -72,6 +72,25 @@ async function seedDatabase() {
     console.log(`  - ${userCourseOfferings.length} user course offerings`);
     console.log(`\n🔑 Using TEST_USER_ID: ${TEST_USER_ID}\n`);
 
+    // Step 1: Clear all existing data
+    console.log("🗑  Clearing existing database...\n");
+    const clearCommand = "npx convex run seed:clearAll --no-push";
+
+    const { stdout: clearStdout, stderr: clearStderr } = await execAsync(
+      clearCommand,
+      {
+        cwd: new URL("..", import.meta.url).pathname,
+        maxBuffer: 10 * 1024 * 1024,
+      },
+    );
+
+    if (clearStderr) {
+      console.error("stderr:", clearStderr);
+    }
+
+    console.log(clearStdout);
+
+    // Step 2: Seed new data
     const data = JSON.stringify({
       appConfigs,
       schools,
@@ -85,7 +104,7 @@ async function seedDatabase() {
       userCourseOfferings,
     });
 
-    console.log("🚀 Calling Convex internal mutation via CLI...\n");
+    console.log("\n🚀 Seeding new data via Convex CLI...\n");
 
     const command = `npx convex run seed:seedAll --no-push '${data.replace(/'/g, "'\\''")}'`;
 

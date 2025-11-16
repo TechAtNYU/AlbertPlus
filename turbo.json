@@ -13,6 +13,7 @@
       "dependsOn": ["^check:types"]
     },
     "dev": {
+      "with": ["@albert-plus/server#dev"],
       "cache": false,
       "persistent": true
     },

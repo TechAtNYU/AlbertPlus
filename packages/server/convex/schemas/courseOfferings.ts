@@ -1,10 +1,12 @@
 import { v } from "convex/values";
+import { schoolName } from "./schools";
 
 const courseOfferings = {
   courseCode: v.string(), // CSCI-UA 102
   classNumber: v.number(), // 10349
   title: v.optional(v.string()),
   section: v.string(), // 001
+  description: v.optional(v.string()),
   year: v.number(), // 2025
   term: v.union(
     v.literal("spring"),
@@ -12,6 +14,8 @@ const courseOfferings = {
     v.literal("fall"),
     v.literal("j-term"),
   ),
+  level: v.union(v.literal("undergraduate"), v.literal("graduate")),
+  school: schoolName,
   instructor: v.array(v.string()),
   location: v.optional(v.string()),
   days: v.array(

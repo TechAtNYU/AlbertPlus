@@ -13,6 +13,7 @@ export const createRequirementsInternal = internalMutation({
           return ctx.db.insert("requirements", {
             programId: newReq.programId,
             isMajor: newReq.isMajor,
+            description: newReq.description,
             type: newReq.type,
             courses: newReq.courses,
             courseLevels: newReq.courseLevels,
@@ -22,6 +23,7 @@ export const createRequirementsInternal = internalMutation({
         return ctx.db.insert("requirements", {
           programId: newReq.programId,
           isMajor: newReq.isMajor,
+          description: newReq.description,
           type: newReq.type,
           courses: newReq.courses,
         });
