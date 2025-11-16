@@ -1,3 +1,4 @@
+export { AlternativeDropdown } from "./alternative-dropdown";
 export { CourseCard } from "./CourseCard";
 export { CourseFilters } from "./CourseFilters";
 export { CourseSectionItem } from "./CourseSectionItem";
