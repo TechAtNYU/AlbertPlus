@@ -19,7 +19,7 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const validateApiKey = async (
   c: Context<{ Bindings: CloudflareBindings }>,
-  next: Next,
+  next: Next
 ) => {
   const apiKey = c.req.header("X-API-KEY");
 
@@ -106,7 +106,7 @@ export default {
     const isScrapeNext = isScrapeNextData === "true";
 
     console.log(
-      `Cronjob: Scraping flags - current: ${isScrapeCurrent}, next: ${isScrapeNext}`,
+      `Cronjob: Scraping flags - current: ${isScrapeCurrent}, next: ${isScrapeNext}`
     );
 
     // Collect unique terms to scrape using a Map to deduplicate
@@ -159,7 +159,7 @@ export default {
       await env.SCRAPING_QUEUE.send({ jobId: createdJob.id });
 
       console.log(
-        `Cronjob: Created course offerings discovery job [id: ${createdJob.id}, term: ${term}, year: ${year}]`,
+        `Cronjob: Created course offerings discovery job [id: ${createdJob.id}, term: ${term}, year: ${year}]`
       );
     }
   },
@@ -167,7 +167,7 @@ export default {
   async queue(
     batch: MessageBatch<JobMessage>,
     env: CloudflareBindings,
-    ctx: ExecutionContext,
+    ctx: ExecutionContext
   ) {
     const db = getDB(env);
     const convex = new ConvexApi({
@@ -196,18 +196,19 @@ export default {
             switch (job.jobType) {
               case "discover-programs": {
                 const programUrls = await discoverPrograms(job.url);
+                console.log("discovered programs");
                 const newJobs = await db
                   .insert(jobs)
                   .values(
                     programUrls.map((url) => ({
                       url,
                       jobType: "program" as const,
-                    })),
+                    }))
                   )
                   .returning();
 
                 await env.SCRAPING_QUEUE.sendBatch(
-                  newJobs.map((j) => ({ body: { jobId: j.id } })),
+                  newJobs.map((j) => ({ body: { jobId: j.id } }))
                 );
                 break;
               }
@@ -230,14 +231,9 @@ export default {
                     )
                     .returning();
 
-                  await env.SCRAPING_QUEUE.sendBatch(
-                    newJobs.map((j) => ({ body: { jobId: j.id } })),
-                  );
-
-                  console.log(
-                    `Queued batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(courseUrls.length / BATCH_SIZE)} (${newJobs.length} jobs)`,
-                  );
-                }
+                await env.SCRAPING_QUEUE.sendBatch(
+                  newJobs.map((j) => ({ body: { jobId: j.id } }))
+                );
                 break;
               }
               case "program": {
@@ -251,7 +247,7 @@ export default {
                 if (!programId) {
                   throw new JobError(
                     "Failed to upsert program: no ID returned",
-                    "validation",
+                    "validation"
                   );
                 }
                 break;
@@ -264,21 +260,14 @@ export default {
                 const courses = await scrapeCourse(job.url, db, env);
 
                 console.log(
-                  `Scraped ${courses.length} courses from ${job.url}`,
+                  `Scraped ${courses.length} courses from ${job.url}`
                 );
 
-                for (const courseData of courses) {
-                  const courseId = await convex.upsertCourseWithPrerequisites({
-                    ...courseData.course,
-                    prerequisites: courseData.prerequisites,
-                  });
-
-                  if (!courseId) {
-                    throw new JobError(
-                      `Failed to upsert course ${courseData.course.code}: no ID returned`,
-                      "validation",
-                    );
-                  }
+                if (!courseId) {
+                  throw new JobError(
+                    "Failed to upsert course: no ID returned",
+                    "validation"
+                  );
                 }
                 break;
               }
@@ -291,14 +280,14 @@ export default {
                 if (!metadata?.term || !metadata?.year) {
                   throw new JobError(
                     "Missing term or year in job metadata",
-                    "validation",
+                    "validation"
                   );
                 }
 
                 const courseOfferingUrls = await discoverCourseOfferings(
                   job.url,
                   metadata.term,
-                  metadata.year,
+                  metadata.year
                 );
                 const newJobs = await db
                   .insert(jobs)
@@ -307,12 +296,12 @@ export default {
                       url,
                       jobType: "course-offering" as const,
                       metadata: { term: metadata.term, year: metadata.year },
-                    })),
+                    }))
                   )
                   .returning();
 
                 await env.SCRAPING_QUEUE.sendBatch(
-                  newJobs.map((j) => ({ body: { jobId: j.id } })),
+                  newJobs.map((j) => ({ body: { jobId: j.id } }))
                 );
                 break;
               }
@@ -320,7 +309,7 @@ export default {
                 const courseOfferings = await scrapeCourseOfferings(
                   job.url,
                   db,
-                  env,
+                  env
                 );
 
                 await convex.upsertCourseOfferings(courseOfferings);
@@ -339,7 +328,7 @@ export default {
               error instanceof JobError
                 ? error
                 : new JobError(
-                    error instanceof Error ? error.message : "Unknown error",
+                    error instanceof Error ? error.message : "Unknown error"
                   );
 
             await db.insert(errorLogs).values({
@@ -357,7 +346,7 @@ export default {
 
             message.retry();
           }
-        })(),
+        })()
       );
     }
   },

@@ -14,7 +14,10 @@ export type ProgramRequirement =
   | Omit<Extract<RequirementItem, { type: "options" }>, "programId">;
 
 export async function discoverPrograms(url: string): Promise<string[]> {
-  // TODO: implement this function
+  url = "https://bulletins.nyu.edu/";
+  const res = await fetch(url);
+  console.log("Status:", res.status);
+  const html = await res.text();
   return [];
 }
 
@@ -26,6 +29,43 @@ export async function scrapeProgram(
   program: Omit<z.infer<typeof ZUpsertProgramWithRequirements>, "requirements">;
   requirements: ProgramRequirement[];
 }> {
-  // TODO: implement this function
-  throw new Error("Not implemented");
+  const base = "https://bulletins.nyu.edu/";
+  let target: URL;
+  let program: Omit<
+    z.infer<typeof ZUpsertProgramWithRequirements>,
+    "requirements"
+  > = {
+    name: "Unknown Program",
+    level: "undergraduate",
+    school: "College of Arts and Science",
+    programUrl: url,
+  };
+  let requirements: ProgramRequirement[] = [];
+
+  try {
+    try {
+      target = new URL(url, base);
+    } catch {
+      target = new URL(base);
+    }
+
+    console.log("Fetching:", target.toString());
+    const res = await fetch(target);
+    console.log("Status:", res.status);
+    const html = await res.text();
+    console.log("Content from website:\n", html);
+
+    //TODO: Find format of html and insert major and requirements parsing logic
+    //TODO: Place the variables in correct place
+    program = {
+      name: "name",
+      level: "undergraduate",
+      school: "College of Arts and Science",
+      programUrl: target.toString(),
+    };
+    requirements = [];
+  } catch (err) {
+    console.error("Error scraping program:", err);
+  }
+  return { program, requirements };
 }
