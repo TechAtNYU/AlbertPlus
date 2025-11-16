@@ -383,7 +383,7 @@ export default function ProfilePage() {
                     }}
                   </form.Field>)}
                   {!editingProfile && (
-                    <p className="text-gray-700 text-sm">{student.school
+                    <p className="text-sm text-muted-foreground">{student.school
                     ? `${student.school.name} (${
                         student.school.level
                           ? student.school.level.charAt(0).toUpperCase() + student.school.level.slice(1).toLowerCase()
@@ -394,7 +394,7 @@ export default function ProfilePage() {
               </div>
               <div className="space-y-2">
                 <Label>Programs</Label>
-                {!editingProfile && (<p className="text-gray-700 text-sm">{student.programs?.length > 0
+                {!editingProfile && (<p className="text-sm text-muted-foreground">{student.programs?.length > 0
                 ? student.programs.map((p) => p.name).join(", ")
                 : "None"}</p>)}
                 {editingProfile && (
@@ -497,7 +497,7 @@ export default function ProfilePage() {
                 </form.Field>
                 </div>)}
                 {!editingProfile && (
-                  <p className="text-gray-700 text-sm">{student.startingDate
+                  <p className="text-sm text-muted-foreground">{student.startingDate
                   ? `${student.startingDate.term.charAt(0).toUpperCase()}${student.startingDate.term.slice(1)} ${student.startingDate.year}`
                   : "N/A"}</p>)}
                 {/* <Input id="email" type="email" defaultValue="john.doe@example.com" /> */}
@@ -557,7 +557,7 @@ export default function ProfilePage() {
                     )}
                   </form.Field>
                 </div>)}
-                {!editingProfile && (<p className="text-gray-700 text-sm">{student.expectedGraduationDate
+                {!editingProfile && (<p className="text-sm text-muted-foreground">{student.expectedGraduationDate
                 ? `${student.expectedGraduationDate.term.charAt(0).toUpperCase()}${student.expectedGraduationDate.term.slice(1)} ${student.expectedGraduationDate.year}`
                 : "N/A"}</p>)}
                 {/* <Input id="phone" defaultValue="+1 (555) 123-4567" /> */}
