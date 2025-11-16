@@ -516,7 +516,6 @@ export default function ProfilePage() {
                             : "N/A"}
                         </p>
                       )}
-                      {/* <Input id="email" type="email" defaultValue="john.doe@example.com" /> */}
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="phone">Expected Graduation Date</Label>
@@ -581,7 +580,6 @@ export default function ProfilePage() {
                             : "N/A"}
                         </p>
                       )}
-                      {/* <Input id="phone" defaultValue="+1 (555) 123-4567" /> */}
                     </div>
 
                     {!editingProfile ? (
@@ -614,8 +612,6 @@ export default function ProfilePage() {
                         </Button>
                       </div>
                     )}
-
-                    {/* <EditProfilePopup/> */}
                   </div>
                 </CardContent>
               </form>
