@@ -21,11 +21,13 @@ export async function bulletinDiscoverSchools(url) {
   const linkRegex = /<a[^>]*href=["']([^"']+)["'][^>]*>(.*?)<\/a>/gi;
   const hrefs = [];
   const validSchools = Object.values(
-    ZUpsertProgramWithRequirements.shape.school.options,
+    ZUpsertProgramWithRequirements.shape.school.options
   );
   for (const section of matches) {
     let match;
-    while ((match = linkRegex.exec(section)) !== null) {
+    while (true) {
+      match = linkRegex.exec(section);
+      if (match === null) break;
       const url = match[1].trim();
       const name = match[2].replace(/<[^>]+>/g, "").trim();
       if (!validSchools.includes(name)) {
@@ -63,7 +65,7 @@ export async function scrapeProgramsListFromSchool(urlarray, db, env) {
     const res = await fetch(target);
     const html = await res.text();
     const sitemapMatch = html.match(
-      /<div\s+class=["']sitemap["'][^>]*>[\s\S]*?<\/div>/i,
+      /<div\s+class=["']sitemap["'][^>]*>[\s\S]*?<\/div>/i
     );
     if (!sitemapMatch) {
       return [schoolbaseinfo, []];
@@ -73,7 +75,9 @@ export async function scrapeProgramsListFromSchool(urlarray, db, env) {
     const linkRe = /<a[^>]*href=["']([^"']+)["'][^>]*>(.*?)<\/a>/gi;
 
     let m;
-    while ((m = linkRe.exec(sitemapHtml)) !== null) {
+    while (true) {
+      m = linkRe.exec(sitemapHtml);
+      if (m === null) break;
       const href = m[1].trim();
       const name = m[2]
         .replace(/<[^>]*>/g, "")
@@ -113,7 +117,7 @@ export async function scrapeRequirements(programdet, db, env) {
   const html = await res.text();
 
   const stripTags = (s) => s.replace(/<[^>]*>/g, "");
-  const unescape = (s) =>
+  const htmlunescape = (s) =>
     s
       .replace(/&nbsp;|&#160;/g, " ")
       .replace(/&amp;/g, "&")
@@ -124,7 +128,7 @@ export async function scrapeRequirements(programdet, db, env) {
       .replace(/&quot;/g, '"')
       .replace(/&#39;/g, "'");
   const cleanText = (s) =>
-    unescape(stripTags(s || ""))
+    htmlunescape(stripTags(s || ""))
       .replace(/\s+/g, " ")
       .trim();
 
@@ -140,6 +144,12 @@ export async function scrapeRequirements(programdet, db, env) {
   if (end === -1) end = html.length;
 
   const curriculumHtml = html.slice(start, end);
+  let totalCredits = null;
+  const curriculumText = cleanText(curriculumHtml);
+  const totalMatch = curriculumText.match(/total credits[^0-9]*([0-9]+)/i);
+  if (totalMatch) {
+    totalCredits = Number.parseInt(totalMatch[1], 10);
+  }
 
   const tableRe =
     /<table\b[^>]*class=["'][^"']*\bsc_courselist\b[^"']*["'][^>]*>[\s\S]*?<\/table>/gi;
@@ -159,7 +169,7 @@ export async function scrapeRequirements(programdet, db, env) {
     if (/<b\b[^>]*>[\s\S]*?<\/b>/i.test(trHtml)) return true;
     if (
       /<span\b[^>]*\bcourselistcomment\b[^"']*\bareaheader\b[^"']*["'][^>]*>[\s\S]*?<\/span>/i.test(
-        trHtml,
+        trHtml
       )
     )
       return true;
@@ -172,7 +182,7 @@ export async function scrapeRequirements(programdet, db, env) {
     m = trHtml.match(/<b\b[^>]*>([\s\S]*?)<\/b>/i);
     if (m) return cleanText(m[1]);
     m = trHtml.match(
-      /<span\b[^>]*\bcourselistcomment\b[^"']*\bareaheader\b[^"']*["'][^>]*>([\s\S]*?)<\/span>/i,
+      /<span\b[^>]*\bcourselistcomment\b[^"']*\bareaheader\b[^"']*["'][^>]*>([\s\S]*?)<\/span>/i
     );
     if (m) return cleanText(m[1]);
     return cleanText(trHtml);
@@ -187,7 +197,9 @@ export async function scrapeRequirements(programdet, db, env) {
 
   const sections = [];
   let m;
-  while ((m = tableRe.exec(curriculumHtml)) !== null) {
+  while (true) {
+    m = tableRe.exec(curriculumHtml);
+    if (m === null) break;
     const tableHtml = m[0];
     const tableOpenTag = (tableHtml.match(/<table\b[^>]*>/i) || ["<table>"])[0];
     const colgroup = getPart(tableHtml, colgroupRe);
@@ -209,7 +221,7 @@ export async function scrapeRequirements(programdet, db, env) {
           tableOpenTag,
           colgroup,
           thead,
-          currentRows.join(""),
+          currentRows.join("")
         );
         sections.push([currentName, sectionTable]);
       }
@@ -268,13 +280,27 @@ export async function scrapeRequirements(programdet, db, env) {
       let title = "";
       if (titleMatch) title = cleanText(titleMatch[0]);
       const creditsMatch = tr.match(
-        /<td[^>]*class=["'][^"']*\bhourscol\b[^"']*["'][^>]*>([\s\S]*?)<\/td>/i,
+        /<td[^>]*class=["'][^"']*\bhourscol\b[^"']*["'][^>]*>([\s\S]*?)<\/td>/i
       );
       const creditsRaw = creditsMatch ? cleanText(creditsMatch[1]) : "";
       const credits = creditsRaw ? parseFloat(creditsRaw) || null : null;
+
       let type = "course";
-      if (/orclass/i.test(tr)) type = "alternative";
-      if (/courselistcomment/i.test(tr) && !code) type = "comment";
+      if (/orclass/i.test(tr)) {
+        type = "alternative";
+      }
+      if (/courselistcomment/i.test(tr) && !code) {
+        if (credits !== null) {
+          type = "options";
+        } else {
+          type = "comment";
+        }
+      }
+
+      if (type === "comment" && !code && credits === null) {
+        continue;
+      }
+
       courses.push({
         type,
         code,
@@ -283,10 +309,48 @@ export async function scrapeRequirements(programdet, db, env) {
       });
     }
 
+    for (let i = 0; i < courses.length; i++) {
+      const row = courses[i];
+      if (
+        (row.type === "comment" || row.type === "options") &&
+        row.title.toLowerCase().includes("select")
+      ) {
+        let j = i + 1;
+        while (j < courses.length && courses[j].type === "course") {
+          courses[j].type = "alternative";
+          j++;
+        }
+      }
+    }
+
+    for (const row of courses) {
+      if (row.type === "course") {
+        row.type = "required";
+      }
+    }
+
     categorizedSections.push([sectionName, courses]);
   }
 
-  programdet.requirements = categorizedSections;
+  const filteredSections = categorizedSections.filter(
+    ([sectionName]) => sectionName !== "General Education Requirements"
+  );
+
+  if (totalCredits !== null) {
+    filteredSections.push([
+      "Total Credits",
+      [
+        {
+          type: "",
+          code: "",
+          title: "Total Credits",
+          credits: totalCredits,
+        },
+      ],
+    ]);
+  }
+
+  programdet.requirements = filteredSections;
   return programdet;
 }
 
@@ -300,20 +364,23 @@ async function main() {
   }
   const flatArray = finalarray.flat();
   //Test
-  console.log(
-    util.inspect(await scrapeRequirements(flatArray[40]), {
-      depth: null,
-      maxArrayLength: null,
-      colors: true,
-    }),
-  );
+  let i = 0;
+  for (i = 0; i < flatArray.length; i++) {
+    console.log(
+      util.inspect(await scrapeRequirements(flatArray[i]), {
+        depth: null,
+        maxArrayLength: null,
+        colors: true,
+      })
+    );
+  }
 }
 
 //33 is Classical Civilization Minor
 //39 is CS/DS
-//42 is Computer Science / Computer Engineering
+//40 is CS (BA), 42 is Computer Science / Computer Engineering
 //53 is Economics (BA)
-//89 is Italian (BA)
+//85 is History (BA), 89 is Italian (BA)
 //120 is MCB Minor
 
 main().catch(console.error);
