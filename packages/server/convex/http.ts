@@ -5,6 +5,8 @@ import type { Id } from "./_generated/dataModel";
 import { apiAction } from "./helpers/auth";
 import { AppConfigKey } from "./schemas/appConfigs";
 
+const ZSchoolLevel = z.enum(["undergraduate", "graduate"] as const);
+
 const ZSchoolName = z.enum([
   "College of Arts and Science",
   "Graduate School of Arts and Science",
@@ -25,12 +27,57 @@ const ZSchoolName = z.enum([
   "Steinhardt School of Culture, Education, and Human Development",
   "Tandon School of Engineering",
   "Tisch School of the Arts",
+  "Non-School Based Programs - UG",
 ] as const);
+
+const ZCourseLevel = z.union([ZSchoolLevel, z.number()]);
+
+const GRADUATE_PROGRAM_CODES = new Set([
+  "GA",
+  "GG",
+  "GH",
+  "GI",
+  "GP",
+  "GN",
+  "GU",
+  "GC",
+  "GS",
+  "GE",
+  "GB",
+  "GY",
+  "GX",
+  "GT",
+  "MD",
+  "LW",
+  "NL",
+  "NP",
+]);
+
+const normalizeCourseLevel = (
+  level: z.infer<typeof ZCourseLevel>,
+  program: string,
+): z.infer<typeof ZSchoolLevel> => {
+  if (typeof level === "string") {
+    return level;
+  }
+
+  const programCode = program.split("-").pop()?.toUpperCase() ?? "";
+
+  if (GRADUATE_PROGRAM_CODES.has(programCode)) {
+    return "graduate";
+  }
+
+  if (programCode.startsWith("U")) {
+    return "undergraduate";
+  }
+
+  return level >= 500 ? "graduate" : "undergraduate";
+};
 
 export const ZUpsertCourseWithPrerequisites = z.object({
   program: z.string(),
   code: z.string(),
-  level: z.coerce.number(),
+  level: ZCourseLevel,
   title: z.string(),
   credits: z.int(),
   description: z.string(),
@@ -57,7 +104,7 @@ export const ZUpsertCourseWithPrerequisites = z.object({
 
 export const ZUpsertProgramWithRequirements = z.object({
   name: z.string(),
-  level: z.enum(["undergraduate", "graduate"]),
+  level: ZSchoolLevel,
   school: ZSchoolName,
   programUrl: z.string(),
   requirements: z.array(
@@ -197,10 +244,14 @@ http.route({
   method: "POST",
   handler: apiAction(async (ctx, body) => {
     const { prerequisites, ...courseData } = body;
+    const normalizedCourseData = {
+      ...courseData,
+      level: normalizeCourseLevel(courseData.level, courseData.program),
+    };
 
     const courseId = await ctx.runMutation(
       internal.courses.upsertCourseInternal,
-      courseData,
+      normalizedCourseData,
     );
 
     if (prerequisites && prerequisites.length > 0) {
