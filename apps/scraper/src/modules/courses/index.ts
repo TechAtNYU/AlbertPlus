@@ -183,6 +183,7 @@ export async function scrapeCourse(
   let currentCredits = 0;
   let currentDescription = "";
   let currentPrereqs = "";
+  let programName = "";
 
   class CourseBlockHandler {
     element(element: Element) {
@@ -202,6 +203,7 @@ export async function scrapeCourse(
             courses.push({
               course: {
                 program,
+                programName: programName,
                 code: currentCode,
                 level,
                 title: currentTitle,
@@ -259,7 +261,19 @@ export async function scrapeCourse(
     }
   }
 
+  class TitleTagHandler {
+    text(text: { text: string }) {
+      const titleText = text.text.trim();
+      // Extract program name from title like "Computer Science (CSCI-UA) | NYU Bulletins"
+      const match = titleText.match(/^([^(]+)\s+\([A-Z-]+\)/);
+      if (match && !programName) {
+        programName = match[1].trim();
+      }
+    }
+  }
+
   const rewriter = new HTMLRewriter()
+    .on("title", new TitleTagHandler())
     .on(".courseblock", new CourseBlockHandler())
     .on(".detail-code strong", new CodeHandler())
     .on(".detail-title strong", new TitleHandler())
