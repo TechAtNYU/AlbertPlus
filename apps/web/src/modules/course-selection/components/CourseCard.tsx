@@ -32,7 +32,9 @@ export const CourseCard = ({
   onSectionSelect,
   onSectionHover,
 }: CourseCardProps) => {
-  const hasSelectedSection = course.offerings.some(offering => selectedClassNumbers?.includes(offering.classNumber));
+  const hasSelectedSection = course.offerings.some((offering) => 
+    selectedClassNumbers?.includes(offering.classNumber),
+  );
   return (
     <div className="w-full">
       <Card

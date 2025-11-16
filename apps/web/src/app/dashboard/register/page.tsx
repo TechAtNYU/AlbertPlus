@@ -45,7 +45,7 @@ const RegisterPage = () => {
     isAuthenticated ? {} : "skip",
   );
 
-  const selectedClassNumbers = allClasses?.map(c => c.classNumber) || [];
+  const selectedClassNumbers = allClasses?.map((c) => c.classNumber) || [];
 
   const { results, status, loadMore } = usePaginatedQuery(
     api.courseOfferings.getCourseOfferings,
