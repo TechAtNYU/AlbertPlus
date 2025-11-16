@@ -300,7 +300,7 @@ async function main() {
   const flatArray = finalarray.flat();
   //Test
   console.log(
-    util.inspect(await scrapeRequirements(flatArray[89]), {
+    util.inspect(await scrapeRequirements(flatArray[40]), {
       depth: null,
       maxArrayLength: null,
       colors: true,
@@ -308,6 +308,9 @@ async function main() {
   );
 }
 
+//33 is Classical Civilization Minor
+//39 is CS/DS
+//42 is Computer Science / Computer Engineering
 //53 is Economics (BA)
 //89 is Italian (BA)
 //120 is MCB Minor
