@@ -93,6 +93,7 @@ export const CourseCard = ({
               <CourseSectionItem
                 key={offering._id}
                 offering={offering}
+                selectedClassNumbers={selectedClassNumbers}
                 onSelect={onSectionSelect}
                 onHover={onSectionHover}
               />
