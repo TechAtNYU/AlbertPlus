@@ -119,7 +119,6 @@ const getRequirementsByCategory = (
         }
         groupedRequirements[key].credits += requirement.creditsRequired;
         groupedRequirements[key].courses.push(courses);
-        groupedRequirements[key].displayName = displayName;
       } else {
         // Mixed prefixes - assign to "Other" category
         if (!groupedRequirements.Other) {
@@ -137,10 +136,9 @@ const getRequirementsByCategory = (
     else {
       for (const courseCode of courses) {
         const prefix = courseCode.split(" ")[0];
-        const displayName =
-          courseLookup.get(courseCode)?.programName || "Other";
-        const key = displayName === "Other" ? "Other" : prefix;
         const course = courseLookup.get(courseCode);
+        const displayName = course?.programName || "Other";
+        const key = displayName === "Other" ? "Other" : prefix;
         const credits = course?.credits ?? 4; // fallback to 4 credits if not found
 
         if (!groupedRequirements[key]) {
@@ -202,26 +200,27 @@ export function ProgramRequirementsChart({
         };
       }
 
+      const courseToCategory = new Map<string, string>();
+      for (const [prefix, data] of Object.entries(
+        program.requirementsByCategory,
+      )) {
+        for (const courseGroup of data.courses) {
+          for (const course of courseGroup) {
+            courseToCategory.set(course.toLowerCase(), prefix);
+          }
+        }
+      }
+
       const completedCreditsByCategory: Record<string, number> = {};
       if (userCourses) {
         for (const userCourse of userCourses) {
-          for (const [prefix, data] of Object.entries(
-            program.requirementsByCategory,
-          )) {
-            // Check if the course code is in any of the nested course arrays
-            const isInRequirement = data.courses.some((courseGroup) =>
-              courseGroup.some(
-                (course) =>
-                  course.toLowerCase() === userCourse.courseCode.toLowerCase(),
-              ),
-            );
-
-            if (isInRequirement) {
-              completedCreditsByCategory[prefix] =
-                (completedCreditsByCategory[prefix] || 0) +
-                (userCourse.course?.credits || 0);
-              break;
-            }
+          const category = courseToCategory.get(
+            userCourse.courseCode.toLowerCase(),
+          );
+          if (category) {
+            completedCreditsByCategory[category] =
+              (completedCreditsByCategory[category] || 0) +
+              (userCourse.course?.credits || 0);
           }
         }
       }
