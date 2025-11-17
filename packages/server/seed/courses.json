@@ -2,6 +2,7 @@
   {
     "code": "CSCI-UA 101",
     "program": "CSCI-UA",
+    "programName": "Computer Science",
     "level": "undergraduate",
     "title": "Introduction to Computer Science",
     "credits": 4,
@@ -12,6 +13,7 @@
   {
     "code": "CSCI-UA 102",
     "program": "CSCI-UA",
+    "programName": "Computer Science",
     "level": "undergraduate",
     "title": "Data Structures",
     "credits": 4,
@@ -22,6 +24,7 @@
   {
     "code": "CSCI-UA 201",
     "program": "CSCI-UA",
+    "programName": "Computer Science",
     "level": "undergraduate",
     "title": "Computer Systems Organization",
     "credits": 4,
@@ -32,6 +35,7 @@
   {
     "code": "CSCI-UA 202",
     "program": "CSCI-UA",
+    "programName": "Computer Science",
     "level": "undergraduate",
     "title": "Operating Systems",
     "credits": 4,
@@ -42,6 +46,7 @@
   {
     "code": "CSCI-UA 310",
     "program": "CSCI-UA",
+    "programName": "Computer Science",
     "level": "undergraduate",
     "title": "Basic Algorithms",
     "credits": 4,
@@ -52,6 +57,7 @@
   {
     "code": "CSCI-UA 380",
     "program": "CSCI-UA",
+    "programName": "Computer Science",
     "level": "undergraduate",
     "title": "Computer Graphics",
     "credits": 4,
@@ -62,6 +68,7 @@
   {
     "code": "CSCI-UA 467",
     "program": "CSCI-UA",
+    "programName": "Computer Science",
     "level": "undergraduate",
     "title": "Introduction to Machine Learning",
     "credits": 4,
@@ -72,6 +79,7 @@
   {
     "code": "CSCI-UA 470",
     "program": "CSCI-UA",
+    "programName": "Computer Science",
     "level": "undergraduate",
     "title": "Computer Networks",
     "credits": 4,
@@ -82,6 +90,7 @@
   {
     "code": "CSCI-UA 473",
     "program": "CSCI-UA",
+    "programName": "Computer Science",
     "level": "undergraduate",
     "title": "Fundamentals of Databases",
     "credits": 4,
@@ -92,6 +101,7 @@
   {
     "code": "CSCI-UA 479",
     "program": "CSCI-UA",
+    "programName": "Computer Science",
     "level": "undergraduate",
     "title": "Data Management and Analysis",
     "credits": 4,
@@ -102,6 +112,7 @@
   {
     "code": "CSCI-UA 480",
     "program": "CSCI-UA",
+    "programName": "Computer Science",
     "level": "undergraduate",
     "title": "Parallel and Distributed Computing",
     "credits": 4,
@@ -112,6 +123,7 @@
   {
     "code": "CSCI-UA 481",
     "program": "CSCI-UA",
+    "programName": "Computer Science",
     "level": "undergraduate",
     "title": "Computer Security",
     "credits": 4,
@@ -122,6 +134,7 @@
   {
     "code": "MATH-UA 120",
     "program": "MATH-UA",
+    "programName": "Mathematics",
     "level": "undergraduate",
     "title": "Discrete Mathematics",
     "credits": 4,
@@ -132,6 +145,7 @@
   {
     "code": "MATH-UA 121",
     "program": "MATH-UA",
+    "programName": "Mathematics",
     "level": "undergraduate",
     "title": "Calculus I",
     "credits": 4,
@@ -142,6 +156,7 @@
   {
     "code": "MATH-UA 122",
     "program": "MATH-UA",
+    "programName": "Mathematics",
     "level": "undergraduate",
     "title": "Calculus II",
     "credits": 4,
@@ -152,6 +167,7 @@
   {
     "code": "MATH-UA 140",
     "program": "MATH-UA",
+    "programName": "Mathematics",
     "level": "undergraduate",
     "title": "Linear Algebra",
     "credits": 4,
@@ -162,6 +178,7 @@
   {
     "code": "MATH-UA 233",
     "program": "MATH-UA",
+    "programName": "Mathematics",
     "level": "undergraduate",
     "title": "Theory of Probability",
     "credits": 4,
@@ -172,6 +189,7 @@
   {
     "code": "CORE-UA 214",
     "program": "CORE-UA",
+    "programName": "Core Curriculum",
     "level": "undergraduate",
     "title": "Physical Science: How Things Work",
     "credits": 4,
@@ -182,6 +200,7 @@
   {
     "code": "WRIT-UA 9",
     "program": "WRIT-UA",
+    "programName": "Writing",
     "level": "undergraduate",
     "title": "Writing the Essay",
     "credits": 4,
@@ -192,6 +211,7 @@
   {
     "code": "PHIL-UA 20",
     "program": "PHIL-UA",
+    "programName": "Philosophy",
     "level": "undergraduate",
     "title": "Ancient Greek and Roman Philosophy",
     "credits": 4,
@@ -202,6 +222,7 @@
   {
     "code": "ECON-UA 1",
     "program": "ECON-UA",
+    "programName": "Economics",
     "level": "undergraduate",
     "title": "Microeconomics",
     "credits": 4,
@@ -212,6 +233,7 @@
   {
     "code": "ECON-UA 2",
     "program": "ECON-UA",
+    "programName": "Economics",
     "level": "undergraduate",
     "title": "Macroeconomics",
     "credits": 4,
@@ -222,6 +244,7 @@
   {
     "code": "PSYCH-UA 1",
     "program": "PSYCH-UA",
+    "programName": "Psychology",
     "level": "undergraduate",
     "title": "Introduction to Psychology",
     "credits": 4,
@@ -232,6 +255,7 @@
   {
     "code": "HIST-UA 101",
     "program": "HIST-UA",
+    "programName": "History",
     "level": "undergraduate",
     "title": "World History to 1500",
     "credits": 4,
@@ -242,6 +266,7 @@
   {
     "code": "DSGA-UA 201",
     "program": "DSGA-UA",
+    "programName": "Data Science",
     "level": "undergraduate",
     "title": "Introduction to Data Science",
     "credits": 4,

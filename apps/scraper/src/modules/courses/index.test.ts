@@ -50,6 +50,48 @@ describe("Courses Scraper", () => {
       }
     });
 
+    test("should extract program name from page title", async () => {
+      const mockDb = createMockDb();
+      const mockEnv = createMockEnv();
+
+      const courses = await scrapeCourse(
+        "https://bulletins.nyu.edu/courses/csci_ua/",
+        mockDb,
+        mockEnv,
+      );
+
+      expect(courses.length).toBeGreaterThan(0);
+
+      // Verify that programName is extracted from the title
+      const firstCourse = courses[0];
+      expect(firstCourse.course).toHaveProperty("programName");
+      expect(firstCourse.course.programName).toBe("Computer Science");
+
+      // Verify that program code is still correct
+      expect(firstCourse.course.program).toMatch(/CSCI-UA/);
+    });
+
+    test("should extract program name from pages with numeric course codes", async () => {
+      const mockDb = createMockDb();
+      const mockEnv = createMockEnv();
+
+      const courses = await scrapeCourse(
+        "https://bulletins.nyu.edu/courses/hrcm1_gc/",
+        mockDb,
+        mockEnv,
+      );
+
+      expect(courses.length).toBeGreaterThan(0);
+
+      // Verify that programName is extracted correctly for codes with numbers like HRCM1-GC
+      const firstCourse = courses[0];
+      expect(firstCourse.course).toHaveProperty("programName");
+      expect(firstCourse.course.programName).toBe("Human Resources");
+
+      // Verify that program code is still correct
+      expect(firstCourse.course.program).toMatch(/HRCM1-GC/);
+    });
+
     test("should handle invalid course URLs", async () => {
       const mockDb = createMockDb();
       const mockEnv = createMockEnv();

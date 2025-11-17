@@ -3,6 +3,11 @@
   "$schema": "https://biomejs.dev/schemas/2.3.5/schema.json",
   "extends": "//",
   "files": {
-    "includes": ["**", "!worker-configuration.d.ts", "!**/__mocks__"]
+    "includes": [
+      "**",
+      "!worker-configuration.d.ts",
+      "!**/__mocks__",
+      "!!**/migrations"
+    ]
   }
 }

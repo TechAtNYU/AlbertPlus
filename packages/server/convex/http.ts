@@ -76,6 +76,7 @@ const normalizeCourseLevel = (
 
 export const ZUpsertCourseWithPrerequisites = z.object({
   program: z.string(),
+  programName: z.string(),
   code: z.string(),
   level: ZCourseLevel,
   title: z.string(),
