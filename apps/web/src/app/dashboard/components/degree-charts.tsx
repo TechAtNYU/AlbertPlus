@@ -107,10 +107,15 @@ const getRequirementsByCategory = (
       if (uniquePrefixes.length === 1) {
         // All same prefix - assign all credits to that one prefix
         const prefix = uniquePrefixes[0];
-        const displayName = courseLookup.get(courses[0])?.programName || "Other";
+        const displayName =
+          courseLookup.get(courses[0])?.programName || "Other";
         const key = displayName === "Other" ? "Other" : prefix;
         if (!groupedRequirements[key]) {
-          groupedRequirements[key] = { credits: 0, courses: [], displayName: displayName };
+          groupedRequirements[key] = {
+            credits: 0,
+            courses: [],
+            displayName: displayName,
+          };
         }
         groupedRequirements[key].credits += requirement.creditsRequired;
         groupedRequirements[key].courses.push(courses);
@@ -118,7 +123,11 @@ const getRequirementsByCategory = (
       } else {
         // Mixed prefixes - assign to "Other" category
         if (!groupedRequirements.Other) {
-          groupedRequirements.Other = { credits: 0, courses: [], displayName: "Other" };
+          groupedRequirements.Other = {
+            credits: 0,
+            courses: [],
+            displayName: "Other",
+          };
         }
         groupedRequirements.Other.credits += requirement.creditsRequired;
         groupedRequirements.Other.courses.push(courses);
@@ -128,13 +137,18 @@ const getRequirementsByCategory = (
     else {
       for (const courseCode of courses) {
         const prefix = courseCode.split(" ")[0];
-        const displayName = courseLookup.get(courseCode)?.programName || "Other";
+        const displayName =
+          courseLookup.get(courseCode)?.programName || "Other";
         const key = displayName === "Other" ? "Other" : prefix;
         const course = courseLookup.get(courseCode);
         const credits = course?.credits ?? 4; // fallback to 4 credits if not found
 
         if (!groupedRequirements[key]) {
-          groupedRequirements[key] = { credits: 0, courses: [], displayName: displayName };
+          groupedRequirements[key] = {
+            credits: 0,
+            courses: [],
+            displayName: displayName,
+          };
         }
         groupedRequirements[key].credits += credits;
         groupedRequirements[key].courses.push([courseCode]);
