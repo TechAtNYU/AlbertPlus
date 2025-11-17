@@ -1,9 +1,9 @@
-name: web
+name: web (prod)
 
 on:
   push:
     branches:
-      - main
+      - prod
     paths:
       - "apps/web/**"
       - "packages/server/**"
