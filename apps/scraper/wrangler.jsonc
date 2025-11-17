@@ -31,7 +31,8 @@
     {
       "binding": "DB",
       "database_name": "albert-plus-scraper-ops",
-      "database_id": "b96165c7-c7ae-488e-b171-a9ceeef8937c"
+      "database_id": "b96165c7-c7ae-488e-b171-a9ceeef8937c",
+      "migrations_dir": "src/drizzle/migrations"
     }
   ],
   "vars": {
