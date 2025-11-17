@@ -66,7 +66,7 @@ export const getCourseByCode = protectedQuery({
 
 export const getCourses = protectedQuery({
   args: {
-    level: v.number(),
+    level: v.union(v.literal("undergraduate"), v.literal("graduate")),
     query: v.optional(v.string()),
     paginationOpts: paginationOptsValidator,
   },

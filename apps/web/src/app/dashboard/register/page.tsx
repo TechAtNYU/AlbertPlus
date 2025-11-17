@@ -45,6 +45,8 @@ const RegisterPage = () => {
     isAuthenticated ? {} : "skip",
   );
 
+  const selectedClassNumbers = allClasses?.map((c) => c.classNumber) || [];
+
   const { results, status, loadMore } = usePaginatedQuery(
     api.courseOfferings.getCourseOfferings,
     isAuthenticated && currentTerm && currentYear
@@ -99,6 +101,7 @@ const RegisterPage = () => {
             loadMore={loadMore}
             status={status}
             isSearching={isSearching}
+            selectedClassNumbers={selectedClassNumbers}
           />
         ) : (
           <div className="h-full">
@@ -117,6 +120,7 @@ const RegisterPage = () => {
           loadMore={loadMore}
           status={status}
           isSearching={isSearching}
+          selectedClassNumbers={selectedClassNumbers}
         />
 
         <div className="flex-1 min-w-0">

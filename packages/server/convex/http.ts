@@ -5,6 +5,8 @@ import type { Id } from "./_generated/dataModel";
 import { apiAction } from "./helpers/auth";
 import { AppConfigKey } from "./schemas/appConfigs";
 
+const ZSchoolLevel = z.enum(["undergraduate", "graduate"] as const);
+
 const ZSchoolName = z.enum([
   "College of Arts and Science",
   "Graduate School of Arts and Science",
@@ -25,12 +27,58 @@ const ZSchoolName = z.enum([
   "Steinhardt School of Culture, Education, and Human Development",
   "Tandon School of Engineering",
   "Tisch School of the Arts",
+  "Non-School Based Programs - UG",
 ] as const);
+
+const ZCourseLevel = z.union([ZSchoolLevel, z.number()]);
+
+const GRADUATE_PROGRAM_CODES = new Set([
+  "GA",
+  "GG",
+  "GH",
+  "GI",
+  "GP",
+  "GN",
+  "GU",
+  "GC",
+  "GS",
+  "GE",
+  "GB",
+  "GY",
+  "GX",
+  "GT",
+  "MD",
+  "LW",
+  "NL",
+  "NP",
+]);
+
+const normalizeCourseLevel = (
+  level: z.infer<typeof ZCourseLevel>,
+  program: string,
+): z.infer<typeof ZSchoolLevel> => {
+  if (typeof level === "string") {
+    return level;
+  }
+
+  const programCode = program.split("-").pop()?.toUpperCase() ?? "";
+
+  if (GRADUATE_PROGRAM_CODES.has(programCode)) {
+    return "graduate";
+  }
+
+  if (programCode.startsWith("U")) {
+    return "undergraduate";
+  }
+
+  return level >= 500 ? "graduate" : "undergraduate";
+};
 
 export const ZUpsertCourseWithPrerequisites = z.object({
   program: z.string(),
+  programName: z.string(),
   code: z.string(),
-  level: z.coerce.number(),
+  level: ZCourseLevel,
   title: z.string(),
   credits: z.int(),
   description: z.string(),
@@ -57,29 +105,32 @@ export const ZUpsertCourseWithPrerequisites = z.object({
 
 export const ZUpsertProgramWithRequirements = z.object({
   name: z.string(),
-  level: z.enum(["undergraduate", "graduate"]),
+  level: ZSchoolLevel,
   school: ZSchoolName,
   programUrl: z.string(),
   requirements: z.array(
     z.discriminatedUnion("type", [
       z.object({
         isMajor: z.boolean(),
+        description: z.optional(z.string()),
         type: z.literal("required"),
         courses: z.array(z.string()),
       }),
       z.object({
         isMajor: z.boolean(),
+        description: z.optional(z.string()),
         type: z.literal("alternative"),
         courses: z.array(z.string()),
       }),
       z.object({
         isMajor: z.boolean(),
+        description: z.optional(z.string()),
         type: z.literal("options"),
         courses: z.array(z.string()),
         courseLevels: z.array(
           z.object({
-            program: z.string(),
-            level: z.coerce.number(),
+            program: z.string(), // CSCI-UA
+            level: z.coerce.number(), // 4
           }),
         ),
         creditsRequired: z.number(),
@@ -88,85 +139,19 @@ export const ZUpsertProgramWithRequirements = z.object({
   ),
 });
 
-export const ZUpsertRequirements = z.array(
-  z.discriminatedUnion("type", [
-    z.object({
-      programId: z.pipe(
-        z.string(),
-        z.transform((val) => val as Id<"programs">),
-      ),
-      isMajor: z.boolean(),
-      type: z.literal("required"),
-      courses: z.array(z.string()),
-    }),
-    z.object({
-      programId: z.pipe(
-        z.string(),
-        z.transform((val) => val as Id<"programs">),
-      ),
-      isMajor: z.boolean(),
-      type: z.literal("alternative"),
-      courses: z.array(z.string()),
-    }),
-    z.object({
-      programId: z.pipe(
-        z.string(),
-        z.transform((val) => val as Id<"programs">),
-      ),
-      isMajor: z.boolean(),
-      type: z.literal("options"),
-      courses: z.array(z.string()),
-      courseLevels: z.array(
-        z.object({
-          program: z.string(),
-          level: z.coerce.number(),
-        }),
-      ),
-      creditsRequired: z.number(),
-    }),
-  ]),
-);
-
-export const ZUpsertPrerequisites = z.array(
-  z.discriminatedUnion("type", [
-    z.object({
-      courseId: z.pipe(
-        z.string(),
-        z.transform((val) => val as Id<"courses">),
-      ),
-      type: z.literal("required"),
-      courses: z.array(z.string()),
-    }),
-    z.object({
-      courseId: z.pipe(
-        z.string(),
-        z.transform((val) => val as Id<"courses">),
-      ),
-      type: z.literal("alternative"),
-      courses: z.array(z.string()),
-    }),
-    z.object({
-      courseId: z.pipe(
-        z.string(),
-        z.transform((val) => val as Id<"courses">),
-      ),
-      type: z.literal("options"),
-      courses: z.array(z.string()),
-      creditsRequired: z.number(),
-    }),
-  ]),
-);
-
 export const ZUpsertCourseOfferings = z.array(
   z.object({
-    courseCode: z.string(),
-    classNumber: z.number(),
-    title: z.string(),
+    courseCode: z.string(), // CSCI-UA 102
+    classNumber: z.number(), // 10349
+    title: z.optional(z.string()),
     section: z.string(),
-    year: z.number(),
+    description: z.optional(z.string()),
+    year: z.number(), // 2025
     term: z.enum(["spring", "summer", "fall", "j-term"]),
-    instructor: z.array(z.string()),
-    location: z.string(),
+    level: z.enum(["undergraduate", "graduate"]),
+    school: ZSchoolName,
+    instructors: z.array(z.string()),
+    location: z.optional(z.string()),
     days: z.array(
       z.enum([
         "monday",
@@ -178,8 +163,8 @@ export const ZUpsertCourseOfferings = z.array(
         "sunday",
       ]),
     ),
-    startTime: z.string(),
-    endTime: z.string(),
+    startTime: z.string(), // 13:00
+    endTime: z.string(), // 14:15
     status: z.enum(["open", "closed", "waitlist"]),
     waitlistNum: z.optional(z.number()),
     isCorequisite: z._default(z.boolean(), false),
@@ -197,10 +182,14 @@ http.route({
   method: "POST",
   handler: apiAction(async (ctx, body) => {
     const { prerequisites, ...courseData } = body;
+    const normalizedCourseData = {
+      ...courseData,
+      level: normalizeCourseLevel(courseData.level, courseData.program),
+    };
 
     const courseId = await ctx.runMutation(
       internal.courses.upsertCourseInternal,
-      courseData,
+      normalizedCourseData,
     );
 
     if (prerequisites && prerequisites.length > 0) {

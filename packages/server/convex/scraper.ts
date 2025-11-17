@@ -34,7 +34,7 @@ export const triggerMajorsScraping = protectedAdminAction({
     if (!response.ok) {
       const errorText = await response.text();
       throw new ConvexError(
-        `Failed to trigger majors scraping: ${response.status} ${errorText}`,
+        `Failed to trigger programs scraping: ${response.status} ${errorText}`,
       );
     }
 

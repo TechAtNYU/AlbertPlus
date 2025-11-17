@@ -6,13 +6,15 @@
     "section": "001",
     "year": 2026,
     "term": "spring",
-    "instructor": ["Chen"],
+    "instructors": ["Chen"],
     "location": "Warren Weaver Hall Room 109",
     "days": ["monday", "wednesday"],
     "startTime": "11:00",
     "endTime": "12:15",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "CSCI-UA 481",
@@ -21,13 +23,15 @@
     "section": "001",
     "year": 2026,
     "term": "spring",
-    "instructor": ["Zhang"],
+    "instructors": ["Zhang"],
     "location": "Warren Weaver Hall Room 101",
     "days": ["tuesday", "thursday"],
     "startTime": "14:00",
     "endTime": "15:15",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "CSCI-UA 480",
@@ -36,13 +40,15 @@
     "section": "001",
     "year": 2026,
     "term": "spring",
-    "instructor": ["Kumar"],
+    "instructors": ["Kumar"],
     "location": "Warren Weaver Hall Room 109",
     "days": ["monday", "wednesday"],
     "startTime": "15:30",
     "endTime": "16:45",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "CSCI-UA 479",
@@ -51,14 +57,16 @@
     "section": "001",
     "year": 2026,
     "term": "spring",
-    "instructor": ["Wu"],
+    "instructors": ["Wu"],
     "location": "60 5th Ave Room 150",
     "days": ["tuesday", "thursday"],
     "startTime": "11:00",
     "endTime": "12:15",
     "status": "waitlist",
     "waitlistNum": 3,
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "CSCI-UA 101",
@@ -67,13 +75,15 @@
     "section": "001",
     "year": 2025,
     "term": "spring",
-    "instructor": ["Joannides"],
+    "instructors": ["Joannides"],
     "location": "Warren Weaver Hall Room 109",
     "days": ["monday", "wednesday"],
     "startTime": "11:00",
     "endTime": "12:15",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "CSCI-UA 101",
@@ -82,14 +92,16 @@
     "section": "002",
     "year": 2025,
     "term": "spring",
-    "instructor": ["Kapp"],
+    "instructors": ["Kapp"],
     "location": "Warren Weaver Hall Room 109",
     "days": ["tuesday", "thursday"],
     "startTime": "14:00",
     "endTime": "15:15",
     "status": "waitlist",
     "waitlistNum": 5,
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "CSCI-UA 102",
@@ -98,13 +110,15 @@
     "section": "001",
     "year": 2025,
     "term": "spring",
-    "instructor": ["Schoenfeld"],
+    "instructors": ["Schoenfeld"],
     "location": "Warren Weaver Hall Room 101",
     "days": ["monday", "wednesday"],
     "startTime": "14:00",
     "endTime": "15:15",
     "status": "closed",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "CSCI-UA 102",
@@ -113,13 +127,15 @@
     "section": "002",
     "year": 2025,
     "term": "spring",
-    "instructor": ["Kapp"],
+    "instructors": ["Kapp"],
     "location": "Warren Weaver Hall Room 101",
     "days": ["tuesday", "thursday"],
     "startTime": "11:00",
     "endTime": "12:15",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "CSCI-UA 201",
@@ -128,13 +144,15 @@
     "section": "001",
     "year": 2025,
     "term": "spring",
-    "instructor": ["Gottlieb"],
+    "instructors": ["Gottlieb"],
     "location": "Warren Weaver Hall Room 109",
     "days": ["monday", "wednesday"],
     "startTime": "15:30",
     "endTime": "16:45",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "CSCI-UA 202",
@@ -143,13 +161,15 @@
     "section": "001",
     "year": 2025,
     "term": "spring",
-    "instructor": ["Zahran"],
+    "instructors": ["Zahran"],
     "location": "Warren Weaver Hall Room 101",
     "days": ["tuesday", "thursday"],
     "startTime": "15:30",
     "endTime": "16:45",
     "status": "closed",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "CSCI-UA 310",
@@ -158,13 +178,15 @@
     "section": "001",
     "year": 2025,
     "term": "spring",
-    "instructor": ["Cole"],
+    "instructors": ["Cole"],
     "location": "Warren Weaver Hall Room 109",
     "days": ["monday", "wednesday"],
     "startTime": "12:30",
     "endTime": "13:45",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "CSCI-UA 467",
@@ -173,13 +195,15 @@
     "section": "001",
     "year": 2025,
     "term": "spring",
-    "instructor": ["Patil"],
+    "instructors": ["Patil"],
     "location": "60 5th Ave Room 150",
     "days": ["tuesday", "thursday"],
     "startTime": "14:00",
     "endTime": "15:15",
     "status": "closed",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "CSCI-UA 473",
@@ -188,13 +212,15 @@
     "section": "001",
     "year": 2025,
     "term": "spring",
-    "instructor": ["Wu"],
+    "instructors": ["Wu"],
     "location": "60 5th Ave Room 150",
     "days": ["monday", "wednesday"],
     "startTime": "15:30",
     "endTime": "16:45",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "CSCI-UA 380",
@@ -203,13 +229,15 @@
     "section": "001",
     "year": 2025,
     "term": "spring",
-    "instructor": ["Perlin"],
+    "instructors": ["Perlin"],
     "location": "Warren Weaver Hall Room 101",
     "days": ["tuesday", "thursday"],
     "startTime": "11:00",
     "endTime": "12:15",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "MATH-UA 120",
@@ -218,13 +246,15 @@
     "section": "001",
     "year": 2025,
     "term": "spring",
-    "instructor": ["Siegel"],
+    "instructors": ["Siegel"],
     "location": "Warren Weaver Hall Room 317",
     "days": ["monday", "wednesday", "friday"],
     "startTime": "10:00",
     "endTime": "10:50",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "MATH-UA 121",
@@ -233,13 +263,15 @@
     "section": "001",
     "year": 2025,
     "term": "spring",
-    "instructor": ["Chen"],
+    "instructors": ["Chen"],
     "location": "Warren Weaver Hall Room 109",
     "days": ["tuesday", "thursday"],
     "startTime": "09:30",
     "endTime": "10:45",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "MATH-UA 122",
@@ -248,14 +280,16 @@
     "section": "001",
     "year": 2025,
     "term": "spring",
-    "instructor": ["Lee"],
+    "instructors": ["Lee"],
     "location": "Warren Weaver Hall Room 101",
     "days": ["monday", "wednesday"],
     "startTime": "09:30",
     "endTime": "10:45",
     "status": "waitlist",
     "waitlistNum": 3,
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "MATH-UA 140",
@@ -264,13 +298,15 @@
     "section": "001",
     "year": 2025,
     "term": "spring",
-    "instructor": ["Wang"],
+    "instructors": ["Wang"],
     "location": "Warren Weaver Hall Room 317",
     "days": ["tuesday", "thursday"],
     "startTime": "12:30",
     "endTime": "13:45",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "MATH-UA 233",
@@ -279,13 +315,15 @@
     "section": "001",
     "year": 2025,
     "term": "spring",
-    "instructor": ["Liu"],
+    "instructors": ["Liu"],
     "location": "Warren Weaver Hall Room 317",
     "days": ["monday", "wednesday"],
     "startTime": "14:00",
     "endTime": "15:15",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "CORE-UA 214",
@@ -294,13 +332,15 @@
     "section": "001",
     "year": 2025,
     "term": "spring",
-    "instructor": ["Haas"],
+    "instructors": ["Haas"],
     "location": "6 Washington Pl (Meyer Hall) Room 121",
     "days": ["tuesday", "thursday"],
     "startTime": "11:00",
     "endTime": "12:15",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "WRIT-UA 9",
@@ -309,13 +349,15 @@
     "section": "001",
     "year": 2025,
     "term": "spring",
-    "instructor": ["Smith"],
+    "instructors": ["Smith"],
     "location": "19 W 4th St Room 101",
     "days": ["monday", "wednesday"],
     "startTime": "11:00",
     "endTime": "12:15",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "PHIL-UA 20",
@@ -324,13 +366,15 @@
     "section": "001",
     "year": 2025,
     "term": "spring",
-    "instructor": ["Maudlin"],
+    "instructors": ["Maudlin"],
     "location": "6 Washington Pl (Meyer Hall) Room 122",
     "days": ["monday", "wednesday"],
     "startTime": "16:55",
     "endTime": "18:10",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "ECON-UA 1",
@@ -339,13 +383,15 @@
     "section": "001",
     "year": 2025,
     "term": "spring",
-    "instructor": ["Johnson"],
+    "instructors": ["Johnson"],
     "location": "19 W 4th St Room 101",
     "days": ["tuesday", "thursday"],
     "startTime": "11:00",
     "endTime": "12:15",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "ECON-UA 2",
@@ -354,13 +400,15 @@
     "section": "001",
     "year": 2025,
     "term": "spring",
-    "instructor": ["Brown"],
+    "instructors": ["Brown"],
     "location": "19 W 4th St Room 102",
     "days": ["monday", "wednesday"],
     "startTime": "14:00",
     "endTime": "15:15",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "PSYCH-UA 1",
@@ -369,13 +417,15 @@
     "section": "001",
     "year": 2025,
     "term": "spring",
-    "instructor": ["Davis"],
+    "instructors": ["Davis"],
     "location": "5 Washington Pl Room 101",
     "days": ["tuesday", "thursday"],
     "startTime": "15:30",
     "endTime": "16:45",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "HIST-UA 101",
@@ -384,13 +434,15 @@
     "section": "001",
     "year": 2025,
     "term": "spring",
-    "instructor": ["Martinez"],
+    "instructors": ["Martinez"],
     "location": "19 W 4th St Room 201",
     "days": ["monday", "wednesday"],
     "startTime": "12:30",
     "endTime": "13:45",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "DSGA-UA 201",
@@ -399,14 +451,16 @@
     "section": "001",
     "year": 2025,
     "term": "spring",
-    "instructor": ["Zhang"],
+    "instructors": ["Zhang"],
     "location": "60 5th Ave Room 150",
     "days": ["tuesday", "thursday"],
     "startTime": "15:30",
     "endTime": "16:45",
     "status": "waitlist",
     "waitlistNum": 8,
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "CSCI-UA 101",
@@ -415,13 +469,15 @@
     "section": "001",
     "year": 2025,
     "term": "fall",
-    "instructor": ["Joannides"],
+    "instructors": ["Joannides"],
     "location": "Warren Weaver Hall Room 109",
     "days": ["monday", "wednesday"],
     "startTime": "11:00",
     "endTime": "12:15",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "CSCI-UA 101",
@@ -430,13 +486,15 @@
     "section": "002",
     "year": 2025,
     "term": "fall",
-    "instructor": ["Kapp"],
+    "instructors": ["Kapp"],
     "location": "Warren Weaver Hall Room 109",
     "days": ["tuesday", "thursday"],
     "startTime": "14:00",
     "endTime": "15:15",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "CSCI-UA 102",
@@ -445,13 +503,15 @@
     "section": "001",
     "year": 2025,
     "term": "fall",
-    "instructor": ["Schoenfeld"],
+    "instructors": ["Schoenfeld"],
     "location": "Warren Weaver Hall Room 101",
     "days": ["tuesday", "thursday"],
     "startTime": "14:00",
     "endTime": "15:15",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "CSCI-UA 201",
@@ -460,13 +520,15 @@
     "section": "001",
     "year": 2025,
     "term": "fall",
-    "instructor": ["Gottlieb"],
+    "instructors": ["Gottlieb"],
     "location": "Warren Weaver Hall Room 109",
     "days": ["monday", "wednesday"],
     "startTime": "15:30",
     "endTime": "16:45",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "CSCI-UA 202",
@@ -475,13 +537,15 @@
     "section": "001",
     "year": 2025,
     "term": "fall",
-    "instructor": ["Zahran"],
+    "instructors": ["Zahran"],
     "location": "Warren Weaver Hall Room 101",
     "days": ["tuesday", "thursday"],
     "startTime": "15:30",
     "endTime": "16:45",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "CSCI-UA 310",
@@ -490,13 +554,15 @@
     "section": "001",
     "year": 2025,
     "term": "fall",
-    "instructor": ["Cole"],
+    "instructors": ["Cole"],
     "location": "Warren Weaver Hall Room 109",
     "days": ["monday", "wednesday"],
     "startTime": "12:30",
     "endTime": "13:45",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "CSCI-UA 380",
@@ -505,13 +571,15 @@
     "section": "001",
     "year": 2025,
     "term": "fall",
-    "instructor": ["Perlin"],
+    "instructors": ["Perlin"],
     "location": "Warren Weaver Hall Room 101",
     "days": ["tuesday", "thursday"],
     "startTime": "11:00",
     "endTime": "12:15",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "CSCI-UA 467",
@@ -520,13 +588,15 @@
     "section": "001",
     "year": 2025,
     "term": "fall",
-    "instructor": ["Patil"],
+    "instructors": ["Patil"],
     "location": "60 5th Ave Room 150",
     "days": ["tuesday", "thursday"],
     "startTime": "14:00",
     "endTime": "15:15",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "CSCI-UA 470",
@@ -535,13 +605,15 @@
     "section": "001",
     "year": 2025,
     "term": "fall",
-    "instructor": ["Chen"],
+    "instructors": ["Chen"],
     "location": "Warren Weaver Hall Room 109",
     "days": ["monday", "wednesday"],
     "startTime": "11:00",
     "endTime": "12:15",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "CSCI-UA 473",
@@ -550,13 +622,15 @@
     "section": "001",
     "year": 2025,
     "term": "fall",
-    "instructor": ["Wu"],
+    "instructors": ["Wu"],
     "location": "60 5th Ave Room 150",
     "days": ["monday", "wednesday"],
     "startTime": "15:30",
     "endTime": "16:45",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "CSCI-UA 479",
@@ -565,13 +639,15 @@
     "section": "001",
     "year": 2025,
     "term": "fall",
-    "instructor": ["Zeidenberg"],
+    "instructors": ["Zeidenberg"],
     "location": "60 5th Ave Room 150",
     "days": ["tuesday", "thursday"],
     "startTime": "11:00",
     "endTime": "12:15",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "CSCI-UA 481",
@@ -580,13 +656,15 @@
     "section": "001",
     "year": 2025,
     "term": "fall",
-    "instructor": ["Zhang"],
+    "instructors": ["Zhang"],
     "location": "Warren Weaver Hall Room 101",
     "days": ["tuesday", "thursday"],
     "startTime": "12:30",
     "endTime": "13:45",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "MATH-UA 120",
@@ -595,13 +673,15 @@
     "section": "001",
     "year": 2025,
     "term": "fall",
-    "instructor": ["Siegel"],
+    "instructors": ["Siegel"],
     "location": "Warren Weaver Hall Room 317",
     "days": ["monday", "wednesday", "friday"],
     "startTime": "10:00",
     "endTime": "10:50",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "MATH-UA 121",
@@ -610,13 +690,15 @@
     "section": "001",
     "year": 2025,
     "term": "fall",
-    "instructor": ["Chen"],
+    "instructors": ["Chen"],
     "location": "Warren Weaver Hall Room 109",
     "days": ["tuesday", "thursday"],
     "startTime": "09:30",
     "endTime": "10:45",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "MATH-UA 140",
@@ -625,13 +707,15 @@
     "section": "001",
     "year": 2025,
     "term": "fall",
-    "instructor": ["Wang"],
+    "instructors": ["Wang"],
     "location": "Warren Weaver Hall Room 317",
     "days": ["tuesday", "thursday"],
     "startTime": "12:30",
     "endTime": "13:45",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "MATH-UA 233",
@@ -640,13 +724,15 @@
     "section": "001",
     "year": 2025,
     "term": "fall",
-    "instructor": ["Liu"],
+    "instructors": ["Liu"],
     "location": "Warren Weaver Hall Room 317",
     "days": ["monday", "wednesday"],
     "startTime": "14:00",
     "endTime": "15:15",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "ECON-UA 1",
@@ -655,13 +741,15 @@
     "section": "001",
     "year": 2025,
     "term": "fall",
-    "instructor": ["Johnson"],
+    "instructors": ["Johnson"],
     "location": "19 W 4th St Room 101",
     "days": ["tuesday", "thursday"],
     "startTime": "11:00",
     "endTime": "12:15",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   },
   {
     "courseCode": "ECON-UA 2",
@@ -670,12 +758,14 @@
     "section": "001",
     "year": 2025,
     "term": "fall",
-    "instructor": ["Brown"],
+    "instructors": ["Brown"],
     "location": "19 W 4th St Room 102",
     "days": ["monday", "wednesday"],
     "startTime": "14:00",
     "endTime": "15:15",
     "status": "open",
-    "isCorequisite": false
+    "isCorequisite": false,
+    "level": "undergraduate",
+    "school": "College of Arts and Science"
   }
 ]

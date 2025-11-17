@@ -19,6 +19,7 @@ interface CourseSelectorComponentProps {
   loadMore: (numItems: number) => void;
   status: "LoadingFirstPage" | "CanLoadMore" | "LoadingMore" | "Exhausted";
   isSearching?: boolean;
+  selectedClassNumbers?: number[];
 }
 
 const CourseSelector = ({
@@ -29,6 +30,7 @@ const CourseSelector = ({
   loadMore,
   status,
   isSearching = false,
+  selectedClassNumbers,
 }: CourseSelectorComponentProps) => {
   const { searchValue: filtersParam, setSearchValue: setFiltersParam } =
     useSearchParam({ paramKey: "filters", debounceDelay: 0 });
@@ -162,6 +164,7 @@ const CourseSelector = ({
                   <CourseCard
                     course={course}
                     isExpanded={isExpanded(course.code)}
+                    selectedClassNumbers={selectedClassNumbers}
                     onToggleExpand={toggleCourseExpansion}
                     onSectionSelect={handleSectionSelect}
                     onSectionHover={setHoveredSection}
