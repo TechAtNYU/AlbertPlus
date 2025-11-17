@@ -1,9 +1,9 @@
-name: convex
+name: convex (prod)
 
 on:
   push:
     branches:
-      - main
+      - prod
     paths:
       - "packages/server/**"
 
