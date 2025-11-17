@@ -59,6 +59,14 @@ const CourseSelector = ({
     setFiltersParam(isFiltersExpanded ? "" : "true");
   };
 
+  const handleSectionHover = (section: CourseOffering | null) => {
+    if (section && (!section.startTime || !section.endTime)) {
+      setHoveredSection(null);
+      return;
+    }
+    setHoveredSection(section);
+  };
+
   const parentRef = React.useRef<HTMLDivElement>(null);
 
   const rowVirtualizer = useVirtualizer({
@@ -181,7 +189,7 @@ const CourseSelector = ({
                     selectedClassNumbers={selectedClassNumbers}
                     onToggleExpand={toggleCourseExpansion}
                     onSectionSelect={handleSectionSelect}
-                    onSectionHover={setHoveredSection}
+                    onSectionHover={handleSectionHover}
                   />
                 </div>
               );

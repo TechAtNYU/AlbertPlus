@@ -58,8 +58,16 @@ export const CourseSectionItem = ({
       <div className="text-xs text-muted-foreground space-y-1">
         <div>{offering.instructor}</div>
         <div>
-          {offering.days.map((day) => day.slice(0, 3).toUpperCase()).join(", ")}{" "}
-          {offering.startTime} - {offering.endTime}
+          {offering.startTime && offering.endTime ? (
+            <>
+              {offering.days
+                .map((day) => day.slice(0, 3).toUpperCase())
+                .join(", ")}{" "}
+              {offering.startTime} - {offering.endTime}
+            </>
+          ) : (
+            <span className="italic">Time not available yet</span>
+          )}
         </div>
         <div>{offering.location ?? "TBD"}</div>
         <div className="capitalize">
