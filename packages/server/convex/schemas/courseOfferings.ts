@@ -16,7 +16,7 @@ const courseOfferings = {
   ),
   level: v.union(v.literal("undergraduate"), v.literal("graduate")),
   school: schoolName,
-  instructor: v.array(v.string()),
+  instructors: v.array(v.string()),
   location: v.optional(v.string()),
   days: v.array(
     v.union(

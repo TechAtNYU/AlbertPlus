@@ -119,7 +119,7 @@ export function CourseInfoDialog({
                       Instructor
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      {course.instructor.join(", ") || "TBA"}
+                      {course.instructors.join(", ") || "TBA"}
                     </p>
                   </div>
 

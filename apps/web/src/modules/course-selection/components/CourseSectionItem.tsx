@@ -56,7 +56,7 @@ export const CourseSectionItem = ({
         </div>
       </div>
       <div className="text-xs text-muted-foreground space-y-1">
-        <div>{offering.instructor}</div>
+        <div>{offering.instructors.join(", ")}</div>
         <div>
           {offering.days.map((day) => day.slice(0, 3).toUpperCase()).join(", ")}{" "}
           {offering.startTime} - {offering.endTime}
