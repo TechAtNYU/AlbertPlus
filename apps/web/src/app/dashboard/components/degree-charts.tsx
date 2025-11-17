@@ -20,7 +20,6 @@ import {
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { getDepartmentName } from "@/lib/department-names";
 
 interface ProgramRequirementsChartProps {
   programs: Record<
@@ -89,7 +88,7 @@ const getRequirementsByCategory = (
   // Calculate total credits for each category
   const groupedRequirements: Record<
     string,
-    { credits: number; courses: string[][] }
+    { credits: number; courses: string[][]; displayName: string }
   > = {};
 
   // FIXME: currently no merging of programs if more than one listed (dual degree), assumes only one program for now
@@ -108,15 +107,18 @@ const getRequirementsByCategory = (
       if (uniquePrefixes.length === 1) {
         // All same prefix - assign all credits to that one prefix
         const prefix = uniquePrefixes[0];
-        if (!groupedRequirements[prefix]) {
-          groupedRequirements[prefix] = { credits: 0, courses: [] };
+        const displayName = courseLookup.get(courses[0])?.programName || "Other";
+        const key = displayName === "Other" ? "Other" : prefix;
+        if (!groupedRequirements[key]) {
+          groupedRequirements[key] = { credits: 0, courses: [], displayName: displayName };
         }
-        groupedRequirements[prefix].credits += requirement.creditsRequired;
-        groupedRequirements[prefix].courses.push(courses);
+        groupedRequirements[key].credits += requirement.creditsRequired;
+        groupedRequirements[key].courses.push(courses);
+        groupedRequirements[key].displayName = displayName;
       } else {
         // Mixed prefixes - assign to "Other" category
         if (!groupedRequirements.Other) {
-          groupedRequirements.Other = { credits: 0, courses: [] };
+          groupedRequirements.Other = { credits: 0, courses: [], displayName: "Other" };
         }
         groupedRequirements.Other.credits += requirement.creditsRequired;
         groupedRequirements.Other.courses.push(courses);
@@ -126,14 +128,16 @@ const getRequirementsByCategory = (
     else {
       for (const courseCode of courses) {
         const prefix = courseCode.split(" ")[0];
+        const displayName = courseLookup.get(courseCode)?.programName || "Other";
+        const key = displayName === "Other" ? "Other" : prefix;
         const course = courseLookup.get(courseCode);
         const credits = course?.credits ?? 4; // fallback to 4 credits if not found
 
-        if (!groupedRequirements[prefix]) {
-          groupedRequirements[prefix] = { credits: 0, courses: [] };
+        if (!groupedRequirements[key]) {
+          groupedRequirements[key] = { credits: 0, courses: [], displayName: displayName };
         }
-        groupedRequirements[prefix].credits += credits;
-        groupedRequirements[prefix].courses.push([courseCode]);
+        groupedRequirements[key].credits += credits;
+        groupedRequirements[key].courses.push([courseCode]);
       }
     }
   }
@@ -215,7 +219,7 @@ export function ProgramRequirementsChart({
           const percentage =
             data.credits > 0 ? Math.round((completed / data.credits) * 100) : 0;
           return {
-            category: prefix,
+            category: data.displayName,
             credits: data.credits,
             completedCredits: completed,
             remainingCredits: data.credits - completed,
@@ -256,7 +260,7 @@ export function ProgramRequirementsChart({
     if (!showCompletion) {
       // Default view: just total credits per category
       return chartData.map((item, index) => ({
-        name: getDepartmentName(item.category),
+        name: item.category,
         value: item.credits,
         fill: COLORS[index % COLORS.length],
       }));
@@ -272,7 +276,7 @@ export function ProgramRequirementsChart({
 
       chartData.forEach((item, index) => {
         const baseColor = COLORS[index % COLORS.length];
-        const departmentName = getDepartmentName(item.category);
+        const departmentName = item.category;
 
         // Add completed portion (darker - original color)
         if (item.completedCredits > 0) {
