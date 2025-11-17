@@ -29,8 +29,8 @@ const courseOfferings = {
       v.literal("sunday"),
     ),
   ),
-  startTime: v.string(), // 13:00
-  endTime: v.string(), // 14:15
+  startTime: v.optional(v.string()), // 13:00
+  endTime: v.optional(v.string()), // 14:15
   status: v.union(
     v.literal("open"),
     v.literal("closed"),
