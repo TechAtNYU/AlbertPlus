@@ -1,4 +1,5 @@
 export { AlternativeDropdown } from "./alternative-dropdown";
+export { default as ConflictDialog } from "./conflict-dialog";
 export { CourseCard } from "./CourseCard";
 export { CourseFilters } from "./CourseFilters";
 export { CourseSectionItem } from "./CourseSectionItem";

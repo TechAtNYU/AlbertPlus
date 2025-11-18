@@ -8,7 +8,7 @@ import { ArrowLeft, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import type { Class } from "../schedule-calendar";
+import type { Class } from "../../schedule-calendar/schedule-calendar";
 
 interface CourseDetailPanelProps {
   course: Class | null;

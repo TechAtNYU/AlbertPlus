@@ -2,14 +2,14 @@
 import { api } from "@albert-plus/server/convex/_generated/api";
 import type { Id } from "@albert-plus/server/convex/_generated/dataModel";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { ConvexError } from "convex/values";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useSearchParam } from "@/hooks/use-search-param";
 import { type Class, CourseDetailPanel } from "@/modules/schedule-calendar";
-import { CourseCard, CourseFilters } from "./components";
+import { ConflictDialog, CourseCard, CourseFilters } from "./components";
 import { useCourseExpansion, useCourseFiltering } from "./hooks";
 import type { CourseOffering, CourseOfferingWithCourse } from "./types";
 
@@ -57,6 +57,20 @@ const CourseSelector = ({
     null,
   );
 
+  const [conflictState, setConflictState] = useState<{
+    course: CourseOffering | null;
+    conflictingClassNumbers: number[];
+  } | null>(null);
+
+  const [isAddingWithConflict, setIsAddingWithConflict] = useState(false);
+
+  const conflictingCourses = useQuery(
+    api.userCourseOfferings.getCourseOfferingsByClassNumbers,
+    conflictState?.conflictingClassNumbers
+      ? { classNumbers: conflictState.conflictingClassNumbers }
+      : "skip",
+  );
+
   const isFiltersExpanded = filtersParam === "true";
 
   const handleToggleFilters = () => {
@@ -92,11 +106,28 @@ const CourseSelector = ({
         },
       });
     } catch (error) {
-      const errorMessage =
-        error instanceof ConvexError
-          ? (error.data as string)
-          : "Unexpected error occurred";
-      toast.error(errorMessage);
+      if (error instanceof ConvexError) {
+        const errorData = error.data as
+          | string
+          | { type: string; conflictingClassNumbers: number[] };
+
+        if (
+          typeof errorData === "object" &&
+          errorData.type === "TIME_CONFLICT"
+        ) {
+          setConflictState({
+            course: offering,
+            conflictingClassNumbers: errorData.conflictingClassNumbers,
+          });
+          return;
+        }
+
+        toast.error(
+          typeof errorData === "string" ? errorData : "An error occurred",
+        );
+      } else {
+        toast.error("Unexpected error occurred");
+      }
     }
   };
 
@@ -152,6 +183,72 @@ const CourseSelector = ({
           : "Unexpected error occurred";
       toast.error(errorMessage);
     }
+  };
+
+  const handleConflictAddAsMain = async () => {
+    if (!conflictState?.course) return;
+
+    setIsAddingWithConflict(true);
+    try {
+      const classNumber = conflictState.course.classNumber;
+      const courseCode = conflictState.course.courseCode;
+      const section = conflictState.course.section;
+      const id = await addCourseOffering({
+        classNumber,
+        forceAdd: true,
+      });
+      toast.success(`${courseCode} ${section} added`, {
+        action: {
+          label: "Undo",
+          onClick: () => removeCourseOffering({ id }),
+        },
+      });
+      setConflictState(null);
+    } catch (error) {
+      const errorMessage =
+        error instanceof ConvexError
+          ? (error.data as string)
+          : "Unexpected error occurred";
+      toast.error(errorMessage);
+    } finally {
+      setIsAddingWithConflict(false);
+    }
+  };
+
+  const handleConflictAddAsAlternative = async (
+    alternativeOf: Id<"userCourseOfferings">,
+  ) => {
+    if (!conflictState?.course) return;
+
+    setIsAddingWithConflict(true);
+    try {
+      const id = await addCourseOffering({
+        classNumber: conflictState.course.classNumber,
+        alternativeOf,
+      });
+      toast.success(
+        `${conflictState.course.courseCode} ${conflictState.course.section} added as alternative`,
+        {
+          action: {
+            label: "Undo",
+            onClick: () => removeCourseOffering({ id }),
+          },
+        },
+      );
+      setConflictState(null);
+    } catch (error) {
+      const errorMessage =
+        error instanceof ConvexError
+          ? (error.data as string)
+          : "Unexpected error occurred";
+      toast.error(errorMessage);
+    } finally {
+      setIsAddingWithConflict(false);
+    }
+  };
+
+  const handleConflictCancel = () => {
+    setConflictState(null);
   };
 
   if (selectedCourse) {
@@ -260,6 +357,19 @@ const CourseSelector = ({
           <p className="text-gray-500">Loading more courses...</p>
         </div>
       )}
+
+      <ConflictDialog
+        open={!!conflictState}
+        onOpenChange={(open) => {
+          if (!open) setConflictState(null);
+        }}
+        newCourse={conflictState?.course ?? null}
+        conflictingCourses={conflictingCourses?.filter((c) => c !== null) ?? []}
+        onAddAsMain={handleConflictAddAsMain}
+        onAddAsAlternative={handleConflictAddAsAlternative}
+        onCancel={handleConflictCancel}
+        isAdding={isAddingWithConflict}
+      />
     </div>
   );
 };

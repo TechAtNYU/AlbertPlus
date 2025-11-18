@@ -2,6 +2,7 @@ import { ConvexError, v } from "convex/values";
 import { omit } from "convex-helpers";
 import { getOneFrom } from "convex-helpers/server/relationships";
 import { protectedMutation, protectedQuery } from "./helpers/auth";
+import { findTimeConflicts } from "./helpers/timeConflicts";
 import { userCourseOfferings } from "./schemas/courseOfferings";
 
 export const getUserCourseOfferings = protectedQuery({
@@ -71,8 +72,13 @@ export const getScheduleCourseOfferings = protectedQuery({
 });
 
 export const addUserCourseOffering = protectedMutation({
-  args: omit(userCourseOfferings, ["userId"]),
+  args: {
+    ...omit(userCourseOfferings, ["userId"]),
+    forceAdd: v.optional(v.boolean()),
+  },
   handler: async (ctx, args) => {
+    const { forceAdd, ...insertArgs } = args;
+
     const existing = await ctx.db
       .query("userCourseOfferings")
       .withIndex("by_user", (q) => q.eq("userId", ctx.user.subject))
@@ -83,10 +89,69 @@ export const addUserCourseOffering = protectedMutation({
       throw new ConvexError("Course offering already added to user schedule");
     }
 
+    const newCourseOffering = await getOneFrom(
+      ctx.db,
+      "courseOfferings",
+      "by_class_number",
+      args.classNumber,
+      "classNumber",
+    );
+
+    if (!newCourseOffering) {
+      throw new ConvexError("Course offering not found");
+    }
+
+    // Only check for conflicts if this is not being added as an alternative
+    if (!args.alternativeOf && !forceAdd) {
+      const userCourses = await ctx.db
+        .query("userCourseOfferings")
+        .withIndex("by_user", (q) => q.eq("userId", ctx.user.subject))
+        .filter((q) => q.eq(q.field("alternativeOf"), undefined))
+        .collect();
+
+      const existingCourseOfferings = await Promise.all(
+        userCourses.map(async (userCourse) => {
+          const offering = await getOneFrom(
+            ctx.db,
+            "courseOfferings",
+            "by_class_number",
+            userCourse.classNumber,
+            "classNumber",
+          );
+          return offering;
+        }),
+      );
+
+      const validOfferings = existingCourseOfferings.filter(
+        (offering) => offering !== null,
+      );
+
+      const conflicts = findTimeConflicts(
+        {
+          days: newCourseOffering.days,
+          startTime: newCourseOffering.startTime,
+          endTime: newCourseOffering.endTime,
+        },
+        validOfferings.map((offering) => ({
+          days: offering.days,
+          startTime: offering.startTime,
+          endTime: offering.endTime,
+          classNumber: offering.classNumber,
+        })),
+      );
+
+      if (conflicts.length > 0) {
+        throw new ConvexError({
+          type: "TIME_CONFLICT",
+          conflictingClassNumbers: conflicts,
+        });
+      }
+    }
+
     return await ctx.db.insert("userCourseOfferings", {
       userId: ctx.user.subject,
-      classNumber: args.classNumber,
-      alternativeOf: args.alternativeOf,
+      classNumber: insertArgs.classNumber,
+      alternativeOf: insertArgs.alternativeOf,
     });
   },
 });
@@ -158,6 +223,29 @@ export const getAlternativeCourses = protectedQuery({
           ...alternative,
           courseOffering,
         };
+      }),
+    );
+  },
+});
+
+export const getCourseOfferingsByClassNumbers = protectedQuery({
+  args: { classNumbers: v.array(v.number()) },
+  handler: async (ctx, args) => {
+    return await Promise.all(
+      args.classNumbers.map(async (classNumber) => {
+        const courseOffering = await getOneFrom(
+          ctx.db,
+          "courseOfferings",
+          "by_class_number",
+          classNumber,
+          "classNumber",
+        );
+
+        if (!courseOffering) {
+          return null;
+        }
+
+        return courseOffering;
       }),
     );
   },
