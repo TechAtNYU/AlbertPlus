@@ -167,13 +167,17 @@ const CourseSelector = ({
     id: Id<"userCourseOfferings">,
     classNumber: number,
     title: string,
+    alternativeOf?: Id<"userCourseOfferings">,
   ) => {
     try {
       await removeCourseOffering({ id });
       toast.success(`${title} removed`, {
         action: {
           label: "Undo",
-          onClick: () => addCourseOffering({ classNumber }),
+          onClick: () =>
+            addCourseOffering(
+              alternativeOf ? { classNumber, alternativeOf } : { classNumber },
+            ),
         },
       });
     } catch (error) {

@@ -49,12 +49,6 @@ export default function ConflictDialog({
 
   const userCourses = useQuery(api.userCourseOfferings.getUserCourseOfferings);
 
-  useEffect(() => {
-    if (!open) {
-      setDropdownOpen(false);
-    }
-  }, [open]);
-
   const conflictingMainCourses = userCourses?.filter(
     (course) =>
       !course.alternativeOf &&

@@ -17,6 +17,7 @@ interface CourseDetailPanelProps {
     id: Id<"userCourseOfferings">,
     classNumber: number,
     title: string,
+    alternativeOf?: Id<"userCourseOfferings">,
   ) => void;
 }
 
@@ -43,6 +44,7 @@ export function CourseDetailPanel({
         course.userCourseOfferingId as Id<"userCourseOfferings">,
         course.classNumber,
         course.title,
+        course.alternativeOf as Id<"userCourseOfferings"> | undefined,
       );
       onClose();
     }

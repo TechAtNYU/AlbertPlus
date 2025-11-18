@@ -77,13 +77,17 @@ export function WeekView({
     id: Id<"userCourseOfferings">,
     classNumber: number,
     title: string,
+    alternativeOf?: Id<"userCourseOfferings">,
   ) => {
     try {
       await removeOffering({ id });
       toast.success(`${title} removed`, {
         action: {
           label: "Undo",
-          onClick: () => addOffering({ classNumber }),
+          onClick: () =>
+            addOffering(
+              alternativeOf ? { classNumber, alternativeOf } : { classNumber },
+            ),
         },
       });
     } catch (error) {
@@ -340,6 +344,9 @@ export function WeekView({
                                 .userCourseOfferingId as Id<"userCourseOfferings">,
                               positionedEvent.event.classNumber,
                               positionedEvent.event.title,
+                              positionedEvent.event.alternativeOf as
+                                | Id<"userCourseOfferings">
+                                | undefined,
                             );
                           }}
                           className="absolute right-1 top-1 z-50 flex size-5 items-center justify-center rounded-full bg-black/10 dark:bg-white/10 text-foreground/70 opacity-0 shadow-md backdrop-blur-sm transition-all hover:bg-black/20 dark:hover:bg-white/20 hover:text-foreground hover:scale-110 group-hover:opacity-100"
