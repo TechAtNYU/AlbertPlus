@@ -14,7 +14,6 @@ import { useRouter } from "next/navigation";
 import React, { Activity } from "react";
 import { toast } from "sonner";
 import z from "zod";
-import MultipleSelector from "@/app/onboarding/component/multiselect";
 import { SchoolCombobox } from "@/app/onboarding/component/school-combobox";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -33,6 +32,7 @@ import {
   FieldLabel,
   Field as UIField,
 } from "@/components/ui/field";
+import MultipleSelector from "@/components/ui/multiselect";
 import {
   Select,
   SelectContent,
@@ -45,6 +45,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useDebounce } from "@/hooks/use-debounce";
 import DegreeProgreeUpload from "@/modules/report-parsing/components/degree-progress-upload";
 import type { UserCourse } from "@/modules/report-parsing/types";
 import type { StartingTerm } from "@/modules/report-parsing/utils/parse-starting-term";
@@ -108,16 +109,15 @@ export function OnboardingForm() {
   );
 
   // Programs
-  const [programsQuery, setProgramsQuery] = React.useState<string | undefined>(
-    undefined,
-  );
-  const {
-    results: programs,
-    status: programsStatus,
-    loadMore: programsLoadMore,
-  } = usePaginatedQuery(
+  const [programSearchInput, setProgramSearchInput] =
+    React.useState<string>("");
+  const debouncedProgramSearch = useDebounce(programSearchInput, 300);
+
+  const { results: programs } = usePaginatedQuery(
     api.programs.getPrograms,
-    isAuthenticated ? { query: programsQuery } : ("skip" as const),
+    isAuthenticated
+      ? { query: debouncedProgramSearch.trim() || undefined }
+      : ("skip" as const),
     { initialNumItems: 20 },
   );
 
@@ -125,25 +125,25 @@ export function OnboardingForm() {
     () =>
       (programs ?? []).map((program) => ({
         value: program._id,
-        label: program.name,
+        label: `${program.name} - ${program.school}`,
       })),
     [programs],
   );
 
-  const handleSearchPrograms = React.useCallback(
-    async (value: string) => {
-      const trimmed = value.trim();
-      setProgramsQuery(trimmed.length === 0 ? undefined : trimmed);
-      return programOptions;
-    },
-    [programOptions],
+  // Cache to store program labels so they don't disappear when search results change
+  const programLabelCache = React.useRef<Map<Id<"programs">, string>>(
+    new Map(),
   );
 
-  const handleLoadMorePrograms = React.useCallback(() => {
-    if (programsStatus === "CanLoadMore") {
-      void programsLoadMore(10);
-    }
-  }, [programsStatus, programsLoadMore]);
+  // Update cache whenever new programs are loaded
+  React.useEffect(() => {
+    programOptions.forEach((option) => {
+      programLabelCache.current.set(
+        option.value as Id<"programs">,
+        option.label,
+      );
+    });
+  }, [programOptions]);
 
   const currentYear = React.useMemo(() => new Date().getFullYear(), []);
   const defaultTerm = React.useMemo<Term>(() => {
@@ -372,8 +372,10 @@ export function OnboardingForm() {
                 {(field) => {
                   const selected = (field.state.value ?? []).map((p) => ({
                     value: p,
-                    label: programOptions.find((val) => val.value === p)
-                      ?.label as string,
+                    label:
+                      programOptions.find((val) => val.value === p)?.label ||
+                      programLabelCache.current.get(p) ||
+                      "",
                   }));
                   return (
                     <UIField>
@@ -390,12 +392,16 @@ export function OnboardingForm() {
                           }
                           defaultOptions={programOptions}
                           options={programOptions}
-                          delay={300}
-                          onSearch={handleSearchPrograms}
-                          triggerSearchOnFocus
                           placeholder="Select your programs"
-                          commandProps={{ label: "Select programs" }}
-                          onListReachEnd={handleLoadMorePrograms}
+                          commandProps={{
+                            label: "Select programs",
+                            shouldFilter: false,
+                          }}
+                          inputProps={{
+                            onValueChange: (value) => {
+                              setProgramSearchInput(value);
+                            },
+                          }}
                           emptyIndicator={
                             <p className="text-center text-sm">
                               No programs found

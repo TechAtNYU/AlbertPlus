@@ -9,8 +9,8 @@
     "db:studio:local": "drizzle-kit studio --config=drizzle-dev.config.ts",
     "db:studio:remote": "drizzle-kit studio --config=drizzle-prod.config.ts",
     "db:generate": "drizzle-kit generate --config=drizzle-dev.config.ts",
-    "db:migrate:local": "wrangler d1 migrations apply scraper-ops --local",
-    "db:migrate:remote": "wrangler d1 migrations apply scraper-ops --remote",
+    "db:migrate:local": "wrangler d1 migrations apply albert-plus-scraper-ops --local",
+    "db:migrate:remote": "wrangler d1 migrations apply albert-plus-scraper-ops --remote",
     "db:push:local": "drizzle-kit push --config=drizzle-dev.config.ts",
     "db:push:remote": "drizzle-kit push --config=drizzle-prod.config.ts",
     "cf-typegen": "wrangler types --env-interface CloudflareBindings",
@@ -20,15 +20,15 @@
     "@albert-plus/server": "workspace:*",
     "dotenv": "^17.2.3",
     "drizzle-orm": "^0.44.7",
-    "hono": "^4.10.5",
+    "hono": "^4.10.6",
     "nanoid": "^5.1.6",
     "zod": "^4.1.12"
   },
   "devDependencies": {
     "@libsql/client": "^0.15.15",
     "@types/node": "^24.10.1",
-    "convex": "^1.29.0",
-    "drizzle-kit": "^0.31.6",
+    "convex": "^1.29.2",
+    "drizzle-kit": "^0.31.7",
     "wrangler": "^4.47.0"
   }
 }
