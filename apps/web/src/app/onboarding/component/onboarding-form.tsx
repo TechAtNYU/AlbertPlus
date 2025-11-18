@@ -14,7 +14,8 @@ import { useRouter } from "next/navigation";
 import React, { Activity } from "react";
 import { toast } from "sonner";
 import z from "zod";
-import MultipleSelector from "@/app/onboarding/component/multiselect";
+import { useDebounce } from "@/hooks/use-debounce";
+import MultipleSelector from "@/components/ui/multiselect";
 import { SchoolCombobox } from "@/app/onboarding/component/school-combobox";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -108,16 +109,15 @@ export function OnboardingForm() {
   );
 
   // Programs
-  const [programsQuery, setProgramsQuery] = React.useState<string | undefined>(
-    undefined,
-  );
-  const {
-    results: programs,
-    status: programsStatus,
-    loadMore: programsLoadMore,
-  } = usePaginatedQuery(
+  const [programSearchInput, setProgramSearchInput] =
+    React.useState<string>("");
+  const debouncedProgramSearch = useDebounce(programSearchInput, 300);
+
+  const { results: programs } = usePaginatedQuery(
     api.programs.getPrograms,
-    isAuthenticated ? { query: programsQuery } : ("skip" as const),
+    isAuthenticated
+      ? { query: debouncedProgramSearch.trim() || undefined }
+      : ("skip" as const),
     { initialNumItems: 20 },
   );
 
@@ -129,21 +129,6 @@ export function OnboardingForm() {
       })),
     [programs],
   );
-
-  const handleSearchPrograms = React.useCallback(
-    async (value: string) => {
-      const trimmed = value.trim();
-      setProgramsQuery(trimmed.length === 0 ? undefined : trimmed);
-      return programOptions;
-    },
-    [programOptions],
-  );
-
-  const handleLoadMorePrograms = React.useCallback(() => {
-    if (programsStatus === "CanLoadMore") {
-      void programsLoadMore(10);
-    }
-  }, [programsStatus, programsLoadMore]);
 
   const currentYear = React.useMemo(() => new Date().getFullYear(), []);
   const defaultTerm = React.useMemo<Term>(() => {
@@ -390,12 +375,16 @@ export function OnboardingForm() {
                           }
                           defaultOptions={programOptions}
                           options={programOptions}
-                          delay={300}
-                          onSearch={handleSearchPrograms}
-                          triggerSearchOnFocus
                           placeholder="Select your programs"
-                          commandProps={{ label: "Select programs" }}
-                          onListReachEnd={handleLoadMorePrograms}
+                          commandProps={{
+                            label: "Select programs",
+                            shouldFilter: false,
+                          }}
+                          inputProps={{
+                            onValueChange: (value) => {
+                              setProgramSearchInput(value);
+                            },
+                          }}
                           emptyIndicator={
                             <p className="text-center text-sm">
                               No programs found
