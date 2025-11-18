@@ -125,10 +125,25 @@ export function OnboardingForm() {
     () =>
       (programs ?? []).map((program) => ({
         value: program._id,
-        label: program.name,
+        label: `${program.name} - ${program.school}`,
       })),
     [programs],
   );
+
+  // Cache to store program labels so they don't disappear when search results change
+  const programLabelCache = React.useRef<Map<Id<"programs">, string>>(
+    new Map(),
+  );
+
+  // Update cache whenever new programs are loaded
+  React.useEffect(() => {
+    programOptions.forEach((option) => {
+      programLabelCache.current.set(
+        option.value as Id<"programs">,
+        option.label,
+      );
+    });
+  }, [programOptions]);
 
   const currentYear = React.useMemo(() => new Date().getFullYear(), []);
   const defaultTerm = React.useMemo<Term>(() => {
@@ -357,8 +372,10 @@ export function OnboardingForm() {
                 {(field) => {
                   const selected = (field.state.value ?? []).map((p) => ({
                     value: p,
-                    label: programOptions.find((val) => val.value === p)
-                      ?.label as string,
+                    label:
+                      programOptions.find((val) => val.value === p)?.label ||
+                      programLabelCache.current.get(p) ||
+                      "",
                   }));
                   return (
                     <UIField>
