@@ -14,8 +14,6 @@ import { useRouter } from "next/navigation";
 import React, { Activity } from "react";
 import { toast } from "sonner";
 import z from "zod";
-import { useDebounce } from "@/hooks/use-debounce";
-import MultipleSelector from "@/components/ui/multiselect";
 import { SchoolCombobox } from "@/app/onboarding/component/school-combobox";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -34,6 +32,7 @@ import {
   FieldLabel,
   Field as UIField,
 } from "@/components/ui/field";
+import MultipleSelector from "@/components/ui/multiselect";
 import {
   Select,
   SelectContent,
@@ -46,6 +45,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useDebounce } from "@/hooks/use-debounce";
 import DegreeProgreeUpload from "@/modules/report-parsing/components/degree-progress-upload";
 import type { UserCourse } from "@/modules/report-parsing/types";
 import type { StartingTerm } from "@/modules/report-parsing/utils/parse-starting-term";
