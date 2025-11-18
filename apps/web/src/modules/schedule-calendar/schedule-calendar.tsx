@@ -32,7 +32,7 @@ export interface Class {
   section: string;
   year: number;
   term: Term;
-  instructor: string[];
+  instructors: string[];
   location?: string;
   startTime: string | undefined;
   endTime: string | undefined;
@@ -180,11 +180,11 @@ export function ScheduleCalendar({
         title: `${offering.courseCode} - ${offering.title}`,
         color,
         times: slots,
-        description: `${offering.instructor.join(", ")} • ${offering.section.toUpperCase()} • ${offering.term} ${offering.year}`,
+        description: `${offering.instructors.join(", ")} • ${offering.section.toUpperCase()} • ${offering.term} ${offering.year}`,
         section: offering.section,
         year: offering.year,
         term: offering.term,
-        instructor: offering.instructor,
+        instructors: offering.instructors,
         location: offering.location,
         startTime: offering.startTime,
         endTime: offering.endTime,
@@ -250,12 +250,12 @@ export function ScheduleCalendar({
         title: `${offering.courseCode} - ${offering.title}`,
         color: getColor(offering._id),
         times: slots,
-        description: `${offering.instructor.join(", ")} • ${offering.section.toUpperCase()} • Preview`,
+        description: `${offering.instructors.join(", ")} • ${offering.section.toUpperCase()} • Preview`,
         isPreview: true,
         section: offering.section,
         year: offering.year,
         term: offering.term,
-        instructor: offering.instructor,
+        instructors: offering.instructors,
         location: offering.location,
         startTime: offering.startTime as string,
         endTime: offering.endTime as string,

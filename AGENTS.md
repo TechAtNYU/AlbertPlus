@@ -1,27 +1,19 @@
-# Development Guidelines for Albert Plus
+# Agent Development Guide
 
-## Build/Lint/Test Commands
+## Commands
 
-- **Build**: `bun run build` (builds all workspaces via turbo)
-- **Lint**: `bun run check` (runs Biome linter/formatter)
-- **Type check**: `bun run check:types` (type checks all workspaces)
-- **Test**: `bun run test` (runs all tests) or `bun test <file>` (single test)
-- **Test single file**: `cd apps/scraper && bun test src/modules/courses/index.test.ts`
-- **Test with pattern**: `bun test --test-name-pattern="<regex>"`
-- **Dev**: `bun run dev` (starts all dev servers with turbo)
+- **Lint/Format**: `bun check` (check) or `biome check --write` (fix)
+- **Type Check**: `bun check:types` (all) or `bun run --filter web check:types` (specific)
+- **Dev**: `bun dev` (starts all services with Turbo)
 
-## Code Style & Formatting
+## Code Style
 
-- **Formatter**: Biome with 2-space indentation, double quotes for strings
-- **Imports**: Organize imports automatically (use `@/*` alias for apps/web src paths)
-- **Types**: Strict TypeScript enabled - use explicit types, avoid `any`
-- **Naming**: camelCase for variables/functions, PascalCase for components/types
-- **Error Handling**: Use `JobError` for scraper modules, return `null` for not found in queries
-
-## Architecture Notes
-
-- **Monorepo**: Turbo + Bun workspaces (`apps/*`, `packages/*`)
-- **Backend**: Convex (packages/server) for queries/mutations with Clerk auth
-- **Frontend**: Next.js 15 with App Router, Tailwind CSS v4, React 19
-- **Scraper**: Cloudflare Workers with Hono, Drizzle ORM for D1
-- **Testing**: Bun test runner with mocks in `__mocks__/` directories
+- **Package Manager**: Bun (v1.3.1+), use `bun install` not npm/yarn/pnpm
+- **Formatter**: Biome - 2 spaces, double quotes, organized imports
+- **TypeScript**: Strict mode, no implicit any, use explicit types for exports
+- **Imports**: Organize imports automatically via Biome, use `@/` for app imports, `workspace:*` for monorepo packages
+- **Naming**: camelCase for variables/functions, PascalCase for components/types, UPPER_SNAKE_CASE for constants
+- **Error Handling**: Use `ConvexError` for Convex functions, `JobError` for scraper jobs, typed errors preferred
+- **Async**: Use async/await, avoid callbacks, handle errors with try/catch or .catch()
+- **Components**: React 19 + Next.js 16, server components by default, use "use client" when needed
+- **Database**: Convex for main app, Drizzle ORM for scraper D1 database

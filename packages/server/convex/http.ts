@@ -222,7 +222,7 @@ export const ZUpsertCourseOfferings = z.array(
     term: z.enum(["spring", "summer", "fall", "j-term"]),
     level: z.enum(["undergraduate", "graduate"]),
     school: ZSchoolName,
-    instructor: z.array(z.string()),
+    instructors: z.array(z.string()),
     location: z.optional(z.string()),
     days: z.array(
       z.enum([
