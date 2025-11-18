@@ -10,7 +10,11 @@ const config = {
     ],
     navBottom: [
       { title: "Settings", url: "#settings", icon: Settings },
-      { title: "Feedback", url: "/feedback", icon: Send },
+      {
+        title: "Feedback",
+        url: "https://techatnyu.featurebase.app/",
+        icon: Send,
+      },
     ],
   },
 };
