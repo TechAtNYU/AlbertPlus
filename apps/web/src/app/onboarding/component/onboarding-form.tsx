@@ -2,7 +2,7 @@
 
 import { api } from "@albert-plus/server/convex/_generated/api";
 import type { Doc, Id } from "@albert-plus/server/convex/_generated/dataModel";
-import { useUser } from "@clerk/nextjs";
+import { useClerk, useUser } from "@clerk/nextjs";
 import { useForm } from "@tanstack/react-form";
 import {
   useConvexAuth,
@@ -11,6 +11,7 @@ import {
   useQuery,
 } from "convex/react";
 import type { FunctionArgs } from "convex/server";
+import { LogOutIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { Activity } from "react";
 import { toast } from "sonner";
@@ -101,6 +102,7 @@ const onboardingFormSchema = z
 export function OnboardingForm() {
   const router = useRouter();
   const { user } = useUser();
+  const { signOut } = useClerk();
   const { isAuthenticated } = useConvexAuth();
   const [isFileLoaded, setIsFileLoaded] = React.useState(false);
   const [currentStep, setCurrentStep] = React.useState<1 | 2>(1);
@@ -273,37 +275,51 @@ export function OnboardingForm() {
       <Activity mode={currentStep === 1 ? "visible" : "hidden"}>
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl flex items-center gap-2">
-              Degree Progress Report
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Badge
-                    variant="outline"
-                    className="cursor-help size-5 rounded-full p-0 text-xs hover:bg-muted"
-                  >
-                    ?
-                  </Badge>
-                </TooltipTrigger>
-                <TooltipContent className="max-w-xs">
-                  <p>
-                    We do not store your degree progress report. Need help
-                    finding it?{" "}
-                    <a
-                      href="https://www.nyu.edu/students/student-information-and-resources/registration-records-and-graduation/registration/tracking-degree-progress.html"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="underline"
-                    >
-                      View NYU's guide
-                    </a>
-                  </p>
-                </TooltipContent>
-              </Tooltip>
-            </CardTitle>
-            <CardDescription>
-              Upload your degree progress report (PDF) so we can help you track
-              your academic progress and suggest courses.
-            </CardDescription>
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex-1">
+                <CardTitle className="text-2xl flex items-center gap-2">
+                  Degree Progress Report
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Badge
+                        variant="outline"
+                        className="cursor-help size-5 rounded-full p-0 text-xs hover:bg-muted"
+                      >
+                        ?
+                      </Badge>
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs">
+                      <p>
+                        We do not store your degree progress report. Need help
+                        finding it?{" "}
+                        <a
+                          href="https://www.nyu.edu/students/student-information-and-resources/registration-records-and-graduation/registration/tracking-degree-progress.html"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="underline"
+                        >
+                          View NYU's guide
+                        </a>
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </CardTitle>
+                <CardDescription>
+                  Upload your degree progress report (PDF) so we can help you
+                  track your academic progress and suggest courses.
+                </CardDescription>
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => signOut({ redirectUrl: "/" })}
+                className="gap-2 text-muted-foreground hover:text-foreground"
+              >
+                <LogOutIcon className="size-4" />
+                Sign out
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <DegreeProgreeUpload
@@ -355,11 +371,25 @@ export function OnboardingForm() {
       <Activity mode={currentStep === 2 ? "visible" : "hidden"}>
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl">Academic Information</CardTitle>
-            <CardDescription>
-              Tell us about your academic background so we can personalize your
-              experience.
-            </CardDescription>
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex-1">
+                <CardTitle className="text-2xl">Academic Information</CardTitle>
+                <CardDescription>
+                  Tell us about your academic background so we can personalize
+                  your experience.
+                </CardDescription>
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => signOut({ redirectUrl: "/" })}
+                className="gap-2 text-muted-foreground hover:text-foreground"
+              >
+                <LogOutIcon className="size-4" />
+                Sign out
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <FieldGroup>
