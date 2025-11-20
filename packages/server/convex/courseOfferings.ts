@@ -120,7 +120,7 @@ export const getCourseOfferings = protectedQuery({
               .eq("term", term)
               .eq("year", year),
           )
-          .take(500),
+          .take(300),
         ctx.db
           .query("courseOfferings")
           .withSearchIndex("search_course_code", (q) =>
@@ -130,7 +130,7 @@ export const getCourseOfferings = protectedQuery({
               .eq("term", term)
               .eq("year", year),
           )
-          .take(500),
+          .take(300),
       ]);
 
       const combinedMap = new Map<string, Doc<"courseOfferings">>();
