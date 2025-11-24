@@ -181,13 +181,20 @@ export function EventItem({
         "py-1 flex flex-col h-full relative",
         durationMinutes < 45 ? "items-center" : "items-start",
         "text-[10px] sm:text-xs",
-        isHovered && !event.isPreview && "scale-105 shadow-lg z-50",
+        isHovered &&
+          !event.isPreview &&
+          !event.isAlternative &&
+          "scale-105 shadow-lg z-50",
         event.isPreview && "opacity-50 z-40",
+        event.isAlternative && "opacity-40 z-30",
         className,
       )}
     >
       {event.isPreview && (
         <div className="absolute inset-0 border border-dashed rounded pointer-events-none" />
+      )}
+      {event.isAlternative && (
+        <div className="absolute inset-0 border border-dashed border-current/30 rounded pointer-events-none" />
       )}
       {durationMinutes < 45 ? (
         <div className="truncate">
