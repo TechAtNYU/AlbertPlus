@@ -206,7 +206,7 @@ export const removeUserCourseOffering = protectedMutation({
       .collect();
 
     for (const alternative of alternatives) {
-      await ctx.db.delete(alternative._id);
+      await ctx.db.patch(alternative._id, { alternativeOf: undefined });
     }
   },
 });
