@@ -6,8 +6,8 @@ import clsx from "clsx";
 import { useQuery } from "convex/react";
 import { CalendarPlus, ChevronDownIcon, GitBranch } from "lucide-react";
 import { useState } from "react";
+import { useNextTerm, useNextYear } from "@/components/AppConfigProvider";
 import { Button } from "@/components/ui/button";
-
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -34,6 +34,9 @@ export const CourseSectionItem = ({
   onSelectAsAlternative,
   onHover,
 }: CourseSectionItemProps) => {
+  const term = useNextTerm();
+  const year = useNextYear();
+
   const [showSelector, setShowSelector] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [selectedCourseId, setSelectedCourseId] =
@@ -61,8 +64,13 @@ export const CourseSectionItem = ({
 
   const userCourses = useQuery(api.userCourseOfferings.getUserCourseOfferings);
 
-  // Filter out courses that are alternatives themselves
-  const mainCourses = userCourses?.filter((course) => !course.alternativeOf);
+  // Filter out courses that are alternatives themselves and only show courses from the same term/year
+  const mainCourses = userCourses?.filter(
+    (course) =>
+      !course.alternativeOf &&
+      course.courseOffering.term === term &&
+      course.courseOffering.year === year,
+  );
 
   const isSelected = selectedClassNumbers?.includes(offering.classNumber);
 

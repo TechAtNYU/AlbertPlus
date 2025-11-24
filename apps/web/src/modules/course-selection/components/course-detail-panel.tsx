@@ -230,7 +230,7 @@ export function CourseDetailPanel({
                           </p>
                           <p className="text-xs text-muted-foreground break-words">
                             Section {alt.courseOffering.section.toUpperCase()} •{" "}
-                            {alt.courseOffering.instructor.join(", ")}
+                            {alt.courseOffering.instructors.join(", ")}
                           </p>
                         </div>
                         <span

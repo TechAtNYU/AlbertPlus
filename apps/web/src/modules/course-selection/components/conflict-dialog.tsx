@@ -5,6 +5,7 @@ import type { Id } from "@albert-plus/server/convex/_generated/dataModel";
 import { useQuery } from "convex/react";
 import { ChevronDown, CircleAlertIcon, GitBranch } from "lucide-react";
 import { useState } from "react";
+import { useNextTerm, useNextYear } from "@/components/AppConfigProvider";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -45,6 +46,8 @@ export default function ConflictDialog({
   onCancel,
   isAdding = false,
 }: ConflictDialogProps) {
+  const term = useNextTerm();
+  const year = useNextYear();
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const userCourses = useQuery(api.userCourseOfferings.getUserCourseOfferings);
@@ -52,6 +55,8 @@ export default function ConflictDialog({
   const conflictingMainCourses = userCourses?.filter(
     (course) =>
       !course.alternativeOf &&
+      course.courseOffering.term === term &&
+      course.courseOffering.year === year &&
       conflictingCourses.some(
         (c) => c.classNumber === course.courseOffering.classNumber,
       ),

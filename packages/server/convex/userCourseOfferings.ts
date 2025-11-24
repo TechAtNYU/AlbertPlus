@@ -130,7 +130,12 @@ export const addUserCourseOffering = protectedMutation({
 
       // Only check courses that have time information
       const validOfferings = existingCourseOfferings.filter(
-        (offering): offering is NonNullable<typeof offering> & { startTime: string; endTime: string } =>
+        (
+          offering,
+        ): offering is NonNullable<typeof offering> & {
+          startTime: string;
+          endTime: string;
+        } =>
           offering !== null &&
           offering.startTime !== undefined &&
           offering.endTime !== undefined,

@@ -4,6 +4,7 @@ import { api } from "@albert-plus/server/convex/_generated/api";
 import type { Id } from "@albert-plus/server/convex/_generated/dataModel";
 import { useQuery } from "convex/react";
 import { ChevronDownIcon } from "lucide-react";
+import { useNextTerm, useNextYear } from "@/components/AppConfigProvider";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -17,10 +18,17 @@ interface AlternativeDropdownProps {
 }
 
 export function AlternativeDropdown({ onSelect }: AlternativeDropdownProps) {
+  const term = useNextTerm();
+  const year = useNextYear();
   const userCourses = useQuery(api.userCourseOfferings.getUserCourseOfferings);
 
-  // Filter out courses that are alternatives themselves
-  const mainCourses = userCourses?.filter((course) => !course.alternativeOf);
+  // Filter out courses that are alternatives themselves and only show courses from the same term/year
+  const mainCourses = userCourses?.filter(
+    (course) =>
+      !course.alternativeOf &&
+      course.courseOffering.term === term &&
+      course.courseOffering.year === year,
+  );
 
   if (!mainCourses || mainCourses.length === 0) {
     return (
