@@ -6,11 +6,10 @@
     "dev": "doppler run -- convex dev",
     "dashboard": "convex dashboard",
     "check:types": "tsc --noEmit",
-    "seed:configs": "convex import --table appConfigs --replace seed/appConfigs.json",
-    "seed": "bun seed/seed.ts"
+    "seed": "convex import --replace ./seed.zip"
   },
   "dependencies": {
-    "convex": "^1.29.0",
+    "convex": "^1.29.2",
     "convex-helpers": "^0.1.104",
     "zod": "^4.1.12"
   },

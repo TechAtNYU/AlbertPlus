@@ -23,6 +23,7 @@ interface CourseSelectorComponentProps {
   isSearching?: boolean;
   selectedCourse?: Class | null;
   onCourseSelect?: (course: Class | null) => void;
+  selectedClassNumbers?: number[];
 }
 
 const CourseSelector = ({
@@ -35,6 +36,7 @@ const CourseSelector = ({
   isSearching = false,
   selectedCourse,
   onCourseSelect,
+  selectedClassNumbers,
 }: CourseSelectorComponentProps) => {
   const { searchValue: filtersParam, setSearchValue: setFiltersParam } =
     useSearchParam({ paramKey: "filters", debounceDelay: 0 });
@@ -77,6 +79,14 @@ const CourseSelector = ({
     setFiltersParam(isFiltersExpanded ? "" : "true");
   };
 
+  const handleSectionHover = (section: CourseOffering | null) => {
+    if (section && (!section.startTime || !section.endTime)) {
+      setHoveredSection(null);
+      return;
+    }
+    setHoveredSection(section);
+  };
+
   const parentRef = React.useRef<HTMLDivElement>(null);
 
   const rowVirtualizer = useVirtualizer({
@@ -90,6 +100,20 @@ const CourseSelector = ({
   useEffect(() => {
     onHover?.(hoveredSection);
   }, [hoveredSection, onHover]);
+
+  // https://tanstack.com/virtual/latest/docs/framework/react/examples/infinite-scroll
+  // biome-ignore lint/correctness/useExhaustiveDependencies: It's in Tanstack doc
+  useEffect(() => {
+    const [lastItem] = [...rowVirtualizer.getVirtualItems()].reverse();
+
+    if (!lastItem) {
+      return;
+    }
+
+    if (lastItem.index >= filteredData.length - 1 && status === "CanLoadMore") {
+      loadMore(200);
+    }
+  }, [status, loadMore, filteredData.length, rowVirtualizer.getVirtualItems()]);
 
   const handleSectionSelect = async (offering: CourseOffering) => {
     if (offering.status === "closed") {
@@ -335,12 +359,13 @@ const CourseSelector = ({
                   <CourseCard
                     course={course}
                     isExpanded={isExpanded(course.code)}
+                    selectedClassNumbers={selectedClassNumbers}
                     onToggleExpand={toggleCourseExpansion}
                     onSectionSelect={handleSectionSelect}
                     onSectionSelectAsAlternative={
                       handleSectionSelectAsAlternative
                     }
-                    onSectionHover={setHoveredSection}
+                    onSectionHover={handleSectionHover}
                   />
                 </div>
               );
@@ -349,13 +374,6 @@ const CourseSelector = ({
         </div>
       )}
 
-      {status === "CanLoadMore" && (
-        <div className="flex justify-center py-4 shrink-0">
-          <Button onClick={() => loadMore(200)} variant="outline">
-            Load More
-          </Button>
-        </div>
-      )}
       {status === "LoadingMore" && (
         <div className="flex justify-center py-4 shrink-0">
           <p className="text-gray-500">Loading more courses...</p>

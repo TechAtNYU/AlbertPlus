@@ -2,6 +2,7 @@
 
 import { api } from "@albert-plus/server/convex/_generated/api";
 import type { Doc, Id } from "@albert-plus/server/convex/_generated/dataModel";
+import { useClerk, useUser } from "@clerk/nextjs";
 import { useForm } from "@tanstack/react-form";
 import {
   useConvexAuth,
@@ -10,11 +11,11 @@ import {
   useQuery,
 } from "convex/react";
 import type { FunctionArgs } from "convex/server";
+import { LogOutIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { Activity } from "react";
 import { toast } from "sonner";
 import z from "zod";
-import MultipleSelector from "@/app/onboarding/component/multiselect";
 import { SchoolCombobox } from "@/app/onboarding/component/school-combobox";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -26,13 +27,17 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   FieldContent,
+  FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
   Field as UIField,
 } from "@/components/ui/field";
+import { Label } from "@/components/ui/label";
+import MultipleSelector from "@/components/ui/multiselect";
 import {
   Select,
   SelectContent,
@@ -45,6 +50,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useDebounce } from "@/hooks/use-debounce";
 import DegreeProgreeUpload from "@/modules/report-parsing/components/degree-progress-upload";
 import type { UserCourse } from "@/modules/report-parsing/types";
 import type { StartingTerm } from "@/modules/report-parsing/utils/parse-starting-term";
@@ -71,6 +77,8 @@ const onboardingFormSchema = z
     expectedGraduationDate: dateSchema,
     // User courses
     userCourses: z.array(z.object()).optional(),
+    // Final presentation invite
+    attendPresentation: z.boolean().optional(),
   })
   .refine(
     (data) => {
@@ -93,6 +101,8 @@ const onboardingFormSchema = z
 
 export function OnboardingForm() {
   const router = useRouter();
+  const { user } = useUser();
+  const { signOut } = useClerk();
   const { isAuthenticated } = useConvexAuth();
   const [isFileLoaded, setIsFileLoaded] = React.useState(false);
   const [currentStep, setCurrentStep] = React.useState<1 | 2>(1);
@@ -100,6 +110,7 @@ export function OnboardingForm() {
   // actions
   const upsertStudent = useMutation(api.students.upsertCurrentStudent);
   const importUserCourses = useMutation(api.userCourses.importUserCourses);
+  const createInvite = useMutation(api.studentInvites.createInvite);
 
   // schools
   const schools = useQuery(
@@ -108,16 +119,15 @@ export function OnboardingForm() {
   );
 
   // Programs
-  const [programsQuery, setProgramsQuery] = React.useState<string | undefined>(
-    undefined,
-  );
-  const {
-    results: programs,
-    status: programsStatus,
-    loadMore: programsLoadMore,
-  } = usePaginatedQuery(
+  const [programSearchInput, setProgramSearchInput] =
+    React.useState<string>("");
+  const debouncedProgramSearch = useDebounce(programSearchInput, 300);
+
+  const { results: programs } = usePaginatedQuery(
     api.programs.getPrograms,
-    isAuthenticated ? { query: programsQuery } : ("skip" as const),
+    isAuthenticated
+      ? { query: debouncedProgramSearch.trim() || undefined }
+      : ("skip" as const),
     { initialNumItems: 20 },
   );
 
@@ -125,25 +135,25 @@ export function OnboardingForm() {
     () =>
       (programs ?? []).map((program) => ({
         value: program._id,
-        label: program.name,
+        label: `${program.name} - ${program.school}`,
       })),
     [programs],
   );
 
-  const handleSearchPrograms = React.useCallback(
-    async (value: string) => {
-      const trimmed = value.trim();
-      setProgramsQuery(trimmed.length === 0 ? undefined : trimmed);
-      return programOptions;
-    },
-    [programOptions],
+  // Cache to store program labels so they don't disappear when search results change
+  const programLabelCache = React.useRef<Map<Id<"programs">, string>>(
+    new Map(),
   );
 
-  const handleLoadMorePrograms = React.useCallback(() => {
-    if (programsStatus === "CanLoadMore") {
-      void programsLoadMore(10);
-    }
-  }, [programsStatus, programsLoadMore]);
+  // Update cache whenever new programs are loaded
+  React.useEffect(() => {
+    programOptions.forEach((option) => {
+      programLabelCache.current.set(
+        option.value as Id<"programs">,
+        option.label,
+      );
+    });
+  }, [programOptions]);
 
   const currentYear = React.useMemo(() => new Date().getFullYear(), []);
   const defaultTerm = React.useMemo<Term>(() => {
@@ -183,6 +193,8 @@ export function OnboardingForm() {
       userCourses: undefined as
         | FunctionArgs<typeof api.userCourses.importUserCourses>["courses"]
         | undefined,
+      // final presentation
+      attendPresentation: false,
     },
     validators: {
       onSubmit: ({ value }) => {
@@ -214,6 +226,14 @@ export function OnboardingForm() {
 
         if (value.userCourses) {
           await importUserCourses({ courses: value.userCourses });
+        }
+
+        if (value.attendPresentation && user) {
+          await createInvite({
+            name: user.fullName || "Unknown",
+            email:
+              user.primaryEmailAddress?.emailAddress || "unknown@example.com",
+          });
         }
       } catch (error) {
         console.error("Error completing onboarding:", error);
@@ -255,37 +275,51 @@ export function OnboardingForm() {
       <Activity mode={currentStep === 1 ? "visible" : "hidden"}>
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl flex items-center gap-2">
-              Degree Progress Report
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Badge
-                    variant="outline"
-                    className="cursor-help size-5 rounded-full p-0 text-xs hover:bg-muted"
-                  >
-                    ?
-                  </Badge>
-                </TooltipTrigger>
-                <TooltipContent className="max-w-xs">
-                  <p>
-                    We do not store your degree progress report. Need help
-                    finding it?{" "}
-                    <a
-                      href="https://www.nyu.edu/students/student-information-and-resources/registration-records-and-graduation/registration/tracking-degree-progress.html"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="underline"
-                    >
-                      View NYU's guide
-                    </a>
-                  </p>
-                </TooltipContent>
-              </Tooltip>
-            </CardTitle>
-            <CardDescription>
-              Upload your degree progress report (PDF) so we can help you track
-              your academic progress and suggest courses.
-            </CardDescription>
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex-1">
+                <CardTitle className="text-2xl flex items-center gap-2">
+                  Degree Progress Report
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Badge
+                        variant="outline"
+                        className="cursor-help size-5 rounded-full p-0 text-xs hover:bg-muted"
+                      >
+                        ?
+                      </Badge>
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs">
+                      <p>
+                        We do not store your degree progress report. Need help
+                        finding it?{" "}
+                        <a
+                          href="https://www.nyu.edu/students/student-information-and-resources/registration-records-and-graduation/registration/tracking-degree-progress.html"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="underline"
+                        >
+                          View NYU's guide
+                        </a>
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </CardTitle>
+                <CardDescription>
+                  Upload your degree progress report (PDF) so we can help you
+                  track your academic progress and suggest courses.
+                </CardDescription>
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => signOut({ redirectUrl: "/" })}
+                className="gap-2 text-muted-foreground hover:text-foreground"
+              >
+                <LogOutIcon className="size-4" />
+                Sign out
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <DegreeProgreeUpload
@@ -337,11 +371,25 @@ export function OnboardingForm() {
       <Activity mode={currentStep === 2 ? "visible" : "hidden"}>
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl">Academic Information</CardTitle>
-            <CardDescription>
-              Tell us about your academic background so we can personalize your
-              experience.
-            </CardDescription>
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex-1">
+                <CardTitle className="text-2xl">Academic Information</CardTitle>
+                <CardDescription>
+                  Tell us about your academic background so we can personalize
+                  your experience.
+                </CardDescription>
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => signOut({ redirectUrl: "/" })}
+                className="gap-2 text-muted-foreground hover:text-foreground"
+              >
+                <LogOutIcon className="size-4" />
+                Sign out
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <FieldGroup>
@@ -372,8 +420,10 @@ export function OnboardingForm() {
                 {(field) => {
                   const selected = (field.state.value ?? []).map((p) => ({
                     value: p,
-                    label: programOptions.find((val) => val.value === p)
-                      ?.label as string,
+                    label:
+                      programOptions.find((val) => val.value === p)?.label ||
+                      programLabelCache.current.get(p) ||
+                      "",
                   }));
                   return (
                     <UIField>
@@ -390,12 +440,16 @@ export function OnboardingForm() {
                           }
                           defaultOptions={programOptions}
                           options={programOptions}
-                          delay={300}
-                          onSearch={handleSearchPrograms}
-                          triggerSearchOnFocus
                           placeholder="Select your programs"
-                          commandProps={{ label: "Select programs" }}
-                          onListReachEnd={handleLoadMorePrograms}
+                          commandProps={{
+                            label: "Select programs",
+                            shouldFilter: false,
+                          }}
+                          inputProps={{
+                            onValueChange: (value) => {
+                              setProgramSearchInput(value);
+                            },
+                          }}
                           emptyIndicator={
                             <p className="text-center text-sm">
                               No programs found
@@ -539,6 +593,55 @@ export function OnboardingForm() {
                   {(field) => <FieldError errors={field.state.meta.errors} />}
                 </form.Field>
               </FieldGroup>
+
+              <div className="rounded-lg border border-border/40 bg-muted/5 p-5">
+                <div className="space-y-4">
+                  <div className="space-y-1">
+                    <h3 className="text-base font-semibold">
+                      Tech@NYU Final Presentation RSVP
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      The Tech@NYU Dev Team will showcase the Albert Plus
+                      project during our final presentation between December 7
+                      and December 12, 2025. Let us know if you'd like to join
+                      so we can send the exact date, time, and location details.
+                    </p>
+                  </div>
+                  {/* Final presentation invite */}
+                  <form.Field name="attendPresentation">
+                    {(field) => (
+                      <div className="space-y-2">
+                        <UIField
+                          orientation="horizontal"
+                          className="items-start gap-3"
+                        >
+                          <Checkbox
+                            id={field.name}
+                            checked={Boolean(field.state.value)}
+                            onCheckedChange={(checked) =>
+                              field.handleChange(checked === true)
+                            }
+                            aria-describedby={`${field.name}-description`}
+                          />
+                          <FieldContent>
+                            <Label
+                              htmlFor={field.name}
+                              className="text-sm font-medium leading-snug"
+                            >
+                              I plan to attend the final presentation
+                            </Label>
+                            <FieldDescription id={`${field.name}-description`}>
+                              We'll email you an RSVP as soon as the schedule is
+                              finalized.
+                            </FieldDescription>
+                          </FieldContent>
+                        </UIField>
+                        <FieldError errors={field.state.meta.errors} />
+                      </div>
+                    )}
+                  </form.Field>
+                </div>
+              </div>
             </FieldGroup>
           </CardContent>
           <CardFooter>
