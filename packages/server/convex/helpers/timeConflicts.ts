@@ -10,7 +10,7 @@ function timeToMinutes(time: string): number {
 }
 
 function doTimesOverlap(
-  day: string,
+  _day: string,
   start1: string,
   end1: string,
   start2: string,

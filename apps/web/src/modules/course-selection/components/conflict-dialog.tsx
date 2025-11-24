@@ -4,7 +4,7 @@ import { api } from "@albert-plus/server/convex/_generated/api";
 import type { Id } from "@albert-plus/server/convex/_generated/dataModel";
 import { useQuery } from "convex/react";
 import { ChevronDown, CircleAlertIcon, GitBranch } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,

@@ -62,14 +62,6 @@ export const CourseSectionItem = ({
   // Filter out courses that are alternatives themselves
   const mainCourses = userCourses?.filter((course) => !course.alternativeOf);
 
-  if (!mainCourses || mainCourses.length === 0) {
-    return (
-      <Button variant="outline" disabled className="w-full">
-        No courses to add alternative to
-      </Button>
-    );
-  }
-
   return (
     <>
       {/** biome-ignore lint/a11y/useSemanticElements: button inside button will cause hydration error */}
@@ -156,7 +148,14 @@ export const CourseSectionItem = ({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className=" max-h-[300px] overflow-y-auto">
-                  {mainCourses.map((course) => (
+                  {mainCourses?.length === 0 && (
+                    <DropdownMenuItem className="flex flex-col items-start py-2 cursor-default">
+                      <span className="font-medium text-sm">
+                        Please add a course first.
+                      </span>
+                    </DropdownMenuItem>
+                  )}
+                  {mainCourses?.map((course) => (
                     <DropdownMenuItem
                       key={course._id}
                       onSelect={() => handleAddAsAlternative(course._id)}
