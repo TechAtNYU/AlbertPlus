@@ -102,7 +102,13 @@ export const addUserCourseOffering = protectedMutation({
     }
 
     // Only check for conflicts if this is not being added as an alternative
-    if (!args.alternativeOf && !forceAdd) {
+    // and if the new course has time information
+    if (
+      !args.alternativeOf &&
+      !forceAdd &&
+      newCourseOffering.startTime &&
+      newCourseOffering.endTime
+    ) {
       const userCourses = await ctx.db
         .query("userCourseOfferings")
         .withIndex("by_user", (q) => q.eq("userId", ctx.user.subject))
@@ -122,8 +128,12 @@ export const addUserCourseOffering = protectedMutation({
         }),
       );
 
+      // Only check courses that have time information
       const validOfferings = existingCourseOfferings.filter(
-        (offering) => offering !== null,
+        (offering): offering is NonNullable<typeof offering> & { startTime: string; endTime: string } =>
+          offering !== null &&
+          offering.startTime !== undefined &&
+          offering.endTime !== undefined,
       );
 
       const conflicts = findTimeConflicts(

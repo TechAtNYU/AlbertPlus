@@ -187,7 +187,7 @@ export default function ConflictDialog({
                     </span>
                     <span className="text-xs text-muted-foreground">
                       Section {course.courseOffering.section.toUpperCase()} •{" "}
-                      {course.courseOffering.instructor.join(", ")}
+                      {course.courseOffering.instructors.join(", ")}
                     </span>
                   </DropdownMenuItem>
                 ))}

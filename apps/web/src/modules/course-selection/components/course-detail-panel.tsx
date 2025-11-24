@@ -147,7 +147,7 @@ export function CourseDetailPanel({
                 Instructor
               </p>
               <p className="text-sm text-muted-foreground break-words">
-                {course.instructor.join(", ") || "TBA"}
+                {course.instructors.join(", ") || "TBA"}
               </p>
             </div>
 
