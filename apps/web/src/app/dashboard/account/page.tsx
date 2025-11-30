@@ -783,7 +783,7 @@ export default function ProfilePage() {
                     }}
                   />
                 </CardContent>
-                <CardFooter className="flex justify-center">
+                <CardFooter>
                   <Button type="submit" disabled={form.state.isSubmitting}>
                     {form.state.isSubmitting ? "Saving..." : "Save Changes"}
                   </Button>
