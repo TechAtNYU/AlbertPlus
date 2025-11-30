@@ -12,7 +12,7 @@ import {
   useQuery,
 } from "convex/react";
 import type { FunctionArgs } from "convex/server";
-import { Mail, MapPin } from "lucide-react";
+import { Mail, MapPin, Pencil } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import React from "react";
 import { toast } from "sonner";
@@ -24,6 +24,7 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -459,11 +460,25 @@ export default function ProfilePage() {
             <AcademicInfoSkeleton />
           ) : student ? (
             <Card>
-              <CardHeader>
-                <CardTitle>Academic Information</CardTitle>
-                <CardDescription>
-                  View and update your academic information here.
-                </CardDescription>
+              <CardHeader className="flex flex-row items-start justify-between">
+                <div className="space-y-1.5">
+                  <CardTitle>Academic Information</CardTitle>
+                  <CardDescription>
+                    View and update your academic information here.
+                  </CardDescription>
+                </div>
+                {!editingProfile && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="gap-1.5"
+                    onClick={() => setEditingProfile(true)}
+                  >
+                    <Pencil className="size-3.5" />
+                    Edit
+                  </Button>
+                )}
               </CardHeader>
               <form
                 onSubmit={(e) => {
@@ -704,39 +719,24 @@ export default function ProfilePage() {
                         </p>
                       )}
                     </div>
-
-                    {!editingProfile ? (
-                      <Button
-                        type="button"
-                        className="w-auto max-w-fit"
-                        onClick={() => setEditingProfile(true)}
-                      >
-                        Edit Profile
-                      </Button>
-                    ) : (
-                      <div className="flex gap-3">
-                        <Button
-                          type="submit"
-                          disabled={form.state.isSubmitting}
-                          className="w-auto max-w-fit"
-                        >
-                          {form.state.isSubmitting
-                            ? "Saving..."
-                            : "Save Changes"}
-                        </Button>
-
-                        <Button
-                          type="button"
-                          variant="outline"
-                          className="w-auto max-w-fit"
-                          onClick={() => setEditingProfile(false)}
-                        >
-                          Cancel
-                        </Button>
-                      </div>
-                    )}
                   </div>
                 </CardContent>
+                {editingProfile && (
+                  <CardFooter>
+                    <div className="ml-auto flex gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setEditingProfile(false)}
+                      >
+                        Cancel
+                      </Button>
+                      <Button type="submit" disabled={form.state.isSubmitting}>
+                        {form.state.isSubmitting ? "Saving..." : "Save Changes"}
+                      </Button>
+                    </div>
+                  </CardFooter>
+                )}
               </form>
             </Card>
           ) : null}
