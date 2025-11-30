@@ -24,7 +24,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -159,9 +158,6 @@ function DegreeProgressSkeleton() {
       <CardContent>
         <Skeleton className="h-52 w-full rounded-lg" />
       </CardContent>
-      <CardFooter>
-        <Skeleton className="h-9 w-28" />
-      </CardFooter>
     </Card>
   );
 }
@@ -195,6 +191,7 @@ export default function ProfilePage() {
 
   // actions
   const upsertStudent = useMutation(api.students.upsertCurrentStudent);
+  const updateStudent = useMutation(api.students.updateCurrentStudent);
   const importUserCourses = useMutation(api.userCourses.importUserCourses);
 
   // schools
@@ -263,7 +260,7 @@ export default function ProfilePage() {
     return years;
   }, [currentYear]);
 
-  function handleConfirmImport(
+  async function handleConfirmImport(
     coursesToImport: UserCourse[],
     startingTerm: StartingTerm | null,
   ) {
@@ -271,17 +268,40 @@ export default function ProfilePage() {
       return;
     }
 
-    form.setFieldValue("userCourses", coursesToImport);
-
+    // Update starting date if available
     if (startingTerm) {
-      form.setFieldValue("startingDate", startingTerm);
-      form.setFieldValue(
-        "expectedGraduationDate",
-        getTermAfterSemesters(startingTerm, 14),
-      );
+      await updateStudent({ startingDate: startingTerm });
     }
 
-    setIsFileLoaded(true);
+    const result = await importUserCourses({ courses: coursesToImport });
+
+    const messages: string[] = [];
+    if (result) {
+      if (result.inserted > 0) {
+        messages.push(
+          `${result.inserted} new course${result.inserted !== 1 ? "s" : ""} imported`,
+        );
+      }
+      if (result.updated > 0) {
+        messages.push(
+          `${result.updated} course${result.updated !== 1 ? "s" : ""} updated with grades`,
+        );
+      }
+      if (result.duplicates > 0) {
+        messages.push(
+          `${result.duplicates} duplicate${result.duplicates !== 1 ? "s" : ""} skipped`,
+        );
+      }
+    }
+
+    const successMessage =
+      messages.length > 0
+        ? `Import complete: ${messages.join(", ")}`
+        : "Import complete";
+
+    toast.success(successMessage);
+    // Don't show "PDF Selected" state - reset to allow another upload
+    setIsFileLoaded(false);
   }
 
   const form = useForm({
@@ -727,69 +747,48 @@ export default function ProfilePage() {
           {isLoading ? (
             <DegreeProgressSkeleton />
           ) : (
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                form.handleSubmit();
-              }}
-            >
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-2xl flex items-center">
-                    Degree Progress Report
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Badge
-                          variant="outline"
-                          className="cursor-help size-5 rounded-full p-0 text-xs hover:bg-muted"
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-2xl flex items-center gap-2">
+                  Degree Progress Report
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Badge
+                        variant="outline"
+                        className="cursor-help size-5 rounded-full p-0 text-xs hover:bg-muted"
+                      >
+                        ?
+                      </Badge>
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs">
+                      <p>
+                        We do not store your degree progress report. Need help
+                        finding it?{" "}
+                        <a
+                          href="https://www.nyu.edu/students/student-information-and-resources/registration-records-and-graduation/registration/tracking-degree-progress.html"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="underline"
                         >
-                          ?
-                        </Badge>
-                      </TooltipTrigger>
-                      <TooltipContent className="max-w-xs">
-                        <p>
-                          We do not store your degree progress report. Need help
-                          finding it?{" "}
-                          <a
-                            href="https://www.nyu.edu/students/student-information-and-resources/registration-records-and-graduation/registration/tracking-degree-progress.html"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="underline"
-                          >
-                            View NYU's guide
-                          </a>
-                        </p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </CardTitle>
-                  <CardDescription>
-                    Upload a PDF of you degree progress report so we can help
-                    you track your academic progress and suggest courses.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <DegreeProgreeUpload
-                    onConfirm={handleConfirmImport}
-                    showFileLoaded={isFileLoaded}
-                    onFileClick={() => {
-                      form.setFieldValue("userCourses", undefined);
-                      form.setFieldValue("startingDate", defaultStartingDate);
-                      form.setFieldValue(
-                        "expectedGraduationDate",
-                        defaultExpectedGraduation,
-                      );
-                      setIsFileLoaded(false);
-                    }}
-                  />
-                </CardContent>
-                <CardFooter>
-                  <Button type="submit" disabled={form.state.isSubmitting}>
-                    {form.state.isSubmitting ? "Saving..." : "Save Changes"}
-                  </Button>
-                </CardFooter>
-              </Card>
-            </form>
+                          View NYU's guide
+                        </a>
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </CardTitle>
+                <CardDescription>
+                  Upload a PDF of your degree progress report so we can help you
+                  track your academic progress and suggest courses.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <DegreeProgreeUpload
+                  onConfirm={handleConfirmImport}
+                  showFileLoaded={isFileLoaded}
+                  onFileClick={() => setIsFileLoaded(false)}
+                />
+              </CardContent>
+            </Card>
           )}
         </TabsContent>
       </Tabs>
