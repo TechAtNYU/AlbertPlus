@@ -105,7 +105,7 @@ export const ZUpsertCourseWithPrerequisites = z.object({
 
 export const ZUpsertProgramWithRequirements = z.object({
   name: z.string(),
-  level: ZSchoolLevel,
+  level: ZSchoolLevel, // undergraduate or graduate
   school: ZSchoolName,
   programUrl: z.string(),
   requirements: z.array(
@@ -130,7 +130,7 @@ export const ZUpsertProgramWithRequirements = z.object({
         courseLevels: z.array(
           z.object({
             program: z.string(), // CSCI-UA
-            level: z.coerce.number(), // 4
+            level: z.coerce.number(), // 4 (represents any classes at 400 level)
           }),
         ),
         creditsRequired: z.number(),
