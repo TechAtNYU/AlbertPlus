@@ -41,6 +41,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Tooltip,
@@ -92,6 +93,77 @@ const onboardingFormSchema = z
       path: ["expectedGraduationDate"],
     },
   );
+
+function ProfileHeaderSkeleton() {
+  return (
+    <Card>
+      <CardContent>
+        <div className="flex flex-col items-start gap-6 md:flex-row md:items-center">
+          <Skeleton className="h-20 w-20 rounded-full" />
+          <div className="flex-1 space-y-4">
+            <Skeleton className="h-8 w-48" />
+            <div className="space-y-3">
+              <Skeleton className="h-4 w-32" />
+              <div className="flex flex-wrap gap-4">
+                <Skeleton className="h-4 w-40" />
+                <Skeleton className="h-4 w-36" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function AcademicInfoSkeleton() {
+  return (
+    <Card>
+      <CardHeader>
+        <Skeleton className="h-6 w-48" />
+        <Skeleton className="h-4 w-72" />
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-16" />
+            <Skeleton className="h-4 w-48" />
+          </div>
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-20" />
+            <Skeleton className="h-4 w-56" />
+          </div>
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-36" />
+            <Skeleton className="h-4 w-32" />
+          </div>
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-44" />
+            <Skeleton className="h-4 w-32" />
+          </div>
+          <Skeleton className="h-9 w-28" />
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function DegreeProgressSkeleton() {
+  return (
+    <Card>
+      <CardHeader className="space-y-2">
+        <Skeleton className="h-6 w-64" />
+        <Skeleton className="h-4 w-96" />
+      </CardHeader>
+      <CardContent>
+        <Skeleton className="h-52 w-full rounded-lg" />
+      </CardContent>
+      <CardFooter>
+        <Skeleton className="h-9 w-28" />
+      </CardFooter>
+    </Card>
+  );
+}
 
 export default function ProfilePage() {
   // const router = useRouter();
@@ -280,73 +352,77 @@ export default function ProfilePage() {
     form.setFieldValue("programs", programIds);
   }, [student, form.setFieldValue]);
 
+  // Loading state - student is undefined while loading
+  const isLoading = student === undefined;
+
   return (
     <div>
       <Tabs defaultValue="personal">
-        <Card>
-          <CardContent>
-            <div className="flex flex-col items-start gap-6 md:flex-row md:items-center">
-              <div className="relative">
-                <Avatar className="inline-block h-20 w-20 rounded-full overflow-hidden">
-                  {user?.imageUrl ? (
-                    <AvatarImage
-                      src={user.imageUrl}
-                      alt={user.fullName || "User avatar"}
-                      className="block h-full w-full object-cover"
-                    />
-                  ) : (
-                    <AvatarFallback className="flex h-full w-full items-center justify-center bg-gray-200 text-base font-medium">
-                      {`${user?.firstName?.[0] || "U"}${user?.lastName?.[0] || "U"}`}
-                    </AvatarFallback>
-                  )}
-                </Avatar>
-              </div>
-              <div className="flex-1 space-y-2">
-                <div className="flex flex-col gap-2 md:flex-row md:items-center">
-                  <h1 className="text-2xl font-bold">
-                    {user?.fullName || "Unknown User"}
-                  </h1>
+        {isLoading ? (
+          <ProfileHeaderSkeleton />
+        ) : (
+          <Card>
+            <CardContent>
+              <div className="flex flex-col items-start gap-6 md:flex-row md:items-center">
+                <div className="relative">
+                  <Avatar className="inline-block h-20 w-20 rounded-full overflow-hidden">
+                    {user?.imageUrl ? (
+                      <AvatarImage
+                        src={user.imageUrl}
+                        alt={user.fullName || "User avatar"}
+                        className="block h-full w-full object-cover"
+                      />
+                    ) : (
+                      <AvatarFallback className="flex h-full w-full items-center justify-center bg-gray-200 text-base font-medium">
+                        {`${user?.firstName?.[0] || "U"}${user?.lastName?.[0] || "U"}`}
+                      </AvatarFallback>
+                    )}
+                  </Avatar>
                 </div>
-                {student && (
-                  <p className="text-muted-foreground">
-                    {student.school?.level
-                      ? student.school.level.charAt(0).toUpperCase() +
-                        student.school.level.slice(1).toLowerCase() +
-                        " Student"
-                      : "Student"}
-                  </p>
-                )}
-                <div className="text-muted-foreground flex flex-wrap gap-4 text-sm">
-                  <div className="flex items-center gap-1">
-                    <Mail className="size-4" />
-                    {user?.primaryEmailAddress?.emailAddress || ""}
+                <div className="flex-1 space-y-2">
+                  <div className="flex flex-col gap-2 md:flex-row md:items-center">
+                    <h1 className="text-2xl font-bold">
+                      {user?.fullName || "Unknown User"}
+                    </h1>
                   </div>
-                  {student?.school?.name && (
-                    <div className="flex items-center gap-1">
-                      <MapPin className="size-4" />
-                      {student.school.name}
-                    </div>
+                  {student && (
+                    <p className="text-muted-foreground">
+                      {student.school?.level
+                        ? student.school.level.charAt(0).toUpperCase() +
+                          student.school.level.slice(1).toLowerCase() +
+                          " Student"
+                        : "Student"}
+                    </p>
                   )}
-                  {/* <div className="flex items-center gap-1">
-                <Calendar className="size-4" />
-                Joined March 2023
-              </div> */}
+                  <div className="text-muted-foreground flex flex-wrap gap-4 text-sm">
+                    <div className="flex items-center gap-1">
+                      <Mail className="size-4" />
+                      {user?.primaryEmailAddress?.emailAddress || ""}
+                    </div>
+                    {student?.school?.name && (
+                      <div className="flex items-center gap-1">
+                        <MapPin className="size-4" />
+                        {student.school.name}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
-              {/* <Button variant="default">Edit Profile</Button> */}
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="personal">Academic Profile</TabsTrigger>
           <TabsTrigger value="degreeProgressReport">
             Degree Progress Report
           </TabsTrigger>
-          {/* <TabsTrigger value="security">Security</TabsTrigger>
-        <TabsTrigger value="notifications">Notifications</TabsTrigger> */}
         </TabsList>
-        {student && (
-          <TabsContent value="personal" className="space-y-6">
+
+        {/* Academic Profile Tab */}
+        <TabsContent value="personal" className="space-y-6">
+          {isLoading ? (
+            <AcademicInfoSkeleton />
+          ) : student ? (
             <Card>
               <CardHeader>
                 <CardTitle>Academic Information</CardTitle>
@@ -628,73 +704,78 @@ export default function ProfilePage() {
                 </CardContent>
               </form>
             </Card>
-          </TabsContent>
-        )}
+          ) : null}
+        </TabsContent>
 
+        {/* Degree Progress Report Tab */}
         <TabsContent value="degreeProgressReport">
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              form.handleSubmit();
-            }}
-          >
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-2xl flex items-center">
-                  Degree Progress Report
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Badge
-                        variant="outline"
-                        className="cursor-help size-5 rounded-full p-0 text-xs hover:bg-muted"
-                      >
-                        ?
-                      </Badge>
-                    </TooltipTrigger>
-                    <TooltipContent className="max-w-xs">
-                      <p>
-                        We do not store your degree progress report. Need help
-                        finding it?{" "}
-                        <a
-                          href="https://www.nyu.edu/students/student-information-and-resources/registration-records-and-graduation/registration/tracking-degree-progress.html"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="underline"
+          {isLoading ? (
+            <DegreeProgressSkeleton />
+          ) : (
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                form.handleSubmit();
+              }}
+            >
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-2xl flex items-center">
+                    Degree Progress Report
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Badge
+                          variant="outline"
+                          className="cursor-help size-5 rounded-full p-0 text-xs hover:bg-muted"
                         >
-                          View NYU's guide
-                        </a>
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </CardTitle>
-                <CardDescription>
-                  Upload a PDF of you degree progress report so we can help you
-                  track your academic progress and suggest courses.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <DegreeProgreeUpload
-                  onConfirm={handleConfirmImport}
-                  showFileLoaded={isFileLoaded}
-                  onFileClick={() => {
-                    form.setFieldValue("userCourses", undefined);
-                    form.setFieldValue("startingDate", defaultStartingDate);
-                    form.setFieldValue(
-                      "expectedGraduationDate",
-                      defaultExpectedGraduation,
-                    );
-                    setIsFileLoaded(false);
-                  }}
-                />
-              </CardContent>
-              <CardFooter className="flex justify-center">
-                <Button type="submit" disabled={form.state.isSubmitting}>
-                  {form.state.isSubmitting ? "Saving..." : "Save Changes"}
-                </Button>
-              </CardFooter>
-            </Card>
-          </form>
+                          ?
+                        </Badge>
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-xs">
+                        <p>
+                          We do not store your degree progress report. Need help
+                          finding it?{" "}
+                          <a
+                            href="https://www.nyu.edu/students/student-information-and-resources/registration-records-and-graduation/registration/tracking-degree-progress.html"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="underline"
+                          >
+                            View NYU's guide
+                          </a>
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </CardTitle>
+                  <CardDescription>
+                    Upload a PDF of you degree progress report so we can help
+                    you track your academic progress and suggest courses.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <DegreeProgreeUpload
+                    onConfirm={handleConfirmImport}
+                    showFileLoaded={isFileLoaded}
+                    onFileClick={() => {
+                      form.setFieldValue("userCourses", undefined);
+                      form.setFieldValue("startingDate", defaultStartingDate);
+                      form.setFieldValue(
+                        "expectedGraduationDate",
+                        defaultExpectedGraduation,
+                      );
+                      setIsFileLoaded(false);
+                    }}
+                  />
+                </CardContent>
+                <CardFooter className="flex justify-center">
+                  <Button type="submit" disabled={form.state.isSubmitting}>
+                    {form.state.isSubmitting ? "Saving..." : "Save Changes"}
+                  </Button>
+                </CardFooter>
+              </Card>
+            </form>
+          )}
         </TabsContent>
       </Tabs>
     </div>
