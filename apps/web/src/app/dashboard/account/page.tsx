@@ -1,26 +1,5 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import DegreeProgreeUpload from "@/modules/report-parsing/components/degree-progress-upload";
-import { getTermAfterSemesters, type Term } from "@/utils/term";
 import { api } from "@albert-plus/server/convex/_generated/api";
 import type { Doc, Id } from "@albert-plus/server/convex/_generated/dataModel";
 import { useUser } from "@clerk/nextjs";
@@ -37,20 +16,41 @@ import { Mail, MapPin } from "lucide-react";
 import React from "react";
 import { toast } from "sonner";
 import z from "zod";
-import MultipleSelector from "@/app/onboarding/component/multiselect";
 import { SchoolCombobox } from "@/app/onboarding/component/school-combobox";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   FieldContent,
   FieldError,
   Field as UIField,
 } from "@/components/ui/field";
+import { Label } from "@/components/ui/label";
+import MultipleSelector, { type Option } from "@/components/ui/multiselect";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import DegreeProgreeUpload from "@/modules/report-parsing/components/degree-progress-upload";
 import type { UserCourse } from "@/modules/report-parsing/types";
 import type { StartingTerm } from "@/modules/report-parsing/utils/parse-starting-term";
+import { getTermAfterSemesters, type Term } from "@/utils/term";
 
 const dateSchema = z.object({
   year: z.number().int().min(2000).max(2100),
@@ -117,16 +117,14 @@ export default function ProfilePage() {
   );
 
   // Programs
-  const [programsQuery, setProgramsQuery] = React.useState<string | undefined>(
-    undefined,
-  );
-  const {
-    results: programs,
-    status: programsStatus,
-    loadMore: programsLoadMore,
-  } = usePaginatedQuery(
+  const [programSearchInput, setProgramSearchInput] =
+    React.useState<string>("");
+
+  const { results: programs } = usePaginatedQuery(
     api.programs.getPrograms,
-    isAuthenticated ? { query: programsQuery } : ("skip" as const),
+    isAuthenticated
+      ? { query: programSearchInput.trim() || undefined }
+      : ("skip" as const),
     { initialNumItems: 20 },
   );
 
@@ -134,25 +132,23 @@ export default function ProfilePage() {
     () =>
       (programs ?? []).map((program) => ({
         value: program._id,
-        label: program.name,
+        label: `${program.name} - ${program.school}`,
       })),
     [programs],
   );
 
-  const handleSearchPrograms = React.useCallback(
-    async (value: string) => {
-      const trimmed = value.trim();
-      setProgramsQuery(trimmed.length === 0 ? undefined : trimmed);
-      return programOptions;
-    },
-    [programOptions],
+  const programLabelCache = React.useRef<Map<Id<"programs">, string>>(
+    new Map(),
   );
 
-  const handleLoadMorePrograms = React.useCallback(() => {
-    if (programsStatus === "CanLoadMore") {
-      void programsLoadMore(10);
-    }
-  }, [programsStatus, programsLoadMore]);
+  React.useEffect(() => {
+    programOptions.forEach((option) => {
+      programLabelCache.current.set(
+        option.value as Id<"programs">,
+        option.label,
+      );
+    });
+  }, [programOptions]);
 
   const currentYear = React.useMemo(() => new Date().getFullYear(), []);
   const defaultTerm = React.useMemo<Term>(() => {
@@ -263,15 +259,26 @@ export default function ProfilePage() {
     form.setFieldValue("school", student.school?._id ?? undefined);
 
     // programs: student.programs might be an array of objects or array of ids
-    const programIds: Id<"programs">[] = (student.programs ?? []).map(
-      (p: any) =>
-        typeof p === "string"
-          ? (p as Id<"programs">)
-          : (p?._id as Id<"programs">),
+    const programIds: Id<"programs">[] = [];
+    (student.programs ?? []).forEach(
+      (
+        p:
+          | Id<"programs">
+          | { _id: Id<"programs">; name: string; school?: string },
+      ) => {
+        const id = typeof p === "string" ? p : p._id;
+        programIds.push(id);
+
+        // Populate cache with existing student programs
+        if (typeof p !== "string" && p.name) {
+          const label = p.school ? `${p.name} - ${p.school}` : p.name;
+          programLabelCache.current.set(id, label);
+        }
+      },
     );
 
     form.setFieldValue("programs", programIds);
-  }, [student]);
+  }, [student, form.setFieldValue]);
 
   return (
     <div>
@@ -314,10 +321,12 @@ export default function ProfilePage() {
                     <Mail className="size-4" />
                     {user?.primaryEmailAddress?.emailAddress || ""}
                   </div>
-                  <div className="flex items-center gap-1">
-                    <MapPin className="size-4" />
-                    New York University
-                  </div>
+                  {student?.school?.name && (
+                    <div className="flex items-center gap-1">
+                      <MapPin className="size-4" />
+                      {student.school.name}
+                    </div>
+                  )}
                   {/* <div className="flex items-center gap-1">
                 <Calendar className="size-4" />
                 Joined March 2023
@@ -409,20 +418,19 @@ export default function ProfilePage() {
                             const selected = (field.state.value ?? []).map(
                               (p) => ({
                                 value: p,
-                                label: programOptions.find(
-                                  (val) => val.value === p,
-                                )?.label as string,
+                                label:
+                                  programOptions.find((val) => val.value === p)
+                                    ?.label ||
+                                  programLabelCache.current.get(p) ||
+                                  "",
                               }),
                             );
                             return (
                               <UIField>
-                                {/* <FieldLabel htmlFor={field.name}>
-                            What are your major(s) and minor(s)?
-                          </FieldLabel> */}
                                 <FieldContent>
                                   <MultipleSelector
                                     value={selected}
-                                    onChange={(opts) =>
+                                    onChange={(opts: Option[]) =>
                                       field.handleChange(
                                         opts.map(
                                           (o) => o.value as Id<"programs">,
@@ -431,12 +439,16 @@ export default function ProfilePage() {
                                     }
                                     defaultOptions={programOptions}
                                     options={programOptions}
-                                    delay={300}
-                                    onSearch={handleSearchPrograms}
-                                    triggerSearchOnFocus
                                     placeholder="Select your programs"
-                                    commandProps={{ label: "Select programs" }}
-                                    onListReachEnd={handleLoadMorePrograms}
+                                    commandProps={{
+                                      label: "Select programs",
+                                      shouldFilter: false,
+                                    }}
+                                    inputProps={{
+                                      onValueChange: (value: string) => {
+                                        setProgramSearchInput(value);
+                                      },
+                                    }}
                                     emptyIndicator={
                                       <p className="text-center text-sm">
                                         No programs found
