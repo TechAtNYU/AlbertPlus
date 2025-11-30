@@ -13,6 +13,7 @@ import {
 } from "convex/react";
 import type { FunctionArgs } from "convex/server";
 import { Mail, MapPin } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
 import React from "react";
 import { toast } from "sonner";
 import z from "zod";
@@ -166,7 +167,8 @@ function DegreeProgressSkeleton() {
 }
 
 export default function ProfilePage() {
-  // const router = useRouter();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const { isAuthenticated } = useConvexAuth();
   const [editingProfile, setEditingProfile] = React.useState(false);
   const [isFileLoaded, setIsFileLoaded] = React.useState(false);
@@ -177,6 +179,19 @@ export default function ProfilePage() {
   );
 
   const { user } = useUser();
+
+  // Get tab from query params, default to "personal"
+  const activeTab = searchParams.get("tab") || "personal";
+
+  // Function to update tab in URL
+  const setActiveTab = React.useCallback(
+    (tab: string) => {
+      const params = new URLSearchParams(searchParams);
+      params.set("tab", tab);
+      router.replace(`?${params.toString()}`, { scroll: false });
+    },
+    [router, searchParams],
+  );
 
   // actions
   const upsertStudent = useMutation(api.students.upsertCurrentStudent);
@@ -357,7 +372,7 @@ export default function ProfilePage() {
 
   return (
     <div>
-      <Tabs defaultValue="personal">
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
         {isLoading ? (
           <ProfileHeaderSkeleton />
         ) : (
