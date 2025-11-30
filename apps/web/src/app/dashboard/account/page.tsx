@@ -392,7 +392,7 @@ export default function ProfilePage() {
   const isLoading = student === undefined;
 
   return (
-    <div>
+    <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         {isLoading ? (
           <ProfileHeaderSkeleton />
