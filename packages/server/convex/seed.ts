@@ -73,11 +73,38 @@ export const seedAll = internalMutation({
         programUrl: v.string(),
       }),
     ),
+    students: v.array(
+      v.object({
+        userId: v.string(),
+        programs: v.array(v.string()),
+        school: schoolName,
+        schoolLevel: v.union(v.literal("undergraduate"), v.literal("graduate")),
+        startingDate: v.object({
+          year: v.number(),
+          term: v.union(
+            v.literal("spring"),
+            v.literal("summer"),
+            v.literal("fall"),
+            v.literal("j-term"),
+          ),
+        }),
+        expectedGraduationDate: v.object({
+          year: v.number(),
+          term: v.union(
+            v.literal("spring"),
+            v.literal("summer"),
+            v.literal("fall"),
+            v.literal("j-term"),
+          ),
+        }),
+      }),
+    ),
     courses: v.array(
       v.object({
         code: v.string(),
         program: v.string(),
-        level: v.number(),
+        programName: v.string(),
+        level: v.union(v.literal("undergraduate"), v.literal("graduate")),
         title: v.string(),
         credits: v.number(),
         school: schoolName,
@@ -89,8 +116,9 @@ export const seedAll = internalMutation({
       v.object({
         courseCode: v.string(),
         classNumber: v.number(),
-        title: v.string(),
+        title: v.optional(v.string()),
         section: v.string(),
+        description: v.optional(v.string()),
         year: v.number(),
         term: v.union(
           v.literal("spring"),
@@ -98,7 +126,9 @@ export const seedAll = internalMutation({
           v.literal("fall"),
           v.literal("j-term"),
         ),
-        instructor: v.array(v.string()),
+        level: v.union(v.literal("undergraduate"), v.literal("graduate")),
+        school: schoolName,
+        instructors: v.array(v.string()),
         location: v.optional(v.string()),
         days: v.array(
           v.union(
@@ -148,18 +178,21 @@ export const seedAll = internalMutation({
         v.object({
           programName: v.string(),
           isMajor: v.boolean(),
+          description: v.optional(v.string()),
           type: v.literal("required"),
           courses: v.array(v.string()),
         }),
         v.object({
           programName: v.string(),
           isMajor: v.boolean(),
+          description: v.optional(v.string()),
           type: v.literal("alternative"),
           courses: v.array(v.string()),
         }),
         v.object({
           programName: v.string(),
           isMajor: v.boolean(),
+          description: v.optional(v.string()),
           type: v.literal("options"),
           courses: v.array(v.string()),
           courseLevels: v.array(
@@ -328,6 +361,7 @@ export const seedAll = internalMutation({
         await ctx.db.insert("requirements", {
           programId,
           isMajor: req.isMajor,
+          description: req.description,
           type: req.type,
           courses: req.courses,
           courseLevels: req.courseLevels,
@@ -337,6 +371,7 @@ export const seedAll = internalMutation({
         await ctx.db.insert("requirements", {
           programId,
           isMajor: req.isMajor,
+          description: req.description,
           type: req.type,
           courses: req.courses,
         });
@@ -363,7 +398,55 @@ export const seedAll = internalMutation({
       }
     }
 
-    // 7. Seed user courses
+    // 7. Seed students
+    console.log("👨 Seeding students...");
+    for (const student of args.students) {
+      // Get school ID by both name and level
+      const school = await ctx.db
+        .query("schools")
+        .withIndex("by_name_level", (q) =>
+          q.eq("name", student.school).eq("level", student.schoolLevel),
+        )
+        .unique();
+      if (!school) {
+        console.warn(
+          `School not found: ${student.school} (${student.schoolLevel})`,
+        );
+        continue;
+      }
+
+      // Convert program names to IDs
+      const programIds: Id<"programs">[] = [];
+      for (const programName of student.programs) {
+        const programId = programMap.get(programName);
+        if (programId) {
+          programIds.push(programId);
+        } else {
+          console.warn(`Program not found: ${programName}`);
+        }
+      }
+
+      const existing = await ctx.db
+        .query("students")
+        .withIndex("by_user_id", (q) => q.eq("userId", student.userId))
+        .first();
+
+      const studentData = {
+        userId: student.userId,
+        programs: programIds,
+        school: school._id,
+        startingDate: student.startingDate,
+        expectedGraduationDate: student.expectedGraduationDate,
+      };
+
+      if (existing) {
+        await ctx.db.patch(existing._id, studentData);
+      } else {
+        await ctx.db.insert("students", studentData);
+      }
+    }
+
+    // 8. Seed user courses
     console.log("📚 Seeding user courses...");
     for (const userCourse of args.userCourses) {
       const existing = await ctx.db

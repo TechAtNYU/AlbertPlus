@@ -21,10 +21,12 @@ import type * as schemas_courseOfferings from "../schemas/courseOfferings.js";
 import type * as schemas_courses from "../schemas/courses.js";
 import type * as schemas_programs from "../schemas/programs.js";
 import type * as schemas_schools from "../schemas/schools.js";
+import type * as schemas_studentInvites from "../schemas/studentInvites.js";
 import type * as schemas_students from "../schemas/students.js";
 import type * as schools from "../schools.js";
 import type * as scraper from "../scraper.js";
 import type * as seed from "../seed.js";
+import type * as studentInvites from "../studentInvites.js";
 import type * as students from "../students.js";
 import type * as userCourseOfferings from "../userCourseOfferings.js";
 import type * as userCourses from "../userCourses.js";
@@ -35,14 +37,6 @@ import type {
   FunctionReference,
 } from "convex/server";
 
-/**
- * A utility for referencing Convex functions in your app's API.
- *
- * Usage:
- * ```js
- * const myFunctionReference = api.myModule.myFunction;
- * ```
- */
 declare const fullApi: ApiFromModules<{
   appConfigs: typeof appConfigs;
   courseOfferings: typeof courseOfferings;
@@ -57,22 +51,40 @@ declare const fullApi: ApiFromModules<{
   "schemas/courses": typeof schemas_courses;
   "schemas/programs": typeof schemas_programs;
   "schemas/schools": typeof schemas_schools;
+  "schemas/studentInvites": typeof schemas_studentInvites;
   "schemas/students": typeof schemas_students;
   schools: typeof schools;
   scraper: typeof scraper;
   seed: typeof seed;
+  studentInvites: typeof studentInvites;
   students: typeof students;
   userCourseOfferings: typeof userCourseOfferings;
   userCourses: typeof userCourses;
 }>;
-declare const fullApiWithMounts: typeof fullApi;
 
+/**
+ * A utility for referencing Convex functions in your app's public API.
+ *
+ * Usage:
+ * ```js
+ * const myFunctionReference = api.myModule.myFunction;
+ * ```
+ */
 export declare const api: FilterApi<
-  typeof fullApiWithMounts,
+  typeof fullApi,
   FunctionReference<any, "public">
 >;
+
+/**
+ * A utility for referencing Convex functions in your app's internal API.
+ *
+ * Usage:
+ * ```js
+ * const myFunctionReference = internal.myModule.myFunction;
+ * ```
+ */
 export declare const internal: FilterApi<
-  typeof fullApiWithMounts,
+  typeof fullApi,
   FunctionReference<any, "internal">
 >;
 

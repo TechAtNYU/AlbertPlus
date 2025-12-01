@@ -46,6 +46,8 @@ const RegisterPage = () => {
     isAuthenticated ? {} : "skip",
   );
 
+  const selectedClassNumbers = allClasses?.map((c) => c.classNumber) || [];
+
   const { results, status, loadMore } = usePaginatedQuery(
     api.courseOfferings.getCourseOfferings,
     isAuthenticated && currentTerm && currentYear
@@ -83,7 +85,7 @@ const RegisterPage = () => {
   }
 
   return (
-    <div className="flex flex-col gap-4 h-[calc(100vh-(--spacing(16))-(--spacing(12)))] w-full">
+    <div className="flex flex-col gap-4 w-full">
       {/* Mobile toggle buttons */}
       <div className="md:hidden shrink-0 p-2">
         <ViewSelector
@@ -107,6 +109,7 @@ const RegisterPage = () => {
             loadMore={loadMore}
             status={status}
             isSearching={isSearching}
+            selectedClassNumbers={selectedClassNumbers}
           />
         ) : (
           <div className="h-full">
@@ -125,6 +128,7 @@ const RegisterPage = () => {
           loadMore={loadMore}
           status={status}
           isSearching={isSearching}
+          selectedClassNumbers={selectedClassNumbers}
         />
 
         <div className="flex-1 min-w-0">

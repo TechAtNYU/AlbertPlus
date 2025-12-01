@@ -18,6 +18,7 @@ import { CourseSectionItem } from "./CourseSectionItem";
 interface CourseCardProps {
   course: CourseWithOfferings;
   isExpanded: boolean;
+  selectedClassNumbers?: number[];
   onToggleExpand: (courseCode: string) => void;
   onSectionSelect?: (offering: CourseOffering) => void;
   onSectionHover?: (offering: CourseOffering | null) => void;
@@ -26,6 +27,7 @@ interface CourseCardProps {
 export const CourseCard = ({
   course,
   isExpanded,
+  selectedClassNumbers,
   onToggleExpand,
   onSectionSelect,
   onSectionHover,
@@ -54,7 +56,7 @@ export const CourseCard = ({
             </div>
             <HoverCard openDelay={10}>
               <HoverCardTrigger>
-                <InfoIcon className="size-4 shrink-0 text-blue-400" />
+                <InfoIcon className="size-4 shrink-0 text-violet-400" />
               </HoverCardTrigger>
               <HoverCardContent>{course.description}</HoverCardContent>
             </HoverCard>
@@ -87,6 +89,7 @@ export const CourseCard = ({
               <CourseSectionItem
                 key={offering._id}
                 offering={offering}
+                selectedClassNumbers={selectedClassNumbers}
                 onSelect={onSectionSelect}
                 onHover={onSectionHover}
               />

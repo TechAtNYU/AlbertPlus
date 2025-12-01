@@ -13,6 +13,9 @@ import { discoverCourses, scrapeCourse } from "./modules/courses";
 import { discoverPrograms, scrapeProgram } from "./modules/programs";
 
 const app = new Hono<{ Bindings: CloudflareBindings }>();
+const COURSE_SCRAPE_DELAY_MS = 250;
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const validateApiKey = async (
   c: Context<{ Bindings: CloudflareBindings }>,
@@ -106,11 +109,11 @@ export default {
       `Cronjob: Scraping flags - current: ${isScrapeCurrent}, next: ${isScrapeNext}`,
     );
 
-    // Collect terms to scrape
-    const termsToScrape: Array<{
-      term: "spring" | "summer" | "fall" | "j-term";
-      year: number;
-    }> = [];
+    // Collect unique terms to scrape using a Map to deduplicate
+    const termsMap = new Map<
+      string,
+      { term: "spring" | "summer" | "fall" | "j-term"; year: number }
+    >();
 
     if (isScrapeCurrent) {
       const currentTerm = (await convex.getAppConfig({
@@ -119,7 +122,8 @@ export default {
       const currentYearStr = await convex.getAppConfig({ key: "current_year" });
       if (currentYearStr) {
         const currentYear = Number.parseInt(currentYearStr, 10);
-        termsToScrape.push({ term: currentTerm, year: currentYear });
+        const key = `${currentTerm}-${currentYear}`;
+        termsMap.set(key, { term: currentTerm, year: currentYear });
       }
     }
 
@@ -132,9 +136,12 @@ export default {
       const nextYearStr = await convex.getAppConfig({ key: "next_year" });
       if (nextYearStr) {
         const nextYear = Number.parseInt(nextYearStr, 10);
-        termsToScrape.push({ term: nextTerm, year: nextYear });
+        const key = `${nextTerm}-${nextYear}`;
+        termsMap.set(key, { term: nextTerm, year: nextYear });
       }
     }
+
+    const termsToScrape = Array.from(termsMap.values());
 
     // Trigger course offerings discovery for each enabled term
     const courseOfferingsUrl = new URL(env.SCRAPING_BASE_URL).toString();
@@ -206,19 +213,31 @@ export default {
               }
               case "discover-courses": {
                 const courseUrls = await discoverCourses(job.url);
-                const newJobs = await db
-                  .insert(jobs)
-                  .values(
-                    courseUrls.map((url) => ({
-                      url,
-                      jobType: "course" as const,
-                    })),
-                  )
-                  .returning();
+                // NOTE: Cloudflare Queues has a limit of 100 messages per sendBatch()
+                console.log(`Discovered ${courseUrls.length} course URLs`);
 
-                await env.SCRAPING_QUEUE.sendBatch(
-                  newJobs.map((j) => ({ body: { jobId: j.id } })),
-                );
+                const BATCH_SIZE = 10;
+                for (let i = 0; i < courseUrls.length; i += BATCH_SIZE) {
+                  const batch = courseUrls.slice(i, i + BATCH_SIZE);
+
+                  const newJobs = await db
+                    .insert(jobs)
+                    .values(
+                      batch.map((url) => ({
+                        url,
+                        jobType: "course" as const,
+                      })),
+                    )
+                    .returning();
+
+                  await env.SCRAPING_QUEUE.sendBatch(
+                    newJobs.map((j) => ({ body: { jobId: j.id } })),
+                  );
+
+                  console.log(
+                    `Queued batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(courseUrls.length / BATCH_SIZE)} (${newJobs.length} jobs)`,
+                  );
+                }
                 break;
               }
               case "program": {
@@ -238,18 +257,28 @@ export default {
                 break;
               }
               case "course": {
-                const res = await scrapeCourse(job.url, db, env);
+                // A single URL may contain multiple courses
+                if (COURSE_SCRAPE_DELAY_MS > 0) {
+                  await sleep(COURSE_SCRAPE_DELAY_MS);
+                }
+                const courses = await scrapeCourse(job.url, db, env);
 
-                const courseId = await convex.upsertCourseWithPrerequisites({
-                  ...res.course,
-                  prerequisites: res.prerequisites,
-                });
+                console.log(
+                  `Scraped ${courses.length} courses from ${job.url}`,
+                );
 
-                if (!courseId) {
-                  throw new JobError(
-                    "Failed to upsert course: no ID returned",
-                    "validation",
-                  );
+                for (const courseData of courses) {
+                  const courseId = await convex.upsertCourseWithPrerequisites({
+                    ...courseData.course,
+                    prerequisites: courseData.prerequisites,
+                  });
+
+                  if (!courseId) {
+                    throw new JobError(
+                      `Failed to upsert course ${courseData.course.code}: no ID returned`,
+                      "validation",
+                    );
+                  }
                 }
                 break;
               }

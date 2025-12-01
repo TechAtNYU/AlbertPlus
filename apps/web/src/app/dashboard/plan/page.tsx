@@ -87,7 +87,7 @@ const PlanPage = () => {
     api.courses.getCourses,
     isAuthenticated
       ? {
-          level: 100, // TODO: make it configurable
+          level: "undergraduate", // TODO: make it configurable
           query: debouncedSearchValue || undefined,
         }
       : "skip",

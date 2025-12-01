@@ -18,6 +18,7 @@ import type { CourseOffering } from "../types";
 
 interface CourseSectionItemProps {
   offering: CourseOffering;
+  selectedClassNumbers?: number[];
   onSelect?: (offering: CourseOffering) => void;
   onSelectAsAlternative?: (
     offering: CourseOffering,
@@ -28,6 +29,7 @@ interface CourseSectionItemProps {
 
 export const CourseSectionItem = ({
   offering,
+  selectedClassNumbers,
   onSelect,
   onSelectAsAlternative,
   onHover,
@@ -36,6 +38,8 @@ export const CourseSectionItem = ({
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [selectedCourseId, setSelectedCourseId] =
     useState<Id<"userCourseOfferings"> | null>(null);
+
+  const isSelected = selectedClassNumbers?.includes(offering.classNumber);
 
   const handleClick = () => {
     if (offering.status === "closed") return;
@@ -101,28 +105,45 @@ export const CourseSectionItem = ({
           <span className="font-semibold text-sm">
             Section {offering.section}
           </span>
-          <span
-            className={clsx(
-              "text-xs px-2 py-1 rounded-full font-medium capitalize",
-              offering.status === "open" && "bg-green-100 text-green-800",
-              offering.status === "closed" && "bg-red-100 text-red-800",
-              offering.status === "waitlist" && "bg-yellow-100 text-yellow-800",
+          <div className="flex items-center gap-2">
+            {isSelected && (
+              <span
+                className="text-xs px-2 py-1 rounded-full font-medium bg-violet-100 text-violet-800 dark:bg-violet-900 
+  dark:text-violet-200"
+              >
+                Selected
+              </span>
             )}
-          >
-            {offering.status === "waitlist"
-              ? `Waitlist (${offering.waitlistNum || 0})`
-              : offering.status}
-          </span>
+            <span
+              className={clsx(
+                "text-xs px-2 py-1 rounded-full font-medium capitalize",
+                offering.status === "open" && "bg-green-100 text-green-800",
+                offering.status === "closed" && "bg-red-100 text-red-800",
+                offering.status === "waitlist" &&
+                  "bg-yellow-100 text-yellow-800",
+              )}
+            >
+              {offering.status === "waitlist"
+                ? `Waitlist (${offering.waitlistNum || 0})`
+                : offering.status}
+            </span>
+          </div>
         </div>
         <div className="text-xs text-muted-foreground space-y-1">
-          <div>{offering.instructor}</div>
+          <div>{offering.instructors.join(", ")}</div>
           <div>
-            {offering.days
-              .map((day) => day.slice(0, 3).toUpperCase())
-              .join(", ")}{" "}
-            {offering.startTime} - {offering.endTime}
+            {offering.startTime && offering.endTime ? (
+              <>
+                {offering.days
+                  .map((day) => day.slice(0, 3).toUpperCase())
+                  .join(", ")}{" "}
+                {offering.startTime} - {offering.endTime}
+              </>
+            ) : (
+              <span className="italic">Time not available yet</span>
+            )}
           </div>
-          <div>{offering.location}</div>
+          <div>{offering.location ?? "TBD"}</div>
           <div className="capitalize">
             {offering.term} {offering.year}
           </div>
@@ -168,7 +189,7 @@ export const CourseSectionItem = ({
                       </span>
                       <span className="text-xs text-muted-foreground">
                         Section {course.courseOffering.section.toUpperCase()} •{" "}
-                        {course.courseOffering.instructor.join(", ")}
+                        {course.courseOffering.instructors.join(", ")}
                       </span>
                     </DropdownMenuItem>
                   ))}

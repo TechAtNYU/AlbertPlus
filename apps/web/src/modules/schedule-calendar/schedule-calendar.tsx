@@ -32,10 +32,10 @@ export interface Class {
   section: string;
   year: number;
   term: Term;
-  instructor: string[];
+  instructors: string[];
   location?: string;
-  startTime: string;
-  endTime: string;
+  startTime: string | undefined;
+  endTime: string | undefined;
   status: "open" | "closed" | "waitlist";
   waitlistNum?: number;
   isCorequisite: boolean;
@@ -71,6 +71,17 @@ export const allClassColors: EventColor[] = [
   "cyan",
 ];
 
+function getColor(id: string): EventColor {
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) {
+    const char = id.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash = hash & hash; // Convert to 32-bit integer
+  }
+  const colorIndex = Math.abs(hash) % allClassColors.length;
+  return allClassColors[colorIndex];
+}
+
 export function getUserClassesByTerm(
   classes:
     | FunctionReturnType<typeof api.userCourseOfferings.getUserCourseOfferings>
@@ -101,95 +112,101 @@ export function ScheduleCalendar({
     return <Skeleton className="h-full w-full rounded-lg" />;
   }
 
-  let colorIndex = 0;
+  const transformedClasses: Class[] = classes
+    .filter((c) => {
+      const offering = c.courseOffering;
+      return offering.startTime && offering.endTime;
+    })
+    .map((c) => {
+      const offering = c.courseOffering;
+      // biome-ignore lint/style/noNonNullAssertion: we just filtered above
+      const startTime = `${offering.startTime!.split(":")[0]} ${offering.startTime!.split(":")[1]}`;
+      // biome-ignore lint/style/noNonNullAssertion: we just filtered above
+      const endTime = `${offering.endTime!.split(":")[0]} ${offering.endTime!.split(":")[1]}`;
 
-  const transformedClasses: Class[] = classes.map((c) => {
-    const offering = c.courseOffering;
-    const startTime = `${offering.startTime.split(":")[0]} ${offering.startTime.split(":")[1]}`;
-    const endTime = `${offering.endTime.split(":")[0]} ${offering.endTime.split(":")[1]}`;
+      // Format times like "Monday 9 15 11 15"
+      const times = offering.days.map((day) => {
+        const dayName = day.charAt(0).toUpperCase() + day.slice(1);
+        return `${dayName} ${startTime} ${endTime}`;
+      });
 
-    // Format times like "Monday 9 15 11 15"
-    const times = offering.days.map((day) => {
-      const dayName = day.charAt(0).toUpperCase() + day.slice(1);
-      return `${dayName} ${startTime} ${endTime}`;
-    });
+      const color = getColor(offering._id);
 
-    const color = allClassColors[colorIndex % allClassColors.length];
-    colorIndex++;
+      const slots: { start: Date; end: Date }[] = [];
 
-    const slots: { start: Date; end: Date }[] = [];
+      // Map weekday names to 0-6 offset from start of week (Sunday = 0)
+      const weekdayMap: Record<string, number> = {
+        Sunday: 0,
+        Monday: 1,
+        Tuesday: 2,
+        Wednesday: 3,
+        Thursday: 4,
+        Friday: 5,
+        Saturday: 6,
+      };
 
-    // Map weekday names to 0-6 offset from start of week (Sunday = 0)
-    const weekdayMap: Record<string, number> = {
-      Sunday: 0,
-      Monday: 1,
-      Tuesday: 2,
-      Wednesday: 3,
-      Thursday: 4,
-      Friday: 5,
-      Saturday: 6,
-    };
+      // Get the start of the current week (Sunday)
+      const startOfCurrentWeek = startOfWeek(new Date(), { weekStartsOn: 0 }); // Sunday = 0
 
-    // Get the start of the current week (Sunday)
-    const startOfCurrentWeek = startOfWeek(new Date(), { weekStartsOn: 0 }); // Sunday = 0
+      for (const slot of times) {
+        const parts = slot.split(" ");
+        const day = parts[0];
+        const startHour = Number(parts[1]);
+        const startMinute = Number(parts[2]);
+        const endHour = Number(parts[3]);
+        const endMinute = Number(parts[4]);
 
-    for (const slot of times) {
-      const parts = slot.split(" ");
-      const day = parts[0];
-      const startHour = Number(parts[1]);
-      const startMinute = Number(parts[2]);
-      const endHour = Number(parts[3]);
-      const endMinute = Number(parts[4]);
+        const dayOffset = weekdayMap[day];
+        if (dayOffset === undefined) {
+          throw new Error(`Invalid day: ${day}`);
+        }
 
-      const dayOffset = weekdayMap[day];
-      if (dayOffset === undefined) {
-        throw new Error(`Invalid day: ${day}`);
+        const date = addDays(startOfCurrentWeek, dayOffset);
+
+        const start = new Date(date);
+        start.setHours(startHour, startMinute, 0, 0);
+
+        const end = new Date(date);
+        end.setHours(endHour, endMinute, 0, 0);
+
+        slots.push({ start, end });
       }
 
-      const date = addDays(startOfCurrentWeek, dayOffset);
-
-      const start = new Date(date);
-      start.setHours(startHour, startMinute, 0, 0);
-
-      const end = new Date(date);
-      end.setHours(endHour, endMinute, 0, 0);
-
-      slots.push({ start, end });
-    }
-
-    return {
-      id: offering._id,
-      userCourseOfferingId: c._id,
-      classNumber: c.classNumber,
-      courseCode: offering.courseCode,
-      title: `${offering.courseCode} - ${offering.title}`,
-      color,
-      times: slots,
-      description: `${offering.instructor.join(", ")} • ${offering.section.toUpperCase()} • ${offering.term} ${offering.year}`,
-      section: offering.section,
-      year: offering.year,
-      term: offering.term,
-      instructor: offering.instructor,
-      location: offering.location,
-      startTime: offering.startTime,
-      endTime: offering.endTime,
-      status: offering.status,
-      waitlistNum: offering.waitlistNum,
-      isCorequisite: offering.isCorequisite,
-      corequisiteOf: offering.corequisiteOf,
-    };
-  });
+      return {
+        id: offering._id,
+        userCourseOfferingId: c._id,
+        classNumber: c.classNumber,
+        courseCode: offering.courseCode,
+        title: `${offering.courseCode} - ${offering.title}`,
+        color,
+        times: slots,
+        description: `${offering.instructors.join(", ")} • ${offering.section.toUpperCase()} • ${offering.term} ${offering.year}`,
+        section: offering.section,
+        year: offering.year,
+        term: offering.term,
+        instructors: offering.instructors,
+        location: offering.location,
+        startTime: offering.startTime,
+        endTime: offering.endTime,
+        status: offering.status,
+        waitlistNum: offering.waitlistNum,
+        isCorequisite: offering.isCorequisite,
+        corequisiteOf: offering.corequisiteOf,
+      };
+    });
 
   // Add hovered course preview
-  if (hoveredCourse) {
+  if (hoveredCourse?.startTime && hoveredCourse.endTime) {
     const isAlreadyAdded = classes.some(
       (c) => c.courseOffering._id === hoveredCourse._id,
     );
 
     if (!isAlreadyAdded) {
       const offering = hoveredCourse;
-      const startTime = `${offering.startTime.split(":")[0]} ${offering.startTime.split(":")[1]}`;
-      const endTime = `${offering.endTime.split(":")[0]} ${offering.endTime.split(":")[1]}`;
+      // biome-ignore lint/style/noNonNullAssertion: we just filtered above
+      const startTime = `${offering.startTime!.split(":")[0]} ${offering.startTime!.split(":")[1]}`;
+      // biome-ignore lint/style/noNonNullAssertion: we just filtered above
+      const endTime = `${offering.endTime!.split(":")[0]} ${offering.endTime!.split(":")[1]}`;
 
       const times = offering.days.map((day) => {
         const dayName = day.charAt(0).toUpperCase() + day.slice(1);
@@ -231,17 +248,17 @@ export function ScheduleCalendar({
         id: `preview-${offering._id}`,
         courseCode: offering.courseCode,
         title: `${offering.courseCode} - ${offering.title}`,
-        color: allClassColors[colorIndex % allClassColors.length],
+        color: getColor(offering._id),
         times: slots,
-        description: `${offering.instructor.join(", ")} • ${offering.section.toUpperCase()} • Preview`,
+        description: `${offering.instructors.join(", ")} • ${offering.section.toUpperCase()} • Preview`,
         isPreview: true,
         section: offering.section,
         year: offering.year,
         term: offering.term,
-        instructor: offering.instructor,
+        instructors: offering.instructors,
         location: offering.location,
-        startTime: offering.startTime,
-        endTime: offering.endTime,
+        startTime: offering.startTime as string,
+        endTime: offering.endTime as string,
         status: offering.status,
         waitlistNum: offering.waitlistNum,
         isCorequisite: offering.isCorequisite,

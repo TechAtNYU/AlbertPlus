@@ -7,6 +7,7 @@ import {
 import { courses, prerequisites, userCourses } from "./schemas/courses";
 import { programs, requirements } from "./schemas/programs";
 import { schools } from "./schemas/schools";
+import { studentInvites } from "./schemas/studentInvites";
 import { students } from "./schemas/students";
 
 export default defineSchema({
@@ -48,5 +49,6 @@ export default defineSchema({
     "userId",
   ]),
   students: defineTable(students).index("by_user_id", ["userId"]),
-  schools: defineTable(schools),
+  schools: defineTable(schools).index("by_name_level", ["name", "level"]),
+  studentInvites: defineTable(studentInvites).index("by_user_id", ["userId"]),
 });

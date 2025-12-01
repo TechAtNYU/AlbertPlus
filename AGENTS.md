@@ -1,31 +1,19 @@
-# Agent Guidelines for albert-plus
+# Agent Development Guide
 
-## Build/Lint/Test Commands
+## Commands
 
-- `bun run dev` - Start all apps in development mode
-- `bun run build` - Build all applications
-- `bun run check` - Run Biome linting/formatting across all workspaces
-- `biome check --fix` - Auto-fix safe Biome issues (formatting, imports, safe fixes)
-- `bun run check:types` - TypeScript type checking across all workspaces
-- `bun run dashboard` - Open Convex dashboard
-- **Single app**: `bun run --filter <app-name> <command>` (e.g., `bun run --filter web dev`)
-- **Tests**: `bun run test` (runs all tests); `bun run --filter scraper test` (single app tests)
-- **Single test**: `cd apps/scraper && bun test src/modules/courses/index.test.ts` (uses bun:test)
+- **Lint/Format**: `bun check` (check) or `biome check --write` (fix)
+- **Type Check**: `bun check:types` (all) or `bun run --filter web check:types` (specific)
+- **Dev**: `bun dev` (starts all services with Turbo)
 
 ## Code Style
 
-- **Formatter**: Biome with 2-space indentation, double quotes, auto-organize imports
-- **Imports**: Use `@/` for app-relative paths; imports auto-sorted by Biome
-- **Types**: TypeScript strict mode; use explicit return types for exported functions
-- **Components**: React functional components with intersection types for props (e.g., `React.ComponentProps<"button"> & VariantProps<...>`)
-- **Naming**: camelCase for variables/functions, PascalCase for components/types
-- **CSS**: TailwindCSS v4 with `cn()` utility (`clsx` + `tailwind-merge`) for conditional classes
-- **Patterns**: Use `class-variance-authority` (cva) for component variants; `convex-helpers` for auth/data access
-
-## Project Structure
-
-- **Monorepo**: Turbo + Bun package manager; workspaces in `apps/*` and `packages/*`
-- **Apps**: `web` (Next.js 15 + Clerk), `browser` (Chrome extension), `scraper` (Cloudflare Worker + Drizzle)
-- **Server**: Convex backend in `packages/server` with `protectedQuery`/`protectedMutation` for auth
-- **Dependencies**: Use `workspace:*` for internal packages; Doppler for environment variables
-- **Database**: Convex for main data; Cloudflare D1 + Drizzle for scraper operations
+- **Package Manager**: Bun (v1.3.1+), use `bun install` not npm/yarn/pnpm
+- **Formatter**: Biome - 2 spaces, double quotes, organized imports
+- **TypeScript**: Strict mode, no implicit any, use explicit types for exports
+- **Imports**: Organize imports automatically via Biome, use `@/` for app imports, `workspace:*` for monorepo packages
+- **Naming**: camelCase for variables/functions, PascalCase for components/types, UPPER_SNAKE_CASE for constants
+- **Error Handling**: Use `ConvexError` for Convex functions, `JobError` for scraper jobs, typed errors preferred
+- **Async**: Use async/await, avoid callbacks, handle errors with try/catch or .catch()
+- **Components**: React 19 + Next.js 16, server components by default, use "use client" when needed
+- **Database**: Convex for main app, Drizzle ORM for scraper D1 database

@@ -9,12 +9,19 @@ import {
   isDegreeProgressReport,
 } from "../utils/extract-pdf-text";
 import { parseCourseHistory } from "../utils/parse-course-history";
+import {
+  extractStartingTerm,
+  type StartingTerm,
+} from "../utils/parse-starting-term";
 import { transformToUserCourses } from "../utils/transform-to-user-courses";
 import ConfirmModal from "./confirm-modal";
 
 type FileUploadButtonProps = {
   maxSizeMB?: number;
-  onConfirm: (courses: UserCourse[]) => Promise<void> | void;
+  onConfirm: (
+    courses: UserCourse[],
+    startingTerm: StartingTerm | null,
+  ) => Promise<void> | void;
   showFileLoaded?: boolean;
   onFileClick?: () => void;
 };
@@ -27,6 +34,7 @@ export default function DegreeProgreeUpload({
 }: FileUploadButtonProps) {
   const maxSize = maxSizeMB * 1024 * 1024;
   const [parsedCourses, setParsedCourses] = useState<UserCourse[]>([]);
+  const [startingTerm, setStartingTerm] = useState<StartingTerm | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [fileName, setFileName] = useState("");
@@ -51,6 +59,8 @@ export default function DegreeProgreeUpload({
       const file = fileData.file;
       if (!(file instanceof File)) return;
 
+      setStartingTerm(null);
+
       // Verify it's a Degree Progress Report
       try {
         const ok = await isDegreeProgressReport(file);
@@ -66,10 +76,22 @@ export default function DegreeProgreeUpload({
         return;
       }
 
+      // try extract starting term
+      try {
+        const startingTerm = await extractStartingTerm(file);
+        console.log(startingTerm);
+
+        setStartingTerm(startingTerm);
+      } catch (e) {
+        console.warn("Could not find starting term:", e);
+      }
+
       // Extract and parse course history
       try {
         const historyText = await extractCourseHistory(file);
+
         const courses = parseCourseHistory(historyText);
+
         const userCourses = transformToUserCourses(courses);
 
         // Store parsed courses and open confirmation modal
@@ -85,13 +107,14 @@ export default function DegreeProgreeUpload({
   const handleConfirm = async () => {
     setIsImporting(true);
     try {
-      await onConfirm(parsedCourses);
+      await onConfirm(parsedCourses, startingTerm);
 
       setIsModalOpen(false);
 
       // wait for modal close before clearing state
       // otherwise the modal will flicker with empty data
       setTimeout(() => {
+        setStartingTerm(null);
         setParsedCourses([]);
         setFileName(files[0].file.name);
         if (files[0]) {
@@ -108,6 +131,7 @@ export default function DegreeProgreeUpload({
 
   const handleCancel = () => {
     setIsModalOpen(false);
+    setStartingTerm(null);
     setParsedCourses([]);
     // Remove the uploaded file
     if (files[0]) {
