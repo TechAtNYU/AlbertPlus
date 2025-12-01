@@ -211,6 +211,37 @@ export const removeUserCourseOffering = protectedMutation({
   },
 });
 
+export const swapWithAlternative = protectedMutation({
+  args: {
+    alternativeId: v.id("userCourseOfferings"),
+  },
+  handler: async (ctx, args) => {
+    const alternative = await ctx.db.get(args.alternativeId);
+
+    if (!alternative || alternative.userId !== ctx.user.subject) {
+      throw new ConvexError("Alternative course not found or unauthorized");
+    }
+
+    if (!alternative.alternativeOf) {
+      throw new ConvexError(
+        "This course is not an alternative of another course",
+      );
+    }
+
+    const mainCourse = await ctx.db.get(alternative.alternativeOf);
+
+    if (!mainCourse || mainCourse.userId !== ctx.user.subject) {
+      throw new ConvexError("Main course not found or unauthorized");
+    }
+
+    // swap
+    await ctx.db.patch(args.alternativeId, { alternativeOf: undefined });
+    await ctx.db.patch(alternative.alternativeOf, {
+      alternativeOf: args.alternativeId,
+    });
+  },
+});
+
 export const getAlternativeCourses = protectedQuery({
   args: { userCourseOfferingId: v.id("userCourseOfferings") },
   handler: async (ctx, args) => {

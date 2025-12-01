@@ -55,6 +55,10 @@ const CourseSelector = ({
     api.userCourseOfferings.removeUserCourseOffering,
   );
 
+  const swapWithAlternative = useMutation(
+    api.userCourseOfferings.swapWithAlternative,
+  );
+
   const [hoveredSection, setHoveredSection] = useState<CourseOffering | null>(
     null,
   );
@@ -213,6 +217,18 @@ const CourseSelector = ({
     }
   };
 
+  const handleSwap = async (alternativeId: Id<"userCourseOfferings">) => {
+    try {
+      await swapWithAlternative({ alternativeId });
+    } catch (error) {
+      const errorMessage =
+        error instanceof ConvexError
+          ? (error.data as string)
+          : "Unexpected error occurred";
+      toast.error(errorMessage);
+    }
+  };
+
   const handleConflictAddAsMain = async () => {
     if (!conflictState?.course) return;
 
@@ -286,6 +302,7 @@ const CourseSelector = ({
           course={selectedCourse}
           onClose={() => onCourseSelect?.(null)}
           onDelete={handleDelete}
+          onSwap={handleSwap}
         />
       </div>
     );

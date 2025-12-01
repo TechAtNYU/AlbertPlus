@@ -19,12 +19,14 @@ interface CourseDetailPanelProps {
     title: string,
     alternativeOf?: Id<"userCourseOfferings">,
   ) => void;
+  onSwap?: (alternativeId: Id<"userCourseOfferings">) => void;
 }
 
 export function CourseDetailPanel({
   course,
   onClose,
   onDelete,
+  onSwap,
 }: CourseDetailPanelProps) {
   const alternatives = useQuery(
     api.userCourseOfferings.getAlternativeCourses,
@@ -36,6 +38,24 @@ export function CourseDetailPanel({
       : "skip",
   );
 
+  // Get the main course info if this course is an alternative
+  const allUserCourses = useQuery(
+    api.userCourseOfferings.getUserCourseOfferings,
+  );
+  const currentCourse = course?.userCourseOfferingId
+    ? allUserCourses?.find((c) => c._id === course.userCourseOfferingId)
+    : null;
+
+  const alternativeOfId: Id<"userCourseOfferings"> | null = currentCourse
+    ? (currentCourse.alternativeOf as Id<"userCourseOfferings"> | null)
+    : course?.alternativeOf
+      ? (course.alternativeOf as Id<"userCourseOfferings">)
+      : null;
+
+  const mainCourse = alternativeOfId
+    ? allUserCourses?.find((c) => c._id === alternativeOfId)
+    : null;
+
   if (!course) return null;
 
   const handleDelete = () => {
@@ -44,7 +64,7 @@ export function CourseDetailPanel({
         course.userCourseOfferingId as Id<"userCourseOfferings">,
         course.classNumber,
         course.title,
-        course.alternativeOf as Id<"userCourseOfferings"> | undefined,
+        alternativeOfId ?? undefined,
       );
       onClose();
     }
@@ -214,17 +234,17 @@ export function CourseDetailPanel({
               <Separator />
               <div className="space-y-3">
                 <h4 className="text-sm font-semibold text-foreground">
-                  Alternative Courses
+                  Alternative Courses Added by You
                 </h4>
                 <div className="space-y-2">
                   {alternatives.map((alt) => (
                     <div
                       key={alt._id}
-                      className="rounded-lg border p-3 space-y-2 hover:bg-accent/50 transition-colors"
+                      className="rounded-lg border p-3 space-y-2 hover:bg-accent/50 transition-colors group"
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium break-words">
+                          <p className="text-sm font-medium break-words mb-1">
                             {alt.courseOffering.courseCode} -{" "}
                             {alt.courseOffering.title}
                           </p>
@@ -249,11 +269,44 @@ export function CourseDetailPanel({
                         • {alt.courseOffering.startTime} -{" "}
                         {alt.courseOffering.endTime}
                       </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full text-xs"
+                        onClick={() => onSwap?.(alt._id)}
+                      >
+                        Switch to this course
+                      </Button>
                     </div>
                   ))}
                 </div>
               </div>
             </>
+          )}
+
+          {/* Alternative Course Info */}
+          {mainCourse && (
+            <div className="rounded-lg border p-4 space-y-3">
+              <p className="text-sm text-muted-foreground">
+                This course is an alternative of{" "}
+                <span className="text-foreground">
+                  {mainCourse.courseOffering.title}
+                </span>
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full text-xs"
+                onClick={() =>
+                  onSwap?.(
+                    course.userCourseOfferingId as Id<"userCourseOfferings">,
+                  )
+                }
+              >
+                Replace with {mainCourse.courseOffering.courseCode} -
+                {" Section "} {mainCourse.courseOffering.section}
+              </Button>
+            </div>
           )}
         </div>
       </ScrollArea>
