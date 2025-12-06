@@ -105,7 +105,7 @@ export const ZUpsertCourseWithPrerequisites = z.object({
 
 export const ZUpsertProgramWithRequirements = z.object({
   name: z.string(),
-  level: ZSchoolLevel,
+  level: ZSchoolLevel, // undergraduate or graduate
   school: ZSchoolName,
   programUrl: z.string(),
   requirements: z.array(
@@ -130,7 +130,7 @@ export const ZUpsertProgramWithRequirements = z.object({
         courseLevels: z.array(
           z.object({
             program: z.string(), // CSCI-UA
-            level: z.coerce.number(), // 4
+            level: z.coerce.number(), // 4 (represents any classes at 400 level)
           }),
         ),
         creditsRequired: z.number(),
@@ -138,6 +138,78 @@ export const ZUpsertProgramWithRequirements = z.object({
     ]),
   ),
 });
+
+export const ZUpsertRequirements = z.array(
+  z.discriminatedUnion("type", [
+    z.object({
+      programId: z.pipe(
+        z.string(),
+        z.transform((val) => val as Id<"programs">),
+      ),
+      isMajor: z.boolean(),
+      description: z.optional(z.string()),
+      type: z.literal("required"),
+      courses: z.array(z.string()),
+    }),
+    z.object({
+      programId: z.pipe(
+        z.string(),
+        z.transform((val) => val as Id<"programs">),
+      ),
+      isMajor: z.boolean(),
+      description: z.optional(z.string()),
+      type: z.literal("alternative"),
+      courses: z.array(z.string()),
+    }),
+    z.object({
+      programId: z.pipe(
+        z.string(),
+        z.transform((val) => val as Id<"programs">),
+      ),
+      isMajor: z.boolean(),
+      description: z.optional(z.string()),
+      type: z.literal("options"),
+      courses: z.array(z.string()),
+      courseLevels: z.array(
+        z.object({
+          program: z.string(),
+          level: z.coerce.number(),
+        }),
+      ),
+      creditsRequired: z.number(),
+    }),
+  ]),
+);
+
+export const ZUpsertPrerequisites = z.array(
+  z.discriminatedUnion("type", [
+    z.object({
+      courseId: z.pipe(
+        z.string(),
+        z.transform((val) => val as Id<"courses">),
+      ),
+      type: z.literal("required"),
+      courses: z.array(z.string()),
+    }),
+    z.object({
+      courseId: z.pipe(
+        z.string(),
+        z.transform((val) => val as Id<"courses">),
+      ),
+      type: z.literal("alternative"),
+      courses: z.array(z.string()),
+    }),
+    z.object({
+      courseId: z.pipe(
+        z.string(),
+        z.transform((val) => val as Id<"courses">),
+      ),
+      type: z.literal("options"),
+      courses: z.array(z.string()),
+      creditsRequired: z.number(),
+    }),
+  ]),
+);
 
 export const ZUpsertCourseOfferings = z.array(
   z.object({
