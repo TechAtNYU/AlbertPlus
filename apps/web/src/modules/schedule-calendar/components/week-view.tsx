@@ -35,6 +35,8 @@ import { CourseInfoDialog } from "./info-dialog";
 interface WeekViewProps {
   classes: Class[];
   hoveredCourseId?: string | null;
+  selectedCourse?: Class | null;
+  onCourseSelect?: (course: Class | null) => void;
 }
 
 interface PositionedEvent {
@@ -50,12 +52,14 @@ interface PositionedEvent {
 export function WeekView({
   classes,
   hoveredCourseId: externalHoveredCourseId,
+  onCourseSelect,
 }: WeekViewProps) {
   const currentDate = new Date();
   const [internalHoveredCourseId, setInternalHoveredCourseId] = useState<
     string | null
   >(null);
-  const [selectedCourse, setSelectedCourse] = useState<Class | null>(null);
+  const [internalSelectedCourse, setInternalSelectedCourse] =
+    useState<Class | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 
   // Combine external hover (from selector) and internal hover (from calendar)
@@ -73,13 +77,17 @@ export function WeekView({
     id: Id<"userCourseOfferings">,
     classNumber: number,
     title: string,
+    alternativeOf?: Id<"userCourseOfferings">,
   ) => {
     try {
       await removeOffering({ id });
       toast.success(`${title} removed`, {
         action: {
           label: "Undo",
-          onClick: () => addOffering({ classNumber }),
+          onClick: () =>
+            addOffering(
+              alternativeOf ? { classNumber, alternativeOf } : { classNumber },
+            ),
         },
       });
     } catch (error) {
@@ -92,8 +100,12 @@ export function WeekView({
   };
 
   const handleEventClick = (event: Class) => {
-    setSelectedCourse(event);
-    setDialogOpen(true);
+    if (onCourseSelect) {
+      onCourseSelect(event);
+    } else {
+      setInternalSelectedCourse(event);
+      setDialogOpen(true);
+    }
   };
 
   const allDays = useMemo(() => {
@@ -332,6 +344,9 @@ export function WeekView({
                                 .userCourseOfferingId as Id<"userCourseOfferings">,
                               positionedEvent.event.classNumber,
                               positionedEvent.event.title,
+                              positionedEvent.event.alternativeOf as
+                                | Id<"userCourseOfferings">
+                                | undefined,
                             );
                           }}
                           className="absolute right-1 top-1 z-50 flex size-5 items-center justify-center rounded-full bg-black/10 dark:bg-white/10 text-foreground/70 opacity-0 shadow-md backdrop-blur-sm transition-all hover:bg-black/20 dark:hover:bg-white/20 hover:text-foreground hover:scale-110 group-hover:opacity-100"
@@ -351,7 +366,7 @@ export function WeekView({
       <CourseInfoDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
-        course={selectedCourse}
+        course={internalSelectedCourse}
         onDelete={handleRemove}
       />
     </div>
