@@ -11,6 +11,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import type { Term, TermYear } from "@/utils/term";
+import {
+  buildAcademicTimeline,
+  getAcademicYearLabel,
+  makeTermKey,
+} from "@/utils/term";
 
 interface TermYearSelectorProps {
   course: Doc<"courses">;
@@ -26,7 +32,7 @@ interface TermYearSelectorProps {
   onClose: () => void;
 }
 
-const TERMS = [
+const TERMS: { value: Term; label: string }[] = [
   { value: "spring", label: "Spring" },
   { value: "summer", label: "Summer" },
   { value: "fall", label: "Fall" },
@@ -41,8 +47,26 @@ const TermYearSelector = ({
 }: TermYearSelectorProps) => {
   const dialogTitleId = useId();
   const currentYear = new Date().getFullYear();
-  const [selectedTerm, setSelectedTerm] = useState<string>("fall");
+  const [selectedTerm, setSelectedTerm] = useState<Term>("fall");
   const [selectedYear, setSelectedYear] = useState<number>(currentYear);
+
+  const academicTimeline = useMemo(() => {
+    if (!student?.startingDate || !student?.expectedGraduationDate) {
+      return null;
+    }
+
+    const start: TermYear = {
+      term: student.startingDate.term as Term,
+      year: student.startingDate.year,
+    };
+
+    const end: TermYear = {
+      term: student.expectedGraduationDate.term as Term,
+      year: student.expectedGraduationDate.year,
+    };
+
+    return buildAcademicTimeline(start, end);
+  }, [student]);
 
   // Generate year options based on student's academic timeline
   const yearOptions = useMemo(() => {
@@ -55,6 +79,21 @@ const TermYearSelector = ({
     // Fallback to current year +/- 2 if no student data
     return Array.from({ length: 5 }, (_, i) => currentYear - 2 + i);
   }, [student, currentYear]);
+
+  const getYearLabel = (year: number) => {
+    const mappedAcademicYear = academicTimeline?.termToYearIndex.get(
+      makeTermKey(selectedTerm, year),
+    );
+
+    if (mappedAcademicYear !== undefined) {
+      return getAcademicYearLabel(mappedAcademicYear);
+    }
+
+    const fallbackIndex = yearOptions.indexOf(year);
+    return fallbackIndex >= 0
+      ? getAcademicYearLabel(fallbackIndex + 1)
+      : year.toString();
+  };
 
   const handleConfirm = () => {
     onConfirm(course.code, course.title, selectedYear, selectedTerm);
@@ -107,14 +146,17 @@ const TermYearSelector = ({
                 <SelectContent>
                   {yearOptions.map((year) => (
                     <SelectItem key={year} value={year.toString()}>
-                      {year}
+                      {getYearLabel(year)}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
-              <Select value={selectedTerm} onValueChange={setSelectedTerm}>
+              <Select
+                value={selectedTerm}
+                onValueChange={(value) => setSelectedTerm(value as Term)}
+              >
                 <SelectTrigger id="term-select">
                   <SelectValue placeholder="Select term" />
                 </SelectTrigger>
