@@ -5,7 +5,7 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import { useMutation } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { ConvexError } from "convex/values";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useSearchParam } from "@/hooks/use-search-param";
@@ -68,6 +68,20 @@ const CoursePlanSelector = ({
     overscan: 5,
     gap: 8,
   });
+
+  // https://tanstack.com/virtual/latest/docs/framework/react/examples/infinite-scroll
+  // biome-ignore lint/correctness/useExhaustiveDependencies: It's in Tanstack doc
+  useEffect(() => {
+    const [lastItem] = [...rowVirtualizer.getVirtualItems()].reverse();
+
+    if (!lastItem) {
+      return;
+    }
+
+    if (lastItem.index >= filteredCourses.length - 1 && status === "CanLoadMore") {
+      loadMore(200);
+    }
+  }, [status, loadMore, filteredCourses.length, rowVirtualizer.getVirtualItems()]);
 
   const handleCourseAdd = async (
     courseCode: string,
@@ -170,13 +184,6 @@ const CoursePlanSelector = ({
         </div>
       )}
 
-      {status === "CanLoadMore" && (
-        <div className="flex justify-center py-4 shrink-0">
-          <Button onClick={() => loadMore(200)} variant="outline">
-            Load More
-          </Button>
-        </div>
-      )}
       {status === "LoadingMore" && (
         <div className="flex justify-center py-4 shrink-0">
           <p className="text-gray-500">Loading more courses...</p>
