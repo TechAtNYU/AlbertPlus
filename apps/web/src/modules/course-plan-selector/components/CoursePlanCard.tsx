@@ -28,11 +28,28 @@ const CoursePlanCard = ({ course, onAdd }: CoursePlanCardProps) => {
     }
   };
 
-  // TODO: finish this
   const SCHOOLABBR = {
     "College of Arts and Science": "CAS",
+    "Graduate School of Arts and Science": "GSAS",
+    "College of Dentistry": "Dentistry",
+    "Gallatin School of Individualized Study": "Gallatin",
+    "Leonard N. Stern School of Business": "Stern",
     "Liberal Studies": "LS",
+    "NYU Abu Dhabi": "NYUAD",
+    "NYU Shanghai": "NYUSH",
+    "NYU Grossman School of Medicine": "Grossman",
+    "NYU Grossman Long Island School of Medicine": "LISOM",
+    "Robert F. Wagner Graduate School of Public Service": "Wagner",
+    "Rory Meyers College of Nursing": "Nursing",
+    "School of Global Public Health": "GPH",
+    "School of Law": "Law",
+    "School of Professional Studies": "SPS",
+    "Silver School of Social Work": "Silver",
+    "Steinhardt School of Culture, Education, and Human Development":
+      "Steinhardt",
     "Tandon School of Engineering": "Tandon",
+    "Tisch School of the Arts": "Tisch",
+    "Non-School Based Programs - UG": "NSB",
   };
 
   return (
@@ -57,17 +74,17 @@ const CoursePlanCard = ({ course, onAdd }: CoursePlanCardProps) => {
               </span>
               <span>•</span>
               <span className="capitalize">
-                {/*@ts-expect-error: abbreviation list is not finished, and we have a fallback to use original name*/}
-                {SCHOOLABBR[course.school] ?? course.school}
+                {SCHOOLABBR[course.school] ?? course.school.split(" ")[0]}
               </span>
             </div>
           </div>
         </button>
+        {/* on mobile we display add button, desktop can just drag and drop */}
         <Button
           size="sm"
           variant="ghost"
           onClick={onAdd}
-          className="shrink-0 h-8 w-8 p-0"
+          className="block md:hidden shrink-0 h-8 w-8 p-0"
           title="Add to plan"
         >
           <PlusIcon className="h-4 w-4" />
