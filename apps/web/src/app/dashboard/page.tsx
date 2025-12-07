@@ -25,10 +25,10 @@ const HomePage = () => {
   const programQueries: RequestForQueries = {};
 
   if (isAuthenticated && student) {
-    for (const programId of student.programs) {
-      programQueries[programId] = {
+    for (const program of student.programs) {
+      programQueries[program._id] = {
         query: api.programs.getProgramById,
-        args: { id: programId },
+        args: { id: program._id },
       };
     }
   }
