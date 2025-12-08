@@ -294,7 +294,8 @@ export default function PlanTable({
     e: React.DragEvent<HTMLElement>,
     userCourse: UserCourseEntry,
   ) => {
-    e.dataTransfer.effectAllowed = "copyMove";
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("application/x-albert-internal", "true");
     setDragPayload(e, {
       userCourseId: userCourse._id,
       courseCode: userCourse.course?.code ?? userCourse.courseCode,
@@ -430,7 +431,10 @@ export default function PlanTable({
                     e: React.DragEvent<HTMLTableCellElement>,
                   ) => {
                     e.preventDefault();
-                    e.dataTransfer.dropEffect = "copy";
+                    const isInternal = e.dataTransfer.types.includes(
+                      "application/x-albert-internal",
+                    );
+                    e.dataTransfer.dropEffect = isInternal ? "move" : "copy";
                     if (
                       !dragOverCell ||
                       dragOverCell.year !== year ||
@@ -545,9 +549,7 @@ export default function PlanTable({
                       {userCourses.length > 0 ? (
                         <div className="space-y-3">
                           {userCourses.map((userCourse) => {
-                            const key = userCourse.course
-                              ? `${year}-${term}-${userCourse.course.code}`
-                              : `${year}-${term}-${userCourse._id}`;
+                            const key = userCourse._id;
 
                             if (!userCourse.course) {
                               return (
