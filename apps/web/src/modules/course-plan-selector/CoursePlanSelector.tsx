@@ -78,10 +78,18 @@ const CoursePlanSelector = ({
       return;
     }
 
-    if (lastItem.index >= filteredCourses.length - 1 && status === "CanLoadMore") {
+    if (
+      lastItem.index >= filteredCourses.length - 1 &&
+      status === "CanLoadMore"
+    ) {
       loadMore(200);
     }
-  }, [status, loadMore, filteredCourses.length, rowVirtualizer.getVirtualItems()]);
+  }, [
+    status,
+    loadMore,
+    filteredCourses.length,
+    rowVirtualizer.getVirtualItems(),
+  ]);
 
   const handleCourseAdd = async (
     courseCode: string,

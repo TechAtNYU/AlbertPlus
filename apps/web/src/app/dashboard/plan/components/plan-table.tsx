@@ -1,6 +1,7 @@
 "use client";
 
 import { api } from "@albert-plus/server/convex/_generated/api";
+import type { Id } from "@albert-plus/server/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import {
@@ -84,6 +85,7 @@ export default function PlanTable({
   const importUserCourses = useMutation(api.userCourses.importUserCourses);
   const createUserCourse = useMutation(api.userCourses.createUserCourse);
   const deleteUserCourse = useMutation(api.userCourses.deleteUserCourse);
+  const updateUserCourse = useMutation(api.userCourses.updateUserCourse);
 
   const updateStudent = useMutation(api.students.updateCurrentStudent);
 
@@ -279,6 +281,38 @@ export default function PlanTable({
     return map;
   }, [academicTimeline]);
 
+  const setDragPayload = (
+    e: React.DragEvent<HTMLElement>,
+    payload: Record<string, unknown>,
+  ) => {
+    const serialized = JSON.stringify(payload);
+    e.dataTransfer.setData("application/json", serialized);
+    e.dataTransfer.setData("text/plain", serialized);
+  };
+
+  const handleInternalDragStart = (
+    e: React.DragEvent<HTMLElement>,
+    userCourse: UserCourseEntry,
+  ) => {
+    e.dataTransfer.effectAllowed = "move";
+    setDragPayload(e, {
+      userCourseId: userCourse._id,
+      courseCode: userCourse.course?.code ?? userCourse.courseCode,
+      title: userCourse.title,
+      term: userCourse.term,
+      year: userCourse.year,
+    });
+    if (e.currentTarget instanceof HTMLElement) {
+      e.currentTarget.style.opacity = "0.6";
+    }
+  };
+
+  const handleInternalDragEnd = (e: React.DragEvent<HTMLElement>) => {
+    if (e.currentTarget instanceof HTMLElement) {
+      e.currentTarget.style.opacity = "1";
+    }
+  };
+
   // only show terms with course
   const visibleTerms = useMemo(() => {
     return allTerms.filter((term) => {
@@ -396,7 +430,7 @@ export default function PlanTable({
                     e: React.DragEvent<HTMLTableCellElement>,
                   ) => {
                     e.preventDefault();
-                    e.dataTransfer.dropEffect = "copy";
+                    e.dataTransfer.dropEffect = "move";
                     if (
                       !dragOverCell ||
                       dragOverCell.year !== year ||
@@ -421,23 +455,64 @@ export default function PlanTable({
                     e.preventDefault();
                     setDragOverCell(null);
 
+                    const rawData =
+                      e.dataTransfer.getData("application/json") ||
+                      e.dataTransfer.getData("text/plain");
+                    if (!rawData) {
+                      return;
+                    }
+
+                    let data: {
+                      userCourseId?: string;
+                      courseCode?: string;
+                      title?: string;
+                      term?: string;
+                      year?: number;
+                    };
+
                     try {
-                      const data = JSON.parse(
-                        e.dataTransfer.getData("application/json"),
-                      );
-                      if (data.courseCode && data.title && onCourseDrop) {
-                        const reverseKey = `${year}-${term}`;
-                        const actualYear =
-                          yearIndexToActualYear.get(reverseKey) ?? year;
-                        onCourseDrop(
-                          data.courseCode,
-                          data.title,
-                          actualYear,
-                          term,
-                        );
-                      }
+                      data = JSON.parse(rawData);
                     } catch (error) {
-                      console.error("Error parsing dropped data:", error);
+                      console.error(error);
+                      return;
+                    }
+
+                    const reverseKey = `${year}-${term}`;
+                    const actualYear =
+                      yearIndexToActualYear.get(reverseKey) ?? year;
+
+                    if (data?.userCourseId) {
+                      if (
+                        data.term === term &&
+                        data.year &&
+                        data.year === actualYear
+                      ) {
+                        return;
+                      }
+
+                      updateUserCourse({
+                        id: data.userCourseId as Id<"userCourses">,
+                        term,
+                        year: actualYear,
+                      })
+                        .then(() => {
+                          toast.success(
+                            `${data.courseCode ?? "Course"} moved to ${term} ${actualYear}`,
+                          );
+                        })
+                        .catch(() => {
+                          toast.error("Failed to move course");
+                        });
+                      return;
+                    }
+
+                    if (data?.courseCode && data?.title && onCourseDrop) {
+                      onCourseDrop(
+                        data.courseCode,
+                        data.title,
+                        actualYear,
+                        term,
+                      );
                     }
                   };
 
@@ -473,7 +548,15 @@ export default function PlanTable({
                               return (
                                 <ContextMenu key={key}>
                                   <ContextMenuTrigger>
-                                    <div className="block p-2 border border-dashed border-amber-500/50 rounded-md bg-amber-500/5">
+                                    <button
+                                      type="button"
+                                      draggable
+                                      onDragStart={(e) =>
+                                        handleInternalDragStart(e, userCourse)
+                                      }
+                                      onDragEnd={handleInternalDragEnd}
+                                      className="block w-full text-left p-2 border border-dashed border-amber-500/50 rounded-md bg-amber-500/5"
+                                    >
                                       <div className="flex items-center gap-2 mb-1">
                                         <span className="font-medium text-sm text-amber-900 dark:text-amber-300">
                                           {userCourse.title}
@@ -482,7 +565,7 @@ export default function PlanTable({
                                       <div className="text-xs text-muted-foreground mt-1">
                                         {userCourse.courseCode}
                                       </div>
-                                    </div>
+                                    </button>
                                   </ContextMenuTrigger>
                                   <ContextMenuContent>
                                     <ContextMenuItem
@@ -505,9 +588,12 @@ export default function PlanTable({
                                   <Link
                                     href={userCourse.course.courseUrl}
                                     target="_blank"
-                                    className={
-                                      "block p-2 border rounded-md bg-card hover:bg-muted/50 transition-colors"
+                                    draggable
+                                    onDragStart={(e) =>
+                                      handleInternalDragStart(e, userCourse)
                                     }
+                                    onDragEnd={handleInternalDragEnd}
+                                    className="block p-2 border rounded-md bg-card hover:bg-muted/50 transition-colors cursor-grab active:cursor-grabbing"
                                   >
                                     <div className="font-medium text-sm">
                                       {userCourse.title}
