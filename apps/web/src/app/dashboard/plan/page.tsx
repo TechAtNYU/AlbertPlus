@@ -123,12 +123,15 @@ const PlanPage = () => {
         year,
         term: term as "spring" | "summer" | "fall" | "j-term",
       });
-      toast.success(`${courseCode} added to ${term} ${year}`, {
-        action: {
-          label: "Undo",
-          onClick: () => deleteUserCourse({ id }),
+      toast.success(
+        `${courseCode} added to ${term.charAt(0).toUpperCase() + term.slice(1)} ${year}`,
+        {
+          action: {
+            label: "Undo",
+            onClick: () => deleteUserCourse({ id }),
+          },
         },
-      });
+      );
     } catch (error) {
       const errorMessage =
         error instanceof ConvexError

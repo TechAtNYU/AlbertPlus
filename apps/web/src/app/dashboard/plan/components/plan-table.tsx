@@ -294,7 +294,7 @@ export default function PlanTable({
     e: React.DragEvent<HTMLElement>,
     userCourse: UserCourseEntry,
   ) => {
-    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.effectAllowed = "copyMove";
     setDragPayload(e, {
       userCourseId: userCourse._id,
       courseCode: userCourse.course?.code ?? userCourse.courseCode,
@@ -430,7 +430,7 @@ export default function PlanTable({
                     e: React.DragEvent<HTMLTableCellElement>,
                   ) => {
                     e.preventDefault();
-                    e.dataTransfer.dropEffect = "move";
+                    e.dataTransfer.dropEffect = "copy";
                     if (
                       !dragOverCell ||
                       dragOverCell.year !== year ||
@@ -455,13 +455,6 @@ export default function PlanTable({
                     e.preventDefault();
                     setDragOverCell(null);
 
-                    const rawData =
-                      e.dataTransfer.getData("application/json") ||
-                      e.dataTransfer.getData("text/plain");
-                    if (!rawData) {
-                      return;
-                    }
-
                     let data: {
                       userCourseId?: string;
                       courseCode?: string;
@@ -471,11 +464,23 @@ export default function PlanTable({
                     };
 
                     try {
+                      const rawData =
+                        e.dataTransfer.getData("application/json") ||
+                        e.dataTransfer.getData("text/plain");
+                      if (!rawData) {
+                        e.dataTransfer.dropEffect = "none";
+                        return;
+                      }
                       data = JSON.parse(rawData);
                     } catch (error) {
-                      console.error(error);
+                      console.error("Error parsing dropped data:", error);
                       return;
                     }
+
+                    const isInternalDrag = Boolean(data?.userCourseId);
+                    e.dataTransfer.dropEffect = isInternalDrag
+                      ? "move"
+                      : "copy";
 
                     const reverseKey = `${year}-${term}`;
                     const actualYear =
@@ -497,7 +502,7 @@ export default function PlanTable({
                       })
                         .then(() => {
                           toast.success(
-                            `${data.courseCode ?? "Course"} moved to ${term} ${actualYear}`,
+                            `${data.courseCode ?? "Course"} moved to ${term.charAt(0).toUpperCase() + term.slice(1)} ${actualYear}`,
                           );
                         })
                         .catch(() => {
