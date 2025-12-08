@@ -55,9 +55,24 @@ const CoursePlanSelector = ({
     ? courses.filter((course) => course.credits === creditFilter)
     : courses;
 
-  const availableCredits = Array.from(
-    new Set(courses.map((course) => course.credits)),
-  ).sort((a, b) => a - b);
+  const [availableCredits, setAvailableCredits] = useState<number[]>([]);
+
+  useEffect(() => {
+    if (status === "LoadingFirstPage") {
+      setAvailableCredits([]);
+      return;
+    }
+
+    setAvailableCredits((prev) => {
+      if (prev.length > 0) {
+        return prev;
+      }
+      const credits = Array.from(
+        new Set(courses.map((course) => course.credits)),
+      ).sort((a, b) => a - b);
+      return credits;
+    });
+  }, [courses, status]);
 
   const parentRef = React.useRef<HTMLDivElement>(null);
 
@@ -69,27 +84,23 @@ const CoursePlanSelector = ({
     gap: 8,
   });
 
-  // https://tanstack.com/virtual/latest/docs/framework/react/examples/infinite-scroll
-  // biome-ignore lint/correctness/useExhaustiveDependencies: It's in Tanstack doc
+  const virtualItems = rowVirtualizer.getVirtualItems();
+
   useEffect(() => {
-    const [lastItem] = [...rowVirtualizer.getVirtualItems()].reverse();
+    if (status !== "CanLoadMore") {
+      return;
+    }
+
+    const [lastItem] = [...virtualItems].reverse();
 
     if (!lastItem) {
       return;
     }
 
-    if (
-      lastItem.index >= filteredCourses.length - 1 &&
-      status === "CanLoadMore"
-    ) {
+    if (lastItem.index >= filteredCourses.length - 1) {
       loadMore(200);
     }
-  }, [
-    status,
-    loadMore,
-    filteredCourses.length,
-    rowVirtualizer.getVirtualItems(),
-  ]);
+  }, [status, loadMore, filteredCourses.length, virtualItems]);
 
   const handleCourseAdd = async (
     courseCode: string,

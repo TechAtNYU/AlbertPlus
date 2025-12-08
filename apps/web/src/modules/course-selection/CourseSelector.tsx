@@ -77,23 +77,27 @@ const CourseSelector = ({
     gap: 8,
   });
 
+  const virtualItems = rowVirtualizer.getVirtualItems();
+
   useEffect(() => {
     onHover?.(hoveredSection);
   }, [hoveredSection, onHover]);
 
-  // https://tanstack.com/virtual/latest/docs/framework/react/examples/infinite-scroll
-  // biome-ignore lint/correctness/useExhaustiveDependencies: It's in Tanstack doc
   useEffect(() => {
-    const [lastItem] = [...rowVirtualizer.getVirtualItems()].reverse();
+    if (status !== "CanLoadMore") {
+      return;
+    }
+
+    const [lastItem] = [...virtualItems].reverse();
 
     if (!lastItem) {
       return;
     }
 
-    if (lastItem.index >= filteredData.length - 1 && status === "CanLoadMore") {
+    if (lastItem.index >= filteredData.length - 1) {
       loadMore(200);
     }
-  }, [status, loadMore, filteredData.length, rowVirtualizer.getVirtualItems()]);
+  }, [status, loadMore, filteredData.length, virtualItems]);
 
   const handleSectionSelect = async (offering: CourseOffering) => {
     if (offering.status === "closed") {
