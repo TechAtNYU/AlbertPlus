@@ -382,14 +382,14 @@ export function ProgramRequirementsChart({
       </CardHeader>
       <CardContent>
         <div className="flex justify-center relative">
-          <ResponsiveContainer width="100%" height={400}>
+          <ResponsiveContainer width="100%" height={450}>
             <PieChart>
               <Pie
                 data={pieChartData}
                 dataKey="value"
                 nameKey="name"
                 cx="50%"
-                cy="50%"
+                cy="45%"
                 innerRadius={90}
                 outerRadius={130}
                 isAnimationActive={!hasAnimated}
@@ -400,8 +400,8 @@ export function ProgramRequirementsChart({
               </Pie>
               <text
                 x="50%"
-                y="50%"
-                dy="-15"
+                y="36%"
+                dy="0"
                 textAnchor="middle"
                 dominantBaseline="middle"
                 className="fill-foreground font-bold"
@@ -413,8 +413,8 @@ export function ProgramRequirementsChart({
               </text>
               <text
                 x="50%"
-                y="50%"
-                dy="25"
+                y="36%"
+                dy="35"
                 textAnchor="middle"
                 dominantBaseline="middle"
                 className="fill-muted-foreground"
@@ -445,7 +445,7 @@ export function ProgramRequirementsChart({
                   return null;
                 }}
               />
-              <Legend />
+              <Legend verticalAlign="bottom" height={80} />
             </PieChart>
           </ResponsiveContainer>
         </div>
