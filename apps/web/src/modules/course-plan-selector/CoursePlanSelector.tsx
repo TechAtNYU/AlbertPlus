@@ -1,57 +1,49 @@
 "use client";
 import { api } from "@albert-plus/server/convex/_generated/api";
+import type { Doc } from "@albert-plus/server/convex/_generated/dataModel";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useMutation } from "convex/react";
+import type { FunctionReturnType } from "convex/server";
 import { ConvexError } from "convex/values";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useSearchParam } from "@/hooks/use-search-param";
-import { CourseCard, CourseFilters } from "./components";
-import { useCourseExpansion, useCourseFiltering } from "./hooks";
-import type { CourseOffering, CourseOfferingWithCourse } from "./types";
+import CoursePlanCard from "./components/CoursePlanCard";
+import CoursePlanFilters from "./components/CoursePlanFilters";
+import TermYearSelector from "./components/TermYearSelector";
 
-interface CourseSelectorComponentProps {
-  courseOfferingsWithCourses: CourseOfferingWithCourse[];
-  onHover: (course: CourseOffering | null) => void;
+interface CoursePlanSelectorProps {
+  courses: Doc<"courses">[];
+  student:
+    | FunctionReturnType<typeof api.students.getCurrentStudent>
+    | undefined;
   onSearchChange: (search: string) => void;
   searchQuery: string;
   loadMore: (numItems: number) => void;
   status: "LoadingFirstPage" | "CanLoadMore" | "LoadingMore" | "Exhausted";
   isSearching?: boolean;
-  selectedClassNumbers?: number[];
 }
 
-const CourseSelector = ({
-  courseOfferingsWithCourses,
-  onHover,
+const CoursePlanSelector = ({
+  courses,
+  student,
   onSearchChange,
   searchQuery,
   loadMore,
   status,
   isSearching = false,
-  selectedClassNumbers,
-}: CourseSelectorComponentProps) => {
+}: CoursePlanSelectorProps) => {
   const { searchValue: filtersParam, setSearchValue: setFiltersParam } =
     useSearchParam({ paramKey: "filters", debounceDelay: 0 });
 
-  const { filterState, dispatch, filteredData, availableCredits } =
-    useCourseFiltering(courseOfferingsWithCourses);
-  const { creditFilter, selectedDays } = filterState;
-
-  const { toggleCourseExpansion, isExpanded } = useCourseExpansion();
-
-  const addCourseOffering = useMutation(
-    api.userCourseOfferings.addUserCourseOffering,
-  );
-
-  const removeCourseOffering = useMutation(
-    api.userCourseOfferings.removeUserCourseOffering,
-  );
-
-  const [hoveredSection, setHoveredSection] = useState<CourseOffering | null>(
+  const [creditFilter, setCreditFilter] = useState<number | null>(null);
+  const [selectedCourse, setSelectedCourse] = useState<Doc<"courses"> | null>(
     null,
   );
+
+  const createUserCourse = useMutation(api.userCourses.createUserCourse);
+  const deleteUserCourse = useMutation(api.userCourses.deleteUserCourse);
 
   const isFiltersExpanded = filtersParam === "true";
 
@@ -59,29 +51,40 @@ const CourseSelector = ({
     setFiltersParam(isFiltersExpanded ? "" : "true");
   };
 
-  const handleSectionHover = (section: CourseOffering | null) => {
-    if (section && (!section.startTime || !section.endTime)) {
-      setHoveredSection(null);
+  const filteredCourses = creditFilter
+    ? courses.filter((course) => course.credits === creditFilter)
+    : courses;
+
+  const [availableCredits, setAvailableCredits] = useState<number[]>([]);
+
+  useEffect(() => {
+    if (status === "LoadingFirstPage") {
+      setAvailableCredits([]);
       return;
     }
-    setHoveredSection(section);
-  };
+
+    setAvailableCredits((prev) => {
+      if (prev.length > 0) {
+        return prev;
+      }
+      const credits = Array.from(
+        new Set(courses.map((course) => course.credits)),
+      ).sort((a, b) => a - b);
+      return credits;
+    });
+  }, [courses, status]);
 
   const parentRef = React.useRef<HTMLDivElement>(null);
 
   const rowVirtualizer = useVirtualizer({
-    count: filteredData.length,
+    count: filteredCourses.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => 100,
+    estimateSize: () => 80,
     overscan: 5,
     gap: 8,
   });
 
   const virtualItems = rowVirtualizer.getVirtualItems();
-
-  useEffect(() => {
-    onHover?.(hoveredSection);
-  }, [hoveredSection, onHover]);
 
   useEffect(() => {
     if (status !== "CanLoadMore") {
@@ -94,61 +97,66 @@ const CourseSelector = ({
       return;
     }
 
-    if (lastItem.index >= filteredData.length - 1) {
+    if (lastItem.index >= filteredCourses.length - 1) {
       loadMore(200);
     }
-  }, [status, loadMore, filteredData.length, virtualItems]);
+  }, [status, loadMore, filteredCourses.length, virtualItems]);
 
-  const handleSectionSelect = async (offering: CourseOffering) => {
-    if (offering.status === "closed") {
-      toast.error("This section is closed.");
-      return;
-    }
-    setHoveredSection(null);
+  const handleCourseAdd = async (
+    courseCode: string,
+    title: string,
+    year: number,
+    term: string,
+  ) => {
     try {
-      const id = await addCourseOffering({ classNumber: offering.classNumber });
-      toast.success(`${offering.courseCode} ${offering.section} added`, {
-        action: {
-          label: "Undo",
-          onClick: () => removeCourseOffering({ id }),
-        },
+      const id = await createUserCourse({
+        courseCode,
+        title,
+        year,
+        term: term as "spring" | "summer" | "fall" | "j-term",
       });
+      toast.success(
+        `${courseCode} added to ${term.charAt(0).toUpperCase() + term.slice(1)} ${year}`,
+        {
+          action: {
+            label: "Undo",
+            onClick: () => deleteUserCourse({ id }),
+          },
+        },
+      );
+      setSelectedCourse(null);
     } catch (error) {
       const errorMessage =
         error instanceof ConvexError
           ? (error.data as string)
-          : "Unexpected error occurred";
+          : error instanceof Error
+            ? error.message
+            : "Unexpected error occurred";
       toast.error(errorMessage);
     }
   };
 
   return (
-    <div className="flex flex-col gap-4 w-full md:w-[350px] h-full">
+    <div className="flex flex-col gap-4 w-full h-full">
       <div className="shrink-0">
-        <CourseFilters
+        <CoursePlanFilters
           searchInput={searchQuery}
           onSearchChange={onSearchChange}
           creditFilter={creditFilter}
-          onCreditFilterChange={(credit) =>
-            dispatch({ type: "SET_CREDIT", payload: credit })
-          }
-          selectedDays={selectedDays}
-          onSelectedDaysChange={(days) =>
-            dispatch({ type: "SET_DAYS", payload: days })
-          }
+          onCreditFilterChange={setCreditFilter}
           availableCredits={availableCredits}
           isExpanded={isFiltersExpanded}
           onToggleExpand={handleToggleFilters}
         />
       </div>
 
-      {filteredData.length === 0 && !isSearching && (
+      {filteredCourses.length === 0 && !isSearching && (
         <div className="flex flex-col space-y-4 items-center justify-center flex-1">
           <p className="text-gray-500">No courses found.</p>
           <Button
             variant="outline"
             onClick={() => {
-              dispatch({ type: "RESET_FILTERS" });
+              setCreditFilter(null);
               onSearchChange("");
             }}
           >
@@ -157,13 +165,13 @@ const CourseSelector = ({
         </div>
       )}
 
-      {filteredData.length === 0 && isSearching && (
+      {filteredCourses.length === 0 && isSearching && (
         <div className="flex flex-col space-y-4 items-center justify-center flex-1">
           <p className="text-gray-500">Searching...</p>
         </div>
       )}
 
-      {filteredData.length > 0 && (
+      {filteredCourses.length > 0 && (
         <div
           ref={parentRef}
           className="overflow-auto no-scrollbar w-full flex-1 min-h-0"
@@ -175,7 +183,7 @@ const CourseSelector = ({
             }}
           >
             {rowVirtualizer.getVirtualItems().map((virtualItem) => {
-              const course = filteredData[virtualItem.index];
+              const course = filteredCourses[virtualItem.index];
 
               return (
                 <div
@@ -187,13 +195,9 @@ const CourseSelector = ({
                     transform: `translateY(${virtualItem.start}px)`,
                   }}
                 >
-                  <CourseCard
+                  <CoursePlanCard
                     course={course}
-                    isExpanded={isExpanded(course.code)}
-                    selectedClassNumbers={selectedClassNumbers}
-                    onToggleExpand={toggleCourseExpansion}
-                    onSectionSelect={handleSectionSelect}
-                    onSectionHover={handleSectionHover}
+                    onAdd={() => setSelectedCourse(course)}
                   />
                 </div>
               );
@@ -207,8 +211,17 @@ const CourseSelector = ({
           <p className="text-gray-500">Loading more courses...</p>
         </div>
       )}
+
+      {selectedCourse && (
+        <TermYearSelector
+          course={selectedCourse}
+          student={student}
+          onConfirm={handleCourseAdd}
+          onClose={() => setSelectedCourse(null)}
+        />
+      )}
     </div>
   );
 };
 
-export default CourseSelector;
+export default CoursePlanSelector;

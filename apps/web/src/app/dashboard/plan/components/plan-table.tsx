@@ -1,13 +1,26 @@
 "use client";
 
 import { api } from "@albert-plus/server/convex/_generated/api";
+import type { Id } from "@albert-plus/server/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
-import { FileTextIcon, SearchIcon } from "lucide-react";
+import {
+  FileTextIcon,
+  Loader2Icon,
+  SearchIcon,
+  Trash2Icon,
+} from "lucide-react";
 import Link from "next/link";
 import { useId, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useCurrentTerm, useCurrentYear } from "@/components/AppConfigProvider";
+import { Button } from "@/components/ui/button";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -37,21 +50,42 @@ interface PlanTableProps {
   student:
     | FunctionReturnType<typeof api.students.getCurrentStudent>
     | undefined;
+  isDragging?: boolean;
+  onCourseDrop?: (
+    courseCode: string,
+    title: string,
+    year: number,
+    term: string,
+  ) => void;
+  onAddExternalCourse?: () => void;
 }
 
 type UserCourseEntry = NonNullable<
   FunctionReturnType<typeof api.userCourses.getUserCourses>
 >[number];
 
-export default function PlanTable({ courses, student }: PlanTableProps) {
+export default function PlanTable({
+  courses,
+  student,
+  isDragging = false,
+  onCourseDrop,
+  onAddExternalCourse,
+}: PlanTableProps) {
   const allTerms = ["fall", "j-term", "spring", "summer"] as const;
 
   const currentTerm = useCurrentTerm();
   const currentYear = useCurrentYear();
 
   const [courseSearch, setCourseSearch] = useState<string>("");
+  const [dragOverCell, setDragOverCell] = useState<{
+    year: number;
+    term: Term;
+  } | null>(null);
 
   const importUserCourses = useMutation(api.userCourses.importUserCourses);
+  const createUserCourse = useMutation(api.userCourses.createUserCourse);
+  const deleteUserCourse = useMutation(api.userCourses.deleteUserCourse);
+  const updateUserCourse = useMutation(api.userCourses.updateUserCourse);
 
   const updateStudent = useMutation(api.students.updateCurrentStudent);
 
@@ -98,6 +132,28 @@ export default function PlanTable({ courses, student }: PlanTableProps) {
         : "Import complete";
 
     toast.success(successMessage);
+  };
+
+  const handleDeleteCourse = async (userCourse: UserCourseEntry) => {
+    try {
+      await deleteUserCourse({ id: userCourse._id });
+      toast.success(`${userCourse.courseCode} removed`, {
+        action: {
+          label: "Undo",
+          onClick: async () => {
+            await createUserCourse({
+              courseCode: userCourse.courseCode,
+              title: userCourse.title,
+              year: userCourse.year,
+              term: userCourse.term,
+              ...(userCourse.grade && { grade: userCourse.grade }),
+            });
+          },
+        },
+      });
+    } catch (_error) {
+      toast.error("Failed to delete course");
+    }
   };
 
   // Filter courses based on search
@@ -210,6 +266,54 @@ export default function PlanTable({ courses, student }: PlanTableProps) {
     return map;
   }, [academicTimeline, filteredData]);
 
+  const yearIndexToActualYear = useMemo(() => {
+    const map = new Map<string, number>();
+
+    if (academicTimeline?.termToYearIndex) {
+      academicTimeline.termToYearIndex.forEach((yearIndex, termKey) => {
+        const actualYear = parseInt(termKey.split("-")[1], 10);
+        const term = termKey.split("-")[0];
+        const reverseKey = `${yearIndex}-${term}`;
+        map.set(reverseKey, actualYear);
+      });
+    }
+
+    return map;
+  }, [academicTimeline]);
+
+  const setDragPayload = (
+    e: React.DragEvent<HTMLElement>,
+    payload: Record<string, unknown>,
+  ) => {
+    const serialized = JSON.stringify(payload);
+    e.dataTransfer.setData("application/json", serialized);
+    e.dataTransfer.setData("text/plain", serialized);
+  };
+
+  const handleInternalDragStart = (
+    e: React.DragEvent<HTMLElement>,
+    userCourse: UserCourseEntry,
+  ) => {
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("application/x-albert-internal", "true");
+    setDragPayload(e, {
+      userCourseId: userCourse._id,
+      courseCode: userCourse.course?.code ?? userCourse.courseCode,
+      title: userCourse.title,
+      term: userCourse.term,
+      year: userCourse.year,
+    });
+    if (e.currentTarget instanceof HTMLElement) {
+      e.currentTarget.style.opacity = "0.6";
+    }
+  };
+
+  const handleInternalDragEnd = (e: React.DragEvent<HTMLElement>) => {
+    if (e.currentTarget instanceof HTMLElement) {
+      e.currentTarget.style.opacity = "1";
+    }
+  };
+
   // only show terms with course
   const visibleTerms = useMemo(() => {
     return allTerms.filter((term) => {
@@ -222,8 +326,7 @@ export default function PlanTable({ courses, student }: PlanTableProps) {
   }, [allTerms, yearColumns, yearTermMap]);
 
   if (!courses) {
-    // TODO: add skeletons for the page
-    return null;
+    return <Loader2Icon className="animate-spin" />;
   }
 
   if (courses.length === 0) {
@@ -257,9 +360,7 @@ export default function PlanTable({ courses, student }: PlanTableProps) {
 
   return (
     <div className="space-y-3 overflow-x-auto">
-      {/* Filters */}
       <div className="flex flex-wrap gap-3 items-end">
-        {/* Course search */}
         <div className="w-64 flex flex-col space-y-1">
           <Label htmlFor={courseSearchId}>Search</Label>
           <div className="relative">
@@ -276,6 +377,9 @@ export default function PlanTable({ courses, student }: PlanTableProps) {
             </div>
           </div>
         </div>
+        <Button className="hidden md:block w-fit" onClick={onAddExternalCourse}>
+          Add From Albert
+        </Button>
       </div>
       <Table className="min-w-max">
         <TableHeader>
@@ -320,55 +424,204 @@ export default function PlanTable({ courses, student }: PlanTableProps) {
                   const termMap = yearTermMap.get(year);
                   const userCourses = termMap?.get(term) ?? [];
                   const isCurrentColumn = currentColumnKey === year;
+                  const isDragOver =
+                    dragOverCell?.year === year && dragOverCell?.term === term;
+
+                  const handleDragOver = (
+                    e: React.DragEvent<HTMLTableCellElement>,
+                  ) => {
+                    e.preventDefault();
+                    const isInternal = e.dataTransfer.types.includes(
+                      "application/x-albert-internal",
+                    );
+                    e.dataTransfer.dropEffect = isInternal ? "move" : "copy";
+                    if (
+                      !dragOverCell ||
+                      dragOverCell.year !== year ||
+                      dragOverCell.term !== term
+                    ) {
+                      setDragOverCell({ year, term });
+                    }
+                  };
+
+                  const handleDragLeave = (
+                    e: React.DragEvent<HTMLTableCellElement>,
+                  ) => {
+                    // Only clear if leaving the cell itself, not child elements
+                    if (e.currentTarget === e.target) {
+                      setDragOverCell(null);
+                    }
+                  };
+
+                  const handleDrop = (
+                    e: React.DragEvent<HTMLTableCellElement>,
+                  ) => {
+                    e.preventDefault();
+                    setDragOverCell(null);
+
+                    let data: {
+                      userCourseId?: string;
+                      courseCode?: string;
+                      title?: string;
+                      term?: string;
+                      year?: number;
+                    };
+
+                    try {
+                      const rawData =
+                        e.dataTransfer.getData("application/json") ||
+                        e.dataTransfer.getData("text/plain");
+                      if (!rawData) {
+                        e.dataTransfer.dropEffect = "none";
+                        return;
+                      }
+                      data = JSON.parse(rawData);
+                    } catch (error) {
+                      console.error("Error parsing dropped data:", error);
+                      return;
+                    }
+
+                    const isInternalDrag = Boolean(data?.userCourseId);
+                    e.dataTransfer.dropEffect = isInternalDrag
+                      ? "move"
+                      : "copy";
+
+                    const reverseKey = `${year}-${term}`;
+                    const actualYear =
+                      yearIndexToActualYear.get(reverseKey) ?? year;
+
+                    if (data?.userCourseId) {
+                      if (
+                        data.term === term &&
+                        data.year &&
+                        data.year === actualYear
+                      ) {
+                        return;
+                      }
+
+                      updateUserCourse({
+                        id: data.userCourseId as Id<"userCourses">,
+                        term,
+                        year: actualYear,
+                      })
+                        .then(() => {
+                          toast.success(
+                            `${data.courseCode ?? "Course"} moved to ${term.charAt(0).toUpperCase() + term.slice(1)} ${actualYear}`,
+                          );
+                        })
+                        .catch(() => {
+                          toast.error("Failed to move course");
+                        });
+                      return;
+                    }
+
+                    if (data?.courseCode && data?.title && onCourseDrop) {
+                      onCourseDrop(
+                        data.courseCode,
+                        data.title,
+                        actualYear,
+                        term,
+                      );
+                    }
+                  };
+
                   return (
                     <TableCell
                       key={year}
                       className={cn(
-                        "align-top p-3",
+                        "align-top p-3 relative transition-all",
                         isCurrentColumn && "bg-primary/5",
+                        isDragging && "cursor-copy",
+                        isDragOver &&
+                          "bg-primary/20 ring-2 ring-primary ring-inset",
                       )}
+                      onDragOver={handleDragOver}
+                      onDragLeave={handleDragLeave}
+                      onDrop={handleDrop}
                     >
+                      {isDragOver && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-primary/10 backdrop-blur-[2px] pointer-events-none z-10 border-2 border-dashed border-primary rounded">
+                          <div className="text-md font-medium text-primary px-3 py-1.5 rounded-md shadow-sm">
+                            Drop here to add
+                          </div>
+                        </div>
+                      )}
                       {userCourses.length > 0 ? (
                         <div className="space-y-3">
                           {userCourses.map((userCourse) => {
-                            const key = userCourse.course
-                              ? `${year}-${term}-${userCourse.course.code}`
-                              : `${year}-${term}-${userCourse._id}`;
+                            const key = userCourse._id;
 
                             if (!userCourse.course) {
                               return (
-                                <div
-                                  key={key}
-                                  className="block p-2 border border-dashed border-amber-500/50 rounded-md bg-amber-500/5"
-                                >
-                                  <div className="flex items-center gap-2 mb-1">
-                                    <span className="font-medium text-sm text-amber-900 dark:text-amber-300">
-                                      {userCourse.title}
-                                    </span>
-                                  </div>
-                                  <div className="text-xs text-muted-foreground mt-1">
-                                    {userCourse.courseCode}
-                                  </div>
-                                </div>
+                                <ContextMenu key={key}>
+                                  <ContextMenuTrigger>
+                                    <button
+                                      type="button"
+                                      draggable
+                                      onDragStart={(e) =>
+                                        handleInternalDragStart(e, userCourse)
+                                      }
+                                      onDragEnd={handleInternalDragEnd}
+                                      className="block w-full text-left p-2 border border-dashed border-amber-500/50 rounded-md bg-amber-500/5"
+                                    >
+                                      <div className="flex items-center gap-2 mb-1">
+                                        <span className="font-medium text-sm text-amber-900 dark:text-amber-300">
+                                          {userCourse.title}
+                                        </span>
+                                      </div>
+                                      <div className="text-xs text-muted-foreground mt-1">
+                                        {userCourse.courseCode}
+                                      </div>
+                                    </button>
+                                  </ContextMenuTrigger>
+                                  <ContextMenuContent>
+                                    <ContextMenuItem
+                                      className="text-destructive focus:text-destructive"
+                                      onClick={() =>
+                                        handleDeleteCourse(userCourse)
+                                      }
+                                    >
+                                      <Trash2Icon className="mr-2 h-4 w-4" />
+                                      Delete
+                                    </ContextMenuItem>
+                                  </ContextMenuContent>
+                                </ContextMenu>
                               );
                             }
 
                             return (
-                              <Link
-                                key={key}
-                                href={userCourse.course.courseUrl}
-                                target="_blank"
-                                className={
-                                  "block p-2 border rounded-md bg-card hover:bg-muted/50 transition-colors"
-                                }
-                              >
-                                <div className="font-medium text-sm">
-                                  {userCourse.title}
-                                </div>
-                                <div className="text-xs text-muted-foreground mt-1">
-                                  {userCourse.course.code}
-                                </div>
-                              </Link>
+                              <ContextMenu key={key}>
+                                <ContextMenuTrigger asChild>
+                                  <Link
+                                    href={userCourse.course.courseUrl}
+                                    target="_blank"
+                                    draggable
+                                    onDragStart={(e) =>
+                                      handleInternalDragStart(e, userCourse)
+                                    }
+                                    onDragEnd={handleInternalDragEnd}
+                                    className="block p-2 border rounded-md bg-card hover:bg-muted/50 transition-colors cursor-grab active:cursor-grabbing"
+                                  >
+                                    <div className="font-medium text-sm">
+                                      {userCourse.title}
+                                    </div>
+                                    <div className="text-xs text-muted-foreground mt-1">
+                                      {userCourse.course.code}
+                                    </div>
+                                  </Link>
+                                </ContextMenuTrigger>
+                                <ContextMenuContent>
+                                  <ContextMenuItem
+                                    className="text-destructive focus:text-destructive"
+                                    onClick={() =>
+                                      handleDeleteCourse(userCourse)
+                                    }
+                                  >
+                                    <Trash2Icon className="mr-2 h-4 w-4" />
+                                    Delete
+                                  </ContextMenuItem>
+                                </ContextMenuContent>
+                              </ContextMenu>
                             );
                           })}
                         </div>
