@@ -1,6 +1,0 @@
-{
-  "framework": "nextjs",
-  "installCommand": "bun install",
-  "buildCommand": "cd ./packages/server && bunx convex deploy --cmd 'cd ../../apps/web && turbo run build' --cmd-url-env-var-name NEXT_PUBLIC_CONVEX_URL",
-  "outputDirectory": "apps/web/.next"
-}
