@@ -19,6 +19,7 @@ interface CourseSelectorComponentProps {
   loadMore: (numItems: number) => void;
   status: "LoadingFirstPage" | "CanLoadMore" | "LoadingMore" | "Exhausted";
   isSearching?: boolean;
+  selectedClassNumbers?: number[];
 }
 
 const CourseSelector = ({
@@ -29,6 +30,7 @@ const CourseSelector = ({
   loadMore,
   status,
   isSearching = false,
+  selectedClassNumbers,
 }: CourseSelectorComponentProps) => {
   const { searchValue: filtersParam, setSearchValue: setFiltersParam } =
     useSearchParam({ paramKey: "filters", debounceDelay: 0 });
@@ -57,6 +59,14 @@ const CourseSelector = ({
     setFiltersParam(isFiltersExpanded ? "" : "true");
   };
 
+  const handleSectionHover = (section: CourseOffering | null) => {
+    if (section && (!section.startTime || !section.endTime)) {
+      setHoveredSection(null);
+      return;
+    }
+    setHoveredSection(section);
+  };
+
   const parentRef = React.useRef<HTMLDivElement>(null);
 
   const rowVirtualizer = useVirtualizer({
@@ -67,9 +77,27 @@ const CourseSelector = ({
     gap: 8,
   });
 
+  const virtualItems = rowVirtualizer.getVirtualItems();
+
   useEffect(() => {
     onHover?.(hoveredSection);
   }, [hoveredSection, onHover]);
+
+  useEffect(() => {
+    if (status !== "CanLoadMore") {
+      return;
+    }
+
+    const [lastItem] = [...virtualItems].reverse();
+
+    if (!lastItem) {
+      return;
+    }
+
+    if (lastItem.index >= filteredData.length - 1) {
+      loadMore(200);
+    }
+  }, [status, loadMore, filteredData.length, virtualItems]);
 
   const handleSectionSelect = async (offering: CourseOffering) => {
     if (offering.status === "closed") {
@@ -162,9 +190,10 @@ const CourseSelector = ({
                   <CourseCard
                     course={course}
                     isExpanded={isExpanded(course.code)}
+                    selectedClassNumbers={selectedClassNumbers}
                     onToggleExpand={toggleCourseExpansion}
                     onSectionSelect={handleSectionSelect}
-                    onSectionHover={setHoveredSection}
+                    onSectionHover={handleSectionHover}
                   />
                 </div>
               );
@@ -173,13 +202,6 @@ const CourseSelector = ({
         </div>
       )}
 
-      {status === "CanLoadMore" && (
-        <div className="flex justify-center py-4 shrink-0">
-          <Button onClick={() => loadMore(200)} variant="outline">
-            Load More
-          </Button>
-        </div>
-      )}
       {status === "LoadingMore" && (
         <div className="flex justify-center py-4 shrink-0">
           <p className="text-gray-500">Loading more courses...</p>

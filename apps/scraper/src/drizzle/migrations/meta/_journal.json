@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1763337192931,
+      "tag": "0000_easy_fat_cobra",
+      "breakpoints": true
+    }
+  ]
+}

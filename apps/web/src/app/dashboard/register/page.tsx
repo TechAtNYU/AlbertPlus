@@ -2,9 +2,10 @@
 
 import { api } from "@albert-plus/server/convex/_generated/api";
 import { useConvexAuth, usePaginatedQuery, useQuery } from "convex/react";
+import { CalendarIcon, ListIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import Selector from "@/app/dashboard/register/components/Selector";
 import { useNextTerm, useNextYear } from "@/components/AppConfigProvider";
+import ViewSelector from "@/components/ViewSelector";
 import { useSearchParam } from "@/hooks/use-search-param";
 import { CourseSelector } from "@/modules/course-selection";
 import CourseSelectorSkeleton from "@/modules/course-selection/components/CourseSelectorSkeleton";
@@ -45,6 +46,8 @@ const RegisterPage = () => {
     isAuthenticated ? {} : "skip",
   );
 
+  const selectedClassNumbers = allClasses?.map((c) => c.classNumber) || [];
+
   const { results, status, loadMore } = usePaginatedQuery(
     api.courseOfferings.getCourseOfferings,
     isAuthenticated && currentTerm && currentYear
@@ -82,10 +85,17 @@ const RegisterPage = () => {
   }
 
   return (
-    <div className="flex flex-col gap-4 h-[calc(100vh-(--spacing(16))-(--spacing(12)))] w-full">
+    <div className="flex flex-col gap-4 w-full">
       {/* Mobile toggle buttons */}
       <div className="md:hidden shrink-0 p-2">
-        <Selector value={mobileView} onValueChange={setMobileView} />
+        <ViewSelector
+          value={mobileView}
+          onValueChange={setMobileView}
+          tabs={[
+            { value: "selector", label: "Courses", icon: ListIcon },
+            { value: "calendar", label: "Schedule", icon: CalendarIcon },
+          ]}
+        />
       </div>
 
       {/* Mobile view */}
@@ -99,6 +109,7 @@ const RegisterPage = () => {
             loadMore={loadMore}
             status={status}
             isSearching={isSearching}
+            selectedClassNumbers={selectedClassNumbers}
           />
         ) : (
           <div className="h-full">
@@ -117,6 +128,7 @@ const RegisterPage = () => {
           loadMore={loadMore}
           status={status}
           isSearching={isSearching}
+          selectedClassNumbers={selectedClassNumbers}
         />
 
         <div className="flex-1 min-w-0">

@@ -16,7 +16,7 @@ const courseOfferings = {
   ),
   level: v.union(v.literal("undergraduate"), v.literal("graduate")),
   school: schoolName,
-  instructor: v.array(v.string()),
+  instructors: v.array(v.string()),
   location: v.optional(v.string()),
   days: v.array(
     v.union(
@@ -29,8 +29,8 @@ const courseOfferings = {
       v.literal("sunday"),
     ),
   ),
-  startTime: v.string(), // 13:00
-  endTime: v.string(), // 14:15
+  startTime: v.optional(v.string()), // 13:00
+  endTime: v.optional(v.string()), // 14:15
   status: v.union(
     v.literal("open"),
     v.literal("closed"),

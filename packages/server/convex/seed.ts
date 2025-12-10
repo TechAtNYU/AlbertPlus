@@ -103,6 +103,7 @@ export const seedAll = internalMutation({
       v.object({
         code: v.string(),
         program: v.string(),
+        programName: v.string(),
         level: v.union(v.literal("undergraduate"), v.literal("graduate")),
         title: v.string(),
         credits: v.number(),
@@ -127,7 +128,7 @@ export const seedAll = internalMutation({
         ),
         level: v.union(v.literal("undergraduate"), v.literal("graduate")),
         school: schoolName,
-        instructor: v.array(v.string()),
+        instructors: v.array(v.string()),
         location: v.optional(v.string()),
         days: v.array(
           v.union(

@@ -169,11 +169,150 @@ interface ParsedCourse {
 export async function scrapeCourse(
   url: string,
   db: DrizzleD1Database,
-  env: CloudflareBindings
-): Promise<{
-  course: Omit<z.infer<typeof ZUpsertCourseWithPrerequisites>, "prerequisites">;
-  prerequisites: CoursePrerequisite[];
-}> {
-  // TODO: implement this function
-  throw new Error("Not implemented");
+  env: CloudflareBindings,
+): Promise<ParsedCourse[]> {
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch course page: ${response.status}`);
+  }
+
+  const courses: ParsedCourse[] = [];
+  let currentCode = "";
+  let currentTitle = "";
+  let currentCredits = 0;
+  let currentDescription = "";
+  let currentPrereqs = "";
+  let programName = "";
+
+  class CourseBlockHandler {
+    element(element: Element) {
+      currentCode = "";
+      currentTitle = "";
+      currentCredits = 0;
+      currentDescription = "";
+      currentPrereqs = "";
+
+      element.onEndTag(() => {
+        if (currentCode && currentTitle) {
+          const codeMatch = currentCode.match(
+            /([A-Z0-9]+(?:-[A-Z0-9]+)?)\s+(\d+)/,
+          );
+          if (codeMatch) {
+            const [, program, courseNumber] = codeMatch;
+            const level = getCourseLevel(program, courseNumber);
+
+            courses.push({
+              course: {
+                program,
+                programName: programName || "Unknown Program",
+                code: currentCode,
+                level,
+                title: currentTitle,
+                credits: Math.floor(currentCredits),
+                description: currentDescription || "No description available.",
+                courseUrl: url,
+                school: getSchoolFromProgram(program),
+              },
+              prerequisites: currentPrereqs
+                ? parsePrerequisites(currentPrereqs)
+                : [],
+            });
+          }
+        }
+      });
+    }
+  }
+
+  class CodeHandler {
+    text(text: { text: string }) {
+      currentCode += text.text.trim();
+    }
+  }
+
+  class TitleHandler {
+    text(text: { text: string }) {
+      currentTitle += text.text.trim();
+    }
+  }
+
+  class CreditsHandler {
+    text(text: { text: string; lastInTextNode: boolean }) {
+      const trimmed = text.text.trim();
+      if (trimmed) {
+        const match = trimmed.match(/\((\d+(?:\.\d+)?)\s*Credits?\)/);
+        if (match) {
+          currentCredits = Number.parseFloat(match[1]);
+        }
+      }
+    }
+  }
+
+  class DescriptionHandler {
+    text(text: { text: string }) {
+      const trimmed = text.text.trim();
+      if (trimmed) {
+        currentDescription += (currentDescription ? " " : "") + trimmed;
+      }
+    }
+  }
+
+  class PrereqHandler {
+    text(text: { text: string }) {
+      currentPrereqs += `${text.text.trim()} `;
+    }
+  }
+
+  class PageTitleHandler {
+    text(text: { text: string }) {
+      const titleText = text.text.trim();
+      const match = titleText.match(/^([^(]+)\s+\([A-Z0-9-]+\)$/);
+      if (match && !programName) {
+        programName = match[1].trim();
+      }
+    }
+  }
+
+  const rewriter = new HTMLRewriter()
+    .on("h1.page-title", new PageTitleHandler())
+    .on(".courseblock", new CourseBlockHandler())
+    .on(".detail-code strong", new CodeHandler())
+    .on(".detail-title strong", new TitleHandler())
+    .on(".detail-hours_html strong", new CreditsHandler())
+    .on(".courseblockextra", new DescriptionHandler())
+    .on(".detail-prerequisites", new PrereqHandler());
+
+  await rewriter.transform(response).arrayBuffer();
+
+  return courses;
+}
+
+function parsePrerequisites(text: string): CoursePrerequisite[] {
+  const prerequisites: CoursePrerequisite[] = [];
+
+  const cleanText = text.replace(/^Prerequisites?:\s*/i, "").trim();
+
+  // Match course codes (including codes with numbers like HRCM1-GC)
+  const coursePattern = /([A-Z0-9]+(?:-[A-Z0-9]+)?)\s+(\d+)/g;
+  const matches = [...cleanText.matchAll(coursePattern)];
+
+  if (matches.length > 0) {
+    const courses = matches.map((match) => `${match[1]} ${match[2]}`);
+
+    // TODO: Now it cannot handle "NOT open to students who take ..."
+    // Check if it's an "or" (alternative) or "and" (required) relationship
+    if (cleanText.toLowerCase().includes(" or ")) {
+      prerequisites.push({
+        type: "alternative",
+        courses,
+      });
+    } else {
+      prerequisites.push({
+        type: "required",
+        courses,
+      });
+    }
+  }
+
+  return prerequisites;
 }

@@ -76,6 +76,7 @@ const normalizeCourseLevel = (
 
 export const ZUpsertCourseWithPrerequisites = z.object({
   program: z.string(),
+  programName: z.string(),
   code: z.string(),
   level: ZCourseLevel,
   title: z.string(),
@@ -104,7 +105,7 @@ export const ZUpsertCourseWithPrerequisites = z.object({
 
 export const ZUpsertProgramWithRequirements = z.object({
   name: z.string(),
-  level: ZSchoolLevel,
+  level: ZSchoolLevel, // undergraduate or graduate
   school: ZSchoolName,
   programUrl: z.string(),
   requirements: z.array(
@@ -129,7 +130,7 @@ export const ZUpsertProgramWithRequirements = z.object({
         courseLevels: z.array(
           z.object({
             program: z.string(), // CSCI-UA
-            level: z.coerce.number(), // 4
+            level: z.coerce.number(), // 4 (represents any classes at 400 level)
           }),
         ),
         creditsRequired: z.number(),
@@ -221,7 +222,7 @@ export const ZUpsertCourseOfferings = z.array(
     term: z.enum(["spring", "summer", "fall", "j-term"]),
     level: z.enum(["undergraduate", "graduate"]),
     school: ZSchoolName,
-    instructor: z.array(z.string()),
+    instructors: z.array(z.string()),
     location: z.optional(z.string()),
     days: z.array(
       z.enum([

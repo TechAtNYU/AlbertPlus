@@ -21,6 +21,15 @@ export function useSearchParam(options: UseSearchParamOptions) {
 
   // Update URL with debounced search value
   useEffect(() => {
+    const currentValue = searchParams.get(paramKey) ?? "";
+
+    if (
+      (debouncedSearchValue === "" && currentValue === "") ||
+      debouncedSearchValue === currentValue
+    ) {
+      return;
+    }
+
     const params = new URLSearchParams(searchParams);
     if (debouncedSearchValue) {
       params.set(paramKey, debouncedSearchValue);
