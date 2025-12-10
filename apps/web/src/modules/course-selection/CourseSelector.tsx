@@ -1,10 +1,9 @@
 "use client";
 import { api } from "@albert-plus/server/convex/_generated/api";
 import type { Id } from "@albert-plus/server/convex/_generated/dataModel";
-import { useVirtualizer } from "@tanstack/react-virtual";
 import { useMutation, useQuery } from "convex/react";
 import { ConvexError } from "convex/values";
-import React, { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useSearchParam } from "@/hooks/use-search-param";
@@ -91,33 +90,28 @@ const CourseSelector = ({
     setHoveredSection(section);
   };
 
-  const parentRef = React.useRef<HTMLDivElement>(null);
+  const observerTarget = useRef<HTMLDivElement>(null);
 
-  const rowVirtualizer = useVirtualizer({
-    count: filteredData.length,
-    getScrollElement: () => parentRef.current,
-    estimateSize: () => 100,
-    overscan: 5,
-    gap: 8,
-  });
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && status === "CanLoadMore") {
+          loadMore(200);
+        }
+      },
+      { threshold: 0.1 },
+    );
+
+    if (observerTarget.current) {
+      observer.observe(observerTarget.current);
+    }
+
+    return () => observer.disconnect();
+  }, [status, loadMore]);
 
   useEffect(() => {
     onHover?.(hoveredSection);
   }, [hoveredSection, onHover]);
-
-  // https://tanstack.com/virtual/latest/docs/framework/react/examples/infinite-scroll
-  // biome-ignore lint/correctness/useExhaustiveDependencies: It's in Tanstack doc
-  useEffect(() => {
-    const [lastItem] = [...rowVirtualizer.getVirtualItems()].reverse();
-
-    if (!lastItem) {
-      return;
-    }
-
-    if (lastItem.index >= filteredData.length - 1 && status === "CanLoadMore") {
-      loadMore(200);
-    }
-  }, [status, loadMore, filteredData.length, rowVirtualizer.getVirtualItems()]);
 
   const handleSectionSelect = async (offering: CourseOffering) => {
     if (offering.status === "closed") {
@@ -350,44 +344,20 @@ const CourseSelector = ({
       )}
 
       {filteredData.length > 0 && (
-        <div
-          ref={parentRef}
-          className="overflow-auto no-scrollbar w-full flex-1 min-h-0"
-        >
-          <div
-            className="relative w-full"
-            style={{
-              height: `${rowVirtualizer.getTotalSize()}px`,
-            }}
-          >
-            {rowVirtualizer.getVirtualItems().map((virtualItem) => {
-              const course = filteredData[virtualItem.index];
-
-              return (
-                <div
-                  key={virtualItem.key}
-                  data-index={virtualItem.index}
-                  ref={rowVirtualizer.measureElement}
-                  className="absolute top-0 left-0 w-full"
-                  style={{
-                    transform: `translateY(${virtualItem.start}px)`,
-                  }}
-                >
-                  <CourseCard
-                    course={course}
-                    isExpanded={isExpanded(course.code)}
-                    selectedClassNumbers={selectedClassNumbers}
-                    onToggleExpand={toggleCourseExpansion}
-                    onSectionSelect={handleSectionSelect}
-                    onSectionSelectAsAlternative={
-                      handleSectionSelectAsAlternative
-                    }
-                    onSectionHover={handleSectionHover}
-                  />
-                </div>
-              );
-            })}
-          </div>
+        <div className="overflow-auto no-scrollbar w-full flex-1 min-h-0 space-y-2">
+          {filteredData.map((course) => (
+            <CourseCard
+              key={course._id}
+              course={course}
+              isExpanded={isExpanded(course.code)}
+              selectedClassNumbers={selectedClassNumbers}
+              onToggleExpand={toggleCourseExpansion}
+              onSectionSelect={handleSectionSelect}
+              onSectionSelectAsAlternative={handleSectionSelectAsAlternative}
+              onSectionHover={handleSectionHover}
+            />
+          ))}
+          <div ref={observerTarget} className="h-1" />
         </div>
       )}
 
