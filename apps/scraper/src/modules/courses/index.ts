@@ -153,7 +153,7 @@ export async function discoverCourses(url: string): Promise<string[]> {
 
   const rewriter = new HTMLRewriter().on(
     'a[href^="/courses/"]',
-    new CourseLinkHandler(),
+    new CourseLinkHandler()
   );
 
   await rewriter.transform(response).arrayBuffer();
