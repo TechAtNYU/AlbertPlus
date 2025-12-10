@@ -64,15 +64,9 @@ export const CourseSectionItem = ({
   const userCourses = useQuery(api.userCourseOfferings.getUserCourseOfferings);
 
   // Filter out courses that are alternatives themselves
-  const mainCourses = userCourses?.filter((course) => !course.alternativeOf);
-
-  if (!mainCourses || mainCourses.length === 0) {
-    return (
-      <Button variant="outline" disabled className="w-full">
-        No courses to add alternative to
-      </Button>
-    );
-  }
+  const mainCourses =
+    userCourses?.filter((course) => !course.alternativeOf) ?? [];
+  const hasMainCourses = mainCourses.length > 0;
 
   return (
     <>
@@ -168,6 +162,7 @@ export const CourseSectionItem = ({
                   <Button
                     className="w-full justify-between gap-3 h-1/2 py-4 cursor-pointer"
                     variant="outline"
+                    aria-disabled={!hasMainCourses}
                   >
                     <div className="items-center flex flex-row gap-3">
                       <GitBranch className="h-5 w-5" />
@@ -177,22 +172,36 @@ export const CourseSectionItem = ({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className=" max-h-[300px] overflow-y-auto">
-                  {mainCourses.map((course) => (
+                  {hasMainCourses ? (
+                    mainCourses.map((course) => (
+                      <DropdownMenuItem
+                        key={course._id}
+                        onSelect={() => handleAddAsAlternative(course._id)}
+                        className="flex flex-col items-start gap-1 py-2 cursor-pointer"
+                      >
+                        <span className="font-medium text-sm">
+                          {course.courseOffering.courseCode} -{" "}
+                          {course.courseOffering.title}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          Section {course.courseOffering.section.toUpperCase()}{" "}
+                          • {course.courseOffering.instructors.join(", ")}
+                        </span>
+                      </DropdownMenuItem>
+                    ))
+                  ) : (
                     <DropdownMenuItem
-                      key={course._id}
-                      onSelect={() => handleAddAsAlternative(course._id)}
-                      className="flex flex-col items-start gap-1 py-2 cursor-pointer"
+                      disabled
+                      className="flex flex-col items-start gap-1 py-2"
                     >
                       <span className="font-medium text-sm">
-                        {course.courseOffering.courseCode} -{" "}
-                        {course.courseOffering.title}
+                        Add a course to set alternatives
                       </span>
                       <span className="text-xs text-muted-foreground">
-                        Section {course.courseOffering.section.toUpperCase()} •{" "}
-                        {course.courseOffering.instructors.join(", ")}
+                        No courses available yet
                       </span>
                     </DropdownMenuItem>
-                  ))}
+                  )}
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
