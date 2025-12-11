@@ -12,6 +12,7 @@ import type * as appConfigs from "../appConfigs.js";
 import type * as courseOfferings from "../courseOfferings.js";
 import type * as courses from "../courses.js";
 import type * as helpers_auth from "../helpers/auth.js";
+import type * as helpers_timeConflicts from "../helpers/timeConflicts.js";
 import type * as http from "../http.js";
 import type * as prerequisites from "../prerequisites.js";
 import type * as programs from "../programs.js";
@@ -42,6 +43,7 @@ declare const fullApi: ApiFromModules<{
   courseOfferings: typeof courseOfferings;
   courses: typeof courses;
   "helpers/auth": typeof helpers_auth;
+  "helpers/timeConflicts": typeof helpers_timeConflicts;
   http: typeof http;
   prerequisites: typeof prerequisites;
   programs: typeof programs;

@@ -71,7 +71,7 @@ export default async function Home() {
                 </CardDescription>
                 <div className="mt-6 flex justify-center bg-none relative w-full aspect-video">
                   <Image
-                    src="/feature.png"
+                    src="/feature1.png"
                     alt="Course Catalog"
                     fill
                     style={{ objectFit: "contain" }}
@@ -94,53 +94,7 @@ export default async function Home() {
                 </CardDescription>
                 <div className="mt-6 flex justify-center bg-none relative w-full aspect-video">
                   <Image
-                    src="/feature.png"
-                    alt="Course Catalog"
-                    fill
-                    style={{ objectFit: "contain" }}
-                    sizes="100vw"
-                  />
-                </div>
-              </CardHeader>
-            </Card>
-          </div>
-
-          <div className="h-screen flex items-center justify-center scroll-snap-align-start border-none">
-            <Card className="w-full max-w-6xl h-full flex flex-col border-none shadow-none bg-transparent dark:bg-transparent">
-              <CardHeader className="flex-1 flex flex-col justify-center items-center text-center">
-                <CardTitle className="text-3xl">
-                  Find courses faster. Search smarter.{" "}
-                </CardTitle>
-                <CardDescription className="text-lg mt-4">
-                  An improved Course Search experience — clearer results, easier
-                  navigation, and instant add options.
-                </CardDescription>
-                <div className="mt-6 flex justify-center bg-none relative w-full aspect-video">
-                  <Image
-                    src="/feature.png"
-                    alt="Course Catalog"
-                    fill
-                    style={{ objectFit: "contain" }}
-                    sizes="100vw"
-                  />
-                </div>
-              </CardHeader>
-            </Card>
-          </div>
-
-          <div className="h-screen flex items-center justify-center scroll-snap-align-start border-none">
-            <Card className="w-full max-w-6xl h-full flex flex-col border-none shadow-none bg-transparent dark:bg-transparent">
-              <CardHeader className="flex-1 flex flex-col justify-center items-center text-center">
-                <CardTitle className="text-3xl">
-                  Plan directly from Albert+
-                </CardTitle>
-                <CardDescription className="text-lg mt-4">
-                  Use the Sidebar to add courses and build your next semester
-                  plan seamlessly.
-                </CardDescription>
-                <div className="mt-6 flex justify-center bg-none relative w-full aspect-video">
-                  <Image
-                    src="/feature.png"
+                    src="/feature2.png"
                     alt="Course Catalog"
                     fill
                     style={{ objectFit: "contain" }}
@@ -163,7 +117,30 @@ export default async function Home() {
                 </CardDescription>
                 <div className="mt-6 flex justify-center bg-none relative w-full aspect-video">
                   <Image
-                    src="/feature.png"
+                    src="/commingsoon.png"
+                    alt="Course Catalog"
+                    fill
+                    style={{ objectFit: "contain" }}
+                    sizes="100vw"
+                  />
+                </div>
+              </CardHeader>
+            </Card>
+          </div>
+
+          <div className="h-screen flex items-center justify-center scroll-snap-align-start border-none">
+            <Card className="w-full max-w-6xl h-full flex flex-col border-none shadow-none bg-transparent dark:bg-transparent">
+              <CardHeader className="flex-1 flex flex-col justify-center items-center text-center">
+                <CardTitle className="text-3xl">
+                  Find courses faster. Search smarter.{" "}
+                </CardTitle>
+                <CardDescription className="text-lg mt-4">
+                  An improved Course Search experience — clearer results, easier
+                  navigation, and instant add options.
+                </CardDescription>
+                <div className="mt-6 flex justify-center bg-none relative w-full aspect-video">
+                  <Image
+                    src="/feature3.png"
                     alt="Course Catalog"
                     fill
                     style={{ objectFit: "contain" }}
@@ -196,7 +173,7 @@ export default async function Home() {
                 </div>
                 <div className="mt-6 flex justify-center bg-none relative w-full aspect-video">
                   <Image
-                    src="/features2.png"
+                    src="/commingsoon2.png"
                     alt="Course Catalog"
                     fill
                     style={{ objectFit: "contain" }}
@@ -221,7 +198,7 @@ export default async function Home() {
                 </div>
                 <div className="mt-6 flex justify-center bg-none relative w-full aspect-video">
                   <Image
-                    src="/features2.png"
+                    src="/commingsoon2.png"
                     alt="Course Catalog"
                     fill
                     style={{ objectFit: "contain" }}
@@ -246,7 +223,7 @@ export default async function Home() {
                 </div>
                 <div className="mt-6 flex justify-center bg-none relative w-full aspect-video">
                   <Image
-                    src="/features2.png"
+                    src="/commingsoon2.png"
                     alt="Course Catalog"
                     fill
                     style={{ objectFit: "contain" }}
