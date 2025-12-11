@@ -19,7 +19,7 @@
   "dependencies": {
     "@albert-plus/server": "workspace:*",
     "dotenv": "^17.2.3",
-    "drizzle-orm": "^0.45.0",
+    "drizzle-orm": "^0.45.1",
     "hono": "^4.10.8",
     "nanoid": "^5.1.6",
     "zod": "^4.1.13"
@@ -27,8 +27,8 @@
   "devDependencies": {
     "@libsql/client": "^0.15.15",
     "@types/node": "^24.10.2",
-    "convex": "^1.30.0",
+    "convex": "^1.31.0",
     "drizzle-kit": "^0.31.8",
-    "wrangler": "^4.52.1"
+    "wrangler": "^4.54.0"
   }
 }
