@@ -103,7 +103,8 @@ export const seedAll = internalMutation({
       v.object({
         code: v.string(),
         program: v.string(),
-        level: v.number(),
+        programName: v.string(),
+        level: v.union(v.literal("undergraduate"), v.literal("graduate")),
         title: v.string(),
         credits: v.number(),
         school: schoolName,
@@ -115,8 +116,9 @@ export const seedAll = internalMutation({
       v.object({
         courseCode: v.string(),
         classNumber: v.number(),
-        title: v.string(),
+        title: v.optional(v.string()),
         section: v.string(),
+        description: v.optional(v.string()),
         year: v.number(),
         term: v.union(
           v.literal("spring"),
@@ -124,7 +126,9 @@ export const seedAll = internalMutation({
           v.literal("fall"),
           v.literal("j-term"),
         ),
-        instructor: v.array(v.string()),
+        level: v.union(v.literal("undergraduate"), v.literal("graduate")),
+        school: schoolName,
+        instructors: v.array(v.string()),
         location: v.optional(v.string()),
         days: v.array(
           v.union(
@@ -174,18 +178,21 @@ export const seedAll = internalMutation({
         v.object({
           programName: v.string(),
           isMajor: v.boolean(),
+          description: v.optional(v.string()),
           type: v.literal("required"),
           courses: v.array(v.string()),
         }),
         v.object({
           programName: v.string(),
           isMajor: v.boolean(),
+          description: v.optional(v.string()),
           type: v.literal("alternative"),
           courses: v.array(v.string()),
         }),
         v.object({
           programName: v.string(),
           isMajor: v.boolean(),
+          description: v.optional(v.string()),
           type: v.literal("options"),
           courses: v.array(v.string()),
           courseLevels: v.array(
@@ -354,6 +361,7 @@ export const seedAll = internalMutation({
         await ctx.db.insert("requirements", {
           programId,
           isMajor: req.isMajor,
+          description: req.description,
           type: req.type,
           courses: req.courses,
           courseLevels: req.courseLevels,
@@ -363,6 +371,7 @@ export const seedAll = internalMutation({
         await ctx.db.insert("requirements", {
           programId,
           isMajor: req.isMajor,
+          description: req.description,
           type: req.type,
           courses: req.courses,
         });

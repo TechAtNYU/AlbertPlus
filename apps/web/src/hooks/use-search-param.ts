@@ -1,5 +1,5 @@
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDebounce } from "./use-debounce";
 
 interface UseSearchParamOptions {
@@ -19,16 +19,23 @@ export function useSearchParam(options: UseSearchParamOptions) {
   );
   const debouncedSearchValue = useDebounce(searchValue, debounceDelay);
 
+  // Track the last URL-synced value to prevent infinite loops
+  const lastSyncedValue = useRef<string | null>(searchParams.get(paramKey));
+
   // Update URL with debounced search value
   useEffect(() => {
-    const params = new URLSearchParams(searchParams);
-    if (debouncedSearchValue) {
-      params.set(paramKey, debouncedSearchValue);
-    } else {
-      params.delete(paramKey);
+    // Only update if the debounced value differs from what's already in the URL
+    if (debouncedSearchValue !== lastSyncedValue.current) {
+      const params = new URLSearchParams(window.location.search);
+      if (debouncedSearchValue) {
+        params.set(paramKey, debouncedSearchValue);
+      } else {
+        params.delete(paramKey);
+      }
+      lastSyncedValue.current = debouncedSearchValue || null;
+      router.replace(`?${params.toString()}`, { scroll: false });
     }
-    router.replace(`?${params.toString()}`, { scroll: false });
-  }, [debouncedSearchValue, router, searchParams, paramKey]);
+  }, [debouncedSearchValue, paramKey, router]);
 
   return {
     searchValue,

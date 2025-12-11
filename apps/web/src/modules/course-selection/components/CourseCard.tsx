@@ -1,3 +1,4 @@
+import type { Id } from "@albert-plus/server/convex/_generated/dataModel";
 import clsx from "clsx";
 import { ChevronDown, ChevronRight, InfoIcon } from "lucide-react";
 import {
@@ -18,16 +19,23 @@ import { CourseSectionItem } from "./CourseSectionItem";
 interface CourseCardProps {
   course: CourseWithOfferings;
   isExpanded: boolean;
+  selectedClassNumbers?: number[];
   onToggleExpand: (courseCode: string) => void;
   onSectionSelect?: (offering: CourseOffering) => void;
+  onSectionSelectAsAlternative?: (
+    offering: CourseOffering,
+    alternativeOf: Id<"userCourseOfferings">,
+  ) => void;
   onSectionHover?: (offering: CourseOffering | null) => void;
 }
 
 export const CourseCard = ({
   course,
   isExpanded,
+  selectedClassNumbers,
   onToggleExpand,
   onSectionSelect,
+  onSectionSelectAsAlternative,
   onSectionHover,
 }: CourseCardProps) => {
   return (
@@ -87,7 +95,9 @@ export const CourseCard = ({
               <CourseSectionItem
                 key={offering._id}
                 offering={offering}
+                selectedClassNumbers={selectedClassNumbers}
                 onSelect={onSectionSelect}
+                onSelectAsAlternative={onSectionSelectAsAlternative}
                 onHover={onSectionHover}
               />
             ))}

@@ -23,7 +23,6 @@
             nodejs_20
             bun
             doppler
-            turbo
             nodePackages.vercel
 
             git

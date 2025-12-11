@@ -24,6 +24,7 @@ interface CourseInfoDialogProps {
     id: Id<"userCourseOfferings">,
     classNumber: number,
     title: string,
+    alternativeOf?: Id<"userCourseOfferings">,
   ) => void;
 }
 
@@ -41,6 +42,7 @@ export function CourseInfoDialog({
         course.userCourseOfferingId as Id<"userCourseOfferings">,
         course.classNumber,
         course.title,
+        course.alternativeOf as Id<"userCourseOfferings"> | undefined,
       );
       onOpenChange(false);
     }
@@ -119,7 +121,7 @@ export function CourseInfoDialog({
                       Instructor
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      {course.instructor.join(", ") || "TBA"}
+                      {course.instructors.join(", ") || "TBA"}
                     </p>
                   </div>
 
