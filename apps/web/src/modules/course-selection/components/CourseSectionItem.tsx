@@ -65,13 +65,15 @@ export const CourseSectionItem = ({
   const userCourses = useQuery(api.userCourseOfferings.getUserCourseOfferings);
 
   // Filter out courses that are alternatives themselves and only show courses from the same term/year
-  const mainCourses = userCourses?.filter(
-    (course) =>
-      !course.alternativeOf &&
-      course.courseOffering.term === term &&
-      course.courseOffering.year === year,
-  );
+  const mainCourses =
+    userCourses?.filter(
+      (course) =>
+        !course.alternativeOf &&
+        course.courseOffering.term === term &&
+        course.courseOffering.year === year,
+    ) ?? [];
 
+  const hasMainCourses = mainCourses.length > 0;
   const isSelected = selectedClassNumbers?.includes(offering.classNumber);
 
   return (
@@ -108,7 +110,7 @@ export const CourseSectionItem = ({
           <div className="flex items-center gap-2">
             {isSelected && (
               <span
-                className="text-xs px-2 py-1 rounded-full font-medium bg-violet-100 text-violet-800 dark:bg-violet-900
+                className="text-xs px-2 py-1 rounded-full font-medium bg-violet-100 text-violet-800 dark:bg-violet-900 
   dark:text-violet-200"
               >
                 Selected
@@ -150,7 +152,7 @@ export const CourseSectionItem = ({
         </div>
         {showSelector && (
           <>
-            <div className="hidden dark:block dark:absolute inset-0 bg-black rounded-lg opacity-90" />
+            <div className="hidden dark:block absolute inset-0 bg-black rounded-lg opacity-90" />
             <div className="absolute inset-0 flex flex-col rounded-lg  ">
               <Button
                 onClick={handleAddToCalendar}
@@ -168,6 +170,7 @@ export const CourseSectionItem = ({
                   <Button
                     className="w-full justify-between gap-3 h-1/2 py-4 cursor-pointer"
                     variant="outline"
+                    aria-disabled={!hasMainCourses}
                   >
                     <div className="items-center flex flex-row gap-3">
                       <GitBranch className="h-5 w-5" />
@@ -177,29 +180,36 @@ export const CourseSectionItem = ({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className=" max-h-[300px] overflow-y-auto">
-                  {mainCourses?.length === 0 && (
-                    <DropdownMenuItem className="flex flex-col items-start py-2 cursor-default">
+                  {hasMainCourses ? (
+                    mainCourses.map((course) => (
+                      <DropdownMenuItem
+                        key={course._id}
+                        onSelect={() => handleAddAsAlternative(course._id)}
+                        className="flex flex-col items-start gap-1 py-2 cursor-pointer"
+                      >
+                        <span className="font-medium text-sm">
+                          {course.courseOffering.courseCode} -{" "}
+                          {course.courseOffering.title}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          Section {course.courseOffering.section.toUpperCase()}{" "}
+                          • {course.courseOffering.instructors.join(", ")}
+                        </span>
+                      </DropdownMenuItem>
+                    ))
+                  ) : (
+                    <DropdownMenuItem
+                      disabled
+                      className="flex flex-col items-start gap-1 py-2"
+                    >
                       <span className="font-medium text-sm">
-                        Please add a course first.
+                        Add a course to set alternatives
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        No courses available yet
                       </span>
                     </DropdownMenuItem>
                   )}
-                  {mainCourses?.map((course) => (
-                    <DropdownMenuItem
-                      key={course._id}
-                      onSelect={() => handleAddAsAlternative(course._id)}
-                      className="flex flex-col items-start gap-1 py-2 cursor-pointer"
-                    >
-                      <span className="font-medium text-sm">
-                        {course.courseOffering.courseCode} -{" "}
-                        {course.courseOffering.title}
-                      </span>
-                      <span className="text-xs text-muted-foreground">
-                        Section {course.courseOffering.section.toUpperCase()} •{" "}
-                        {course.courseOffering.instructors.join(", ")}
-                      </span>
-                    </DropdownMenuItem>
-                  ))}
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>

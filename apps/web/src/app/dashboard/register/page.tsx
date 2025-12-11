@@ -2,11 +2,12 @@
 
 import { api } from "@albert-plus/server/convex/_generated/api";
 import { useConvexAuth, usePaginatedQuery, useQuery } from "convex/react";
+import { CalendarIcon, ListIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import Selector from "@/app/dashboard/register/components/Selector";
 import { useNextTerm, useNextYear } from "@/components/AppConfigProvider";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import ViewSelector from "@/components/ViewSelector";
 import { useSearchParam } from "@/hooks/use-search-param";
 import { CourseSelector } from "@/modules/course-selection";
 import CourseSelectorSkeleton from "@/modules/course-selection/components/CourseSelectorSkeleton";
@@ -157,7 +158,16 @@ const RegisterPage = () => {
     <div className="flex flex-col gap-4 w-full">
       {/* Mobile toggle buttons */}
       <div className="md:hidden shrink-0 p-2">
-        <Selector value={mobileView} onValueChange={handleMobileViewChange} />
+        <ViewSelector
+          value={mobileView}
+          onValueChange={(val) =>
+            handleMobileViewChange(val as "selector" | "calendar")
+          }
+          tabs={[
+            { value: "selector", label: "Courses", icon: ListIcon },
+            { value: "calendar", label: "Schedule", icon: CalendarIcon },
+          ]}
+        />
       </div>
 
       {/* Mobile view */}

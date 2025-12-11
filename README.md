@@ -22,11 +22,11 @@
 <div align="center">
 
 [![CI](https://github.com/TechAtNYU/AlbertPlus/actions/workflows/ci.yaml/badge.svg)](https://github.com/TechAtNYU/AlbertPlus/actions/workflows/ci.yaml)
-[![Web Deploy](https://github.com/TechAtNYU/AlbertPlus/actions/workflows/web.yaml/badge.svg)](https://github.com/TechAtNYU/AlbertPlus/actions/workflows/web.yaml)
+[![Web Deploy](https://github.com/TechAtNYU/AlbertPlus/actions/workflows/web-prod.yaml/badge.svg)](https://github.com/TechAtNYU/AlbertPlus/actions/workflows/web-prod.yaml)
 [![Docs Deploy](https://github.com/TechAtNYU/AlbertPlus/actions/workflows/docs.yaml/badge.svg)](https://github.com/TechAtNYU/AlbertPlus/actions/workflows/docs.yaml)
 [![Scraper Deploy](https://github.com/TechAtNYU/AlbertPlus/actions/workflows/scraper.yaml/badge.svg)](https://github.com/TechAtNYU/AlbertPlus/actions/workflows/scraper.yaml)
 [![Browser Extension Deploy](https://github.com/TechAtNYU/AlbertPlus/actions/workflows/browser.yml/badge.svg)](https://github.com/TechAtNYU/AlbertPlus/actions/workflows/browser.yml)
-[![Convex Deploy](https://github.com/TechAtNYU/AlbertPlus/actions/workflows/convex.yaml/badge.svg)](https://github.com/TechAtNYU/AlbertPlus/actions/workflows/convex.yaml)
+[![Convex Deploy](https://github.com/TechAtNYU/AlbertPlus/actions/workflows/convex_prod.yaml/badge.svg)](https://github.com/TechAtNYU/AlbertPlus/actions/workflows/convex_prod.yaml)
 
 </div>
 
@@ -35,7 +35,6 @@
 ## Table of Contents
 
 - [About The Project](#about-the-project)
-  - [Built With](#built-with)
 - [Deployed Sites](#deployed-sites)
 - [Getting Started](#getting-started)
 - [Contributing](#contributing)
@@ -44,13 +43,6 @@
 ## About The Project
 
 AlbertPlus is a comprehensive, open-source platform designed to enhance the course registration experience for New York University (NYU) students. It provides a modern, intuitive interface and a suite of tools to help students plan their academic journey, build schedules, and navigate the complexities of course selection. The project is a monorepo that consists of a web application, a browser extension, a web scraper, and a documentation site, all powered by a Convex backend.
-
-### Built With
-
-This project is built with a modern and robust tech stack, including:
-
-- **Core:** TypeScript, React 19, Next.js 15, Convex, Bun, Turborepo
-- **Specialized:** Plasmo, Cloudflare Workers, Hono, Drizzle ORM, Astro, Starlight, Clerk
 
 For a full list of technologies, please refer to the [Tech Stack](https://docs.albertplus.com/getting-started/tech-stack/) documentation.
 
