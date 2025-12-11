@@ -29,6 +29,8 @@ export interface Class {
   times: TimeSlot[];
   description: string;
   isPreview?: boolean;
+  isAlternative?: boolean;
+  alternativeOf?: string;
   section: string;
   year: number;
   term: Term;
@@ -102,11 +104,15 @@ export interface ScheduleCalendarProps {
     | FunctionReturnType<typeof api.userCourseOfferings.getUserCourseOfferings>
     | undefined;
   hoveredCourse?: Doc<"courseOfferings"> | null;
+  selectedCourse?: Class | null;
+  onCourseSelect?: (course: Class | null) => void;
 }
 
 export function ScheduleCalendar({
   classes,
   hoveredCourse,
+  selectedCourse,
+  onCourseSelect,
 }: ScheduleCalendarProps) {
   if (!classes) {
     return <Skeleton className="h-full w-full rounded-lg" />;
@@ -181,6 +187,8 @@ export function ScheduleCalendar({
         color,
         times: slots,
         description: `${offering.instructors.join(", ")} • ${offering.section.toUpperCase()} • ${offering.term} ${offering.year}`,
+        isAlternative: !!c.alternativeOf,
+        alternativeOf: c.alternativeOf,
         section: offering.section,
         year: offering.year,
         term: offering.term,
@@ -282,6 +290,8 @@ export function ScheduleCalendar({
         <WeekView
           classes={transformedClasses}
           hoveredCourseId={hoveredCourse?._id ?? null}
+          selectedCourse={selectedCourse}
+          onCourseSelect={onCourseSelect}
         />
       </div>
     </div>
