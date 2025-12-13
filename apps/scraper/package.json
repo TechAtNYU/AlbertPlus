@@ -20,7 +20,7 @@
     "@albert-plus/server": "workspace:*",
     "dotenv": "^17.2.3",
     "drizzle-orm": "^0.45.1",
-    "hono": "^4.10.8",
+    "hono": "^4.11.0",
     "nanoid": "^5.1.6",
     "zod": "^4.1.13"
   },
