@@ -201,9 +201,10 @@ const RegisterPage = () => {
       </div>
 
       {/* Desktop view */}
-      <div className="hidden md:flex gap-4 flex-1 min-h-0">
-        <div className="flex flex-col space-y-4">
-          <div className="relative flex w-full items-start gap-2 rounded-md border border-input p-4 shadow-xs outline-none has-data-[state=checked]:border-primary/50">
+      <div className="hidden md:flex gap-4 h-[calc(100vh-var(--header-height)-3rem)] overflow-hidden">
+        {/* Left column */}
+        <div className="flex flex-col space-y-4 w-[360px] shrink-0 overflow-y-auto no-scrollbar">
+          <div className="relative flex w-full items-start gap-2 rounded-md border border-input p-4 shadow-xs outline-none has-data-[state=checked]:border-primary/50 shrink-0">
             <AltToggle />
           </div>
           <CourseSelector
@@ -220,15 +221,14 @@ const RegisterPage = () => {
           />
         </div>
 
+        {/* Right column */}
         <div className="flex-1 min-w-0">
-          <div className="sticky top-0">
-            <ScheduleCalendar
-              classes={classes}
-              hoveredCourse={hoveredCourse}
-              selectedCourse={selectedCourse}
-              onCourseSelect={handleCourseSelect}
-            />
-          </div>
+          <ScheduleCalendar
+            classes={classes}
+            hoveredCourse={hoveredCourse}
+            selectedCourse={selectedCourse}
+            onCourseSelect={handleCourseSelect}
+          />
         </div>
       </div>
     </div>
