@@ -3,7 +3,7 @@
 import { api } from "@albert-plus/server/convex/_generated/api";
 import { useConvexAuth, usePaginatedQuery, useQuery } from "convex/react";
 import { CalendarIcon, ListIcon } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { Activity, useEffect, useRef, useState } from "react";
 import { useNextTerm, useNextYear } from "@/components/AppConfigProvider";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -172,7 +172,7 @@ const RegisterPage = () => {
 
       {/* Mobile view */}
       <div className="md:hidden flex-1 min-h-0">
-        {mobileView === "selector" ? (
+        <Activity mode={mobileView === "selector" ? "visible" : "hidden"}>
           <CourseSelector
             courseOfferingsWithCourses={displayedResults}
             onHover={setHoveredCourse}
@@ -185,9 +185,10 @@ const RegisterPage = () => {
             onCourseSelect={handleCourseSelect}
             selectedClassNumbers={selectedClassNumbers}
           />
-        ) : (
+        </Activity>
+        <Activity mode={mobileView === "calendar" ? "visible" : "hidden"}>
           <div className="h-full flex flex-col space-y-2">
-            <div className="md:hidden relative flex w-full items-start gap-2 rounded-md border border-input p-4 shadow-xs outline-none has-data-[state=checked]:border-primary/50">
+            <div className="relative flex w-full items-start gap-2 rounded-md border border-input p-4 shadow-xs outline-none has-data-[state=checked]:border-primary/50">
               <AltToggle />
             </div>
             <ScheduleCalendar
@@ -197,7 +198,7 @@ const RegisterPage = () => {
               onCourseSelect={handleCourseSelect}
             />
           </div>
-        )}
+        </Activity>
       </div>
 
       {/* Desktop view */}
